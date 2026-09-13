@@ -1,0 +1,465 @@
+<!DOCTYPE html><html lang="es" data-theme="dful-dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"><script>
+      (() => {
+        const storageKey = 'dful-theme';
+        const schemaKey = 'dful-theme-schema';
+        const schemaVersion = '2';
+        const legacyStorageKey = 'dful-theme-preview';
+        const valid = new Set(["dful-dark","amber-dark","dful-light","flexoki-paper","phosphor","arcade","cobalt"]);
+        const dark = new Set(["dful-dark","amber-dark","phosphor","arcade","cobalt"]);
+        const fallback = "dful-dark";
+        let theme = fallback;
+        try {
+          const needsMigration = localStorage.getItem(schemaKey) !== schemaVersion;
+          let stored = localStorage.getItem(storageKey);
+          if (needsMigration) {
+            if (stored === 'graphite') stored = 'dful-dark';
+            else if (stored === 'dful-dark') stored = 'amber-dark';
+            localStorage.setItem(schemaKey, schemaVersion);
+            if (stored) localStorage.setItem(storageKey, stored);
+          }
+          if (valid.has(stored)) theme = stored;
+          else {
+            let legacy = localStorage.getItem(legacyStorageKey);
+            if (needsMigration) {
+              if (legacy === 'graphite') legacy = 'dful-dark';
+              else if (legacy === 'dful-dark') legacy = 'amber-dark';
+            }
+            if (valid.has(legacy)) {
+              theme = legacy;
+              localStorage.setItem(storageKey, legacy);
+            }
+            if (legacy) localStorage.removeItem(legacyStorageKey);
+          }
+          localStorage.setItem(storageKey, theme);
+        } catch {}
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = dark.has(theme) ? 'dark' : 'light';
+      })();</script><meta name="description" content="Qwen3.8-27B en una RTX 5070 Ti de 16 GB, ajustes de inferencia y una prueba agentic real desde Kali con OpenCode."><link rel="canonical" href="https://dful.github.io/es/research/qwen3-8-27b-local-opencode-hack-the-box/"><link rel="alternate" hreflang="es" href="https://dful.github.io/es/research/qwen3-8-27b-local-opencode-hack-the-box/"><link rel="alternate" hreflang="en" href="https://dful.github.io/en/research/qwen3-8-27b-local-agentic-pentesting/"><link rel="alternate" hreflang="x-default" href="https://dful.github.io/en/research/qwen3-8-27b-local-agentic-pentesting/"><meta property="og:url" content="https://dful.github.io/es/research/qwen3-8-27b-local-opencode-hack-the-box/"><meta property="og:type" content="website"><meta property="og:site_name" content="dful"><meta property="og:title" content="Probando Qwen3.8-27B en local con OpenCode y Hack The Box · dful"><meta property="og:description" content="Qwen3.8-27B en una RTX 5070 Ti de 16 GB, ajustes de inferencia y una prueba agentic real desde Kali con OpenCode."><meta property="og:locale" content="es_ES"><meta property="og:locale:alternate" content="en_GB"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="Probando Qwen3.8-27B en local con OpenCode y Hack The Box · dful"><meta name="twitter:description" content="Qwen3.8-27B en una RTX 5070 Ti de 16 GB, ajustes de inferencia y una prueba agentic real desde Kali con OpenCode."><meta name="generator" content="Astro v7.3.2"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><title>Probando Qwen3.8-27B en local con OpenCode y Hack The Box · dful</title><link rel="stylesheet" href="/_astro/research.CdZQXa2k.css"><link rel="stylesheet" href="/_astro/publishing.C5o61NTe.css"><link rel="stylesheet" href="/_astro/BaseLayout.l85KjHsw.css"></head><body><a class="skip-link" href="#main">Saltar al contenido</a><header class="site-header"><div class="header-inner"><a class="wordmark" href="/es/" aria-label="dful · Inicio">dful<span>.</span></a><nav class="primary-nav" aria-label="Principal"><a href="/es/" data-active="false">Inicio</a><a href="/es/notes/" data-active="false">Notas</a><a href="/es/research/" data-active="true" aria-current="page">Artículos</a><a href="/es/about/" data-active="false">About</a></nav><div class="header-actions"><details class="theme-picker" data-theme-picker data-astro-cid-hcqnpaxe><summary aria-label="Tema" data-astro-cid-hcqnpaxe><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.25a8.75 8.75 0 1 0 0 17.5h1.25a2.25 2.25 0 0 0 0-4.5h-.75a1.75 1.75 0 0 1 0-3.5h2.35A5.9 5.9 0 0 0 20.75 6.9C18.72 4.63 15.72 3.25 12 3.25Z"></path><circle cx="7.4" cy="10" r=".7" fill="currentColor" stroke="none"></circle><circle cx="9.25" cy="6.9" r=".7" fill="currentColor" stroke="none"></circle><circle cx="13" cy="6.2" r=".7" fill="currentColor" stroke="none"></circle><circle cx="16.25" cy="8" r=".7" fill="currentColor" stroke="none"></circle></svg><span class="theme-current" data-theme-current data-astro-cid-hcqnpaxe>Dful Dark</span></summary><div class="theme-menu" aria-label="Tema" data-astro-cid-hcqnpaxe><div class="theme-menu-head" data-astro-cid-hcqnpaxe>Tema</div><button type="button" aria-pressed="true" data-theme-option="dful-dark" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#111214" data-astro-cid-hcqnpaxe></i><i style="--swatch:#f0eee8" data-astro-cid-hcqnpaxe></i><i style="--swatch:#ff8b3d" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Dful Dark</span></button><button type="button" aria-pressed="false" data-theme-option="amber-dark" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#0c0c0b" data-astro-cid-hcqnpaxe></i><i style="--swatch:#f2efe7" data-astro-cid-hcqnpaxe></i><i style="--swatch:#ff9f2f" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Amber Dark</span></button><button type="button" aria-pressed="false" data-theme-option="dful-light" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#f7f3ea" data-astro-cid-hcqnpaxe></i><i style="--swatch:#171511" data-astro-cid-hcqnpaxe></i><i style="--swatch:#b94d08" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Dful Light</span></button><button type="button" aria-pressed="false" data-theme-option="flexoki-paper" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#fffcf0" data-astro-cid-hcqnpaxe></i><i style="--swatch:#100f0f" data-astro-cid-hcqnpaxe></i><i style="--swatch:#bc5215" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Flexoki Paper</span></button><button type="button" aria-pressed="false" data-theme-option="phosphor" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#030604" data-astro-cid-hcqnpaxe></i><i style="--swatch:#c8f7cf" data-astro-cid-hcqnpaxe></i><i style="--swatch:#48ff78" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Phosphor</span></button><button type="button" aria-pressed="false" data-theme-option="arcade" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#11102b" data-astro-cid-hcqnpaxe></i><i style="--swatch:#fff4d7" data-astro-cid-hcqnpaxe></i><i style="--swatch:#4de9ff" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Arcade</span></button><button type="button" aria-pressed="false" data-theme-option="cobalt" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#07111f" data-astro-cid-hcqnpaxe></i><i style="--swatch:#edf6ff" data-astro-cid-hcqnpaxe></i><i style="--swatch:#42b9ff" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Cobalt</span></button></div></details><script>
+  (() => {
+    const storageKey = 'dful-theme';
+    const themes = [{"id":"dful-dark","name":"Dful Dark","colorScheme":"dark"},{"id":"amber-dark","name":"Amber Dark","colorScheme":"dark"},{"id":"dful-light","name":"Dful Light","colorScheme":"light"},{"id":"flexoki-paper","name":"Flexoki Paper","colorScheme":"light"},{"id":"phosphor","name":"Phosphor","colorScheme":"dark"},{"id":"arcade","name":"Arcade","colorScheme":"dark"},{"id":"cobalt","name":"Cobalt","colorScheme":"dark"}];
+    const valid = new Set(themes.map(({ id }) => id));
+    const names = Object.fromEntries(themes.map(({ id, name }) => [id, name]));
+    const isDark = (theme) => themes.find((item) => item.id === theme)?.colorScheme === 'dark';
+    const apply = (theme) => {
+      const selected = valid.has(theme) ? theme : "dful-dark";
+      document.documentElement.dataset.theme = selected;
+      document.documentElement.style.colorScheme = isDark(selected) ? 'dark' : 'light';
+      try { localStorage.setItem(storageKey, selected); } catch {}
+      document.querySelectorAll('[data-theme-picker]').forEach((picker) => {
+        const current = picker.querySelector('[data-theme-current]');
+        if (current) current.textContent = names[selected];
+        picker.querySelectorAll('[data-theme-option]').forEach((button) => button.setAttribute('aria-pressed', button.getAttribute('data-theme-option') === selected ? 'true' : 'false'));
+      });
+    };
+    const enhance = () => {
+      document.querySelectorAll('[data-theme-picker]:not([data-enhanced])').forEach((picker) => {
+        picker.setAttribute('data-enhanced','true');
+        picker.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && picker.open) {
+            picker.removeAttribute('open');
+            picker.querySelector('summary').focus();
+          }
+        });
+        picker.querySelectorAll('[data-theme-option]').forEach((button) => button.addEventListener('click', () => {
+          apply(button.getAttribute('data-theme-option'));
+          picker.removeAttribute('open');
+          picker.querySelector('summary').focus();
+        }));
+      });
+      let stored = "dful-dark";
+      try { stored = localStorage.getItem(storageKey) || stored; } catch {}
+      apply(stored);
+    };
+    enhance();
+    document.addEventListener('astro:page-load', enhance);
+  })();</script><nav class="lang-switch" aria-label="Cambiar idioma"><a href="/en/research/qwen3-8-27b-local-agentic-pentesting/" data-active="false">EN</a><a href="/es/research/qwen3-8-27b-local-opencode-hack-the-box/" data-active="true" aria-current="page">ES</a></nav><div class="social-links" aria-label="Perfiles sociales"><a href="https://github.com/dful" rel="me">GitHub</a><a href="https://www.linkedin.com/in/daniel-fulladosa/" rel="me">LinkedIn</a></div></div></div></header><main id="main"><article class="article-page" data-article-page><header class="article-header"><div class="article-header-content"><div class="article-pretitle"><p class="article-eyebrow">AI for Offensive Security · Agentic Systems</p></div><h1>Probando Qwen3.8-27B en local con OpenCode y Hack The Box</h1><p class="article-deck">Qwen3.8-27B en una RTX 5070 Ti de 16 GB, ajustes de inferencia y una prueba agentic real desde Kali con OpenCode.</p><div class="article-meta"><span>Daniel Fulladosa</span><time datetime="2026-08-25T00:00:00.000Z">25 ago 2026</time><span class="article-meta-reading"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7v5l3.2 2"></path></svg>15 min de lectura</span></div></div></header><div class="article-layout"><aside class="article-rail" data-article-rail aria-label="En este artículo"><div class="article-rail-block article-rail-context"><p class="article-rail-label">Artículo</p><dl><div><dt>Publicado</dt><dd><time datetime="2026-08-25T00:00:00.000Z">25 ago 2026</time></dd></div><div><dt>Áreas</dt><dd>AI for Offensive Security · Agentic Systems</dd></div></dl></div><div class="article-rail-block article-rail-tags"><p class="article-rail-label">Tags</p><ul><li><a href="/es/research/?tag=local-llm" data-tag-slug="local-llm">local-llm</a></li><li><a href="/es/research/?tag=opencode" data-tag-slug="opencode">opencode</a></li><li><a href="/es/research/?tag=agentic-pentesting" data-tag-slug="agentic-pentesting">agentic-pentesting</a></li><li><a href="/es/research/?tag=hack-the-box" data-tag-slug="hack-the-box">hack-the-box</a></li></ul></div><div class="article-rail-block article-rail-toc"><details data-article-toc-details><summary>En este artículo</summary><nav aria-label="En este artículo"><ul><li><a href="#el-equipo-y-el-laboratorio">El equipo y el laboratorio</a></li><li><a href="#primeras-pruebas-con-q4">Primeras pruebas con Q4</a></li><li><a href="#el-salto-a-ud-q3_k_xl">El salto a UD-Q3_K_XL</a></li><li><a href="#aumentar-el-contexto-antes-de-conectar-opencode">Aumentar el contexto antes de conectar OpenCode</a></li><li><a href="#kv-cache-y-flash-attention">KV cache y Flash Attention</a></li><li><a href="#configuración-final-en-lm-studio">Configuración final en LM Studio</a></li><li><a href="#ventanas-de-contexto-en-opencode-y-lm-studio">Ventanas de contexto en OpenCode y LM Studio</a></li><li><a href="#lm-studio-como-backend-local">LM Studio como backend local</a></li><li><a href="#prueba-de-hacking-en-devhub">Prueba de hacking en DevHub</a></li><li><a href="#qué-aportaba-el-harness">Qué aportaba el harness</a></li><li><a href="#limitaciones">Limitaciones</a></li><li><a href="#conclusiones">Conclusiones</a></li></ul></nav></details></div></aside><div class="article-main-lane"><div class="publishing-prose article-prose"><p>Cuando apareció <a href="https://huggingface.co/Qwen/Qwen3.8-27B">Qwen3.8-27B</a> empecé a verlo bastante en conversaciones y comparativas sobre modelos locales. Es un modelo de 27B con reasoning, tool use y un contexto nativo de 262K tokens. Sobre el papel tenía justo el tamaño que me interesaba probar: suficientemente grande como para esperar capacidades útiles de coding y razonamiento, pero todavía dentro del terreno donde una buena cuantización podía hacerlo viable en una GPU doméstica.</p>
+<p>Mi GPU es una RTX 5070 Ti con 16 GB de VRAM. Como referencia, 27.000 millones de parámetros almacenados a 16 bits necesitan del orden de 54 GB solo para los pesos. La primera parte del experimento era bastante práctica: ver qué combinación de cuantización, GPU offload y contexto podía ejecutar con el hardware que ya tenía.</p>
+<p>Las primeras pruebas fueron con el modelo en LM Studio. Cuando conseguí una configuración rápida y con suficiente contexto, el siguiente paso fue usarla en algo más cercano a mi trabajo: servir el modelo por API, conectar OpenCode desde una Kali y probar una sesión larga de pentesting sobre una máquina Medium de Hack The Box.</p>
+<h2 id="el-equipo-y-el-laboratorio">El equipo y el laboratorio</h2>
+<p>Todo se hizo en mi PC habitual:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Componente</th><th>Configuración</th></tr></thead><tbody><tr><td>GPU</td><td>NVIDIA GeForce RTX 5070 Ti · 16 GB VRAM</td></tr><tr><td>CPU</td><td>Intel Core i9-9900K</td></tr><tr><td>RAM</td><td>32 GB DDR4</td></tr><tr><td>Host</td><td>Windows</td></tr><tr><td>Runtime</td><td>LM Studio / llama.cpp</td></tr><tr><td>Entorno de pentesting</td><td>Kali Linux en VMware</td></tr></tbody></table>
+<p>Para iterar con las distintas configuraciones utilicé <a href="https://lmstudio.ai/">LM Studio</a>. En esta prueba me interesaba poder descargar un GGUF, cambiar el contexto, mover el GPU offload, tocar la KV cache y volver a cargar el modelo en segundos. Para un servicio con otros requisitos de concurrencia o despliegue habría valorado una herramienta más orientada a serving, como vLLM.</p>
+<p>LM Studio también me permitía mantener el mismo runtime cuando pasase de las pruebas manuales al agente. Puede exponer los modelos cargados mediante una <a href="https://lmstudio.ai/docs/developer/openai-compat">API compatible con OpenAI</a>, así que OpenCode podía consumir el modelo local sin necesitar una integración específica.</p>
+<figure class="pub-figure pub-breakout-wide" data-preview="true"><p><img alt="Diagrama del host Windows con Qwen y LM Studio conectado por LAN a una Kali con OpenCode y la VPN de Hack The Box" loading="lazy" decoding="async" width="1440" height="720" src="/_astro/architecture.DKTKdb7o_139DcY.svg"></p><figcaption>Arquitectura del laboratorio: la inferencia queda en Windows y OpenCode trabaja desde la Kali a través de la LAN.</figcaption></figure>
+<h2 id="primeras-pruebas-con-q4">Primeras pruebas con Q4</h2>
+<p>El primer modelo que descargué fue el <code>Q4_K_M</code> de <strong>LM Studio Community</strong>, de unos 16,8 GB. Los modelos se distribuían como GGUF, el formato que utiliza llama.cpp para almacenar los pesos cuantizados y los metadatos necesarios para cargarlos.</p>
+<p>La cuantización es lo que hace posible plantearse un modelo así en 16 GB. La forma más sencilla que tengo de visualizarla es pensar en redondear números. Si no necesitas conservar <code>3.14159265</code>, puedes utilizar una representación menos precisa y gastar menos espacio. En un LLM el proceso es bastante más complejo, pero la idea útil para este caso es esa: utilizar menos bits para representar los pesos reduce mucho la memoria necesaria.</p>
+<aside class="pub-callout note" role="note"><strong class="pub-callout-title">Q3, Q4 y calidad</strong><p>Q3 o Q4 describen la cuantización de los pesos, no modelos diferentes. Reducir precisión ahorra memoria y puede afectar a la calidad, pero este experimento no intenta medir esa pérdida. Primero necesitaba una configuración que fuese suficientemente rápida y tuviese contexto suficiente para trabajar con un agente.</p></aside>
+<p>La otra opción para hacer entrar modelos grandes es repartirlos entre GPU y CPU. llama.cpp permite decidir cuántas capas se mantienen en VRAM mediante el GPU offload. Las capas que no entran se quedan en RAM y se procesan en CPU.</p>
+<p><a href="https://huggingface.co/Qwen/Qwen3.8-27B/blob/main/README.md">Qwen3.8-27B tiene 64 capas</a>. <a href="https://github.com/ggml-org/llama.cpp/blob/master/docs/development/token_generation_performance_tips.md">llama.cpp también puede descargar a GPU la capa de salida</a>, por eso LM Studio mostraba un máximo de 65 unidades en su control de offload. Con el Q4, 32K de contexto y KV cache en Q8, mi configuración se quedaba en <strong>54 de 65</strong>.</p>
+<p>Ya esperaba que mezclar CPU y GPU no fuese lo ideal, pero la diferencia práctica fue mayor de lo que esperaba. La generación rondaba los <strong>9 tokens/s</strong>. Cambiar de seis a ocho CPU threads apenas movió el resultado y algunas pruebas con speculative decoding tampoco mejoraron el problema principal: una parte de la inferencia seguía fuera de la GPU.</p>
+<figure class="pub-figure" data-preview="true"><p><img alt="Configuración completa de LM Studio utilizada para la prueba Q4 con 32768 tokens de contexto y GPU offload 54" loading="lazy" decoding="async" width="741" height="1108" src="/_astro/q4-load-settings.BBPiN5-3_fIMEI.webp"></p><figcaption>Q4 a 32K: 54 unidades de GPU offload, KV cache Q8 y Flash Attention activado.</figcaption></figure>
+<figure class="pub-figure pub-breakout-wide" data-preview="true"><p><img alt="OpenCode junto a los logs de LM Studio durante la prueba Q4, mostrando una generación cercana a 9 tokens por segundo" loading="lazy" decoding="async" width="2047" height="1109" src="/_astro/q4-throughput-evidence.DMrBSQoB_Z1rR3Ng.webp"></p><figcaption>Los logs de LM Studio se estabilizaban alrededor de 9 tokens/s con el Q4 y offload parcial.</figcaption></figure>
+<p>A 9 tokens/s se puede conversar con el modelo sin demasiado problema. Con un agente la espera se acumula mucho más rápido. Cada paso puede generar reasoning, producir una tool call, esperar al comando, incorporar su salida y volver a generar para decidir qué hacer después. En una tarea larga ese ciclo se repite continuamente.</p>
+<h2 id="el-salto-a-ud-q3_k_xl">El salto a UD-Q3_K_XL</h2>
+<p>Después probé <a href="https://huggingface.co/unsloth/Qwen3.8-27B-GGUF"><code>UD-Q3_K_XL</code></a>, una de las cuantizaciones dinámicas publicadas por Unsloth. LM Studio mostraba unos <strong>13,4 GB en disco</strong>, aproximadamente tres gigabytes menos que el Q4 que había probado primero.</p>
+<p>Ese margen permitió llevar el GPU offload al máximo. La carga del modelo podía quedarse en la 5070 Ti y las generaciones cortas pasaron a moverse alrededor de <strong>40-45 tokens/s</strong>.</p>
+<p>Estos resultados no permiten decir que Q3 sea cinco veces más rápido que Q4. Entre las dos pruebas también cambió dónde se ejecutaba el modelo: en la primera había capas en CPU y en la segunda la carga quedaba en GPU. Para el uso que buscaba, resolver ese cuello de botella tenía más impacto que intentar comparar pequeñas diferencias de calidad entre las dos cuantizaciones.</p>
+<figure class="pub-figure pub-breakout-wide" data-preview="true"><p><img alt="Gráfica con aproximadamente 9.2 tokens por segundo para Q4 con offload parcial, 43.2 para una request corta del Q3 y alrededor de 20.9 con más de 20K tokens de contexto" loading="lazy" decoding="async" width="1440" height="530" src="/_astro/throughput-observed.eDsZ0diH_1Xxxap.svg"></p><figcaption>Tres referencias de throughput observadas en el mismo equipo.</figcaption></figure>
+<h2 id="aumentar-el-contexto-antes-de-conectar-opencode">Aumentar el contexto antes de conectar OpenCode</h2>
+<p>Las primeras pruebas se hicieron con ventanas de 32K o inferiores. Para cargar el modelo, probar prompts y medir la velocidad era suficiente. Con el Q3 completamente en GPU todavía quedaba margen de VRAM, y quería saber hasta dónde podía aumentarlo sin volver a una experiencia incómoda.</p>
+<p>Además, la siguiente prueba ya iba a ser agentic. Una sesión de OpenCode no acumula únicamente mensajes: también entran instrucciones, schemas de tools, resultados de comandos, contenido de archivos, búsquedas y el historial necesario para mantener una tarea durante bastante tiempo. Para algo pequeño 32K puede bastar. Para una prueba de pentesting que podía durar horas prefería trabajar alrededor de 64K.</p>
+<p>Antes de pasar a OpenCode preparé un benchmark sencillo de long context. El script PowerShell enviaba un documento grande junto con diez preguntas de recuperación a <code>/v1/chat/completions</code>, sin permitir conocimiento externo, y guardaba por separado la respuesta, el reasoning y las métricas de uso. Me servía para comprobar que una ventana grande seguía siendo utilizable en mi configuración, no para medir la calidad general de Qwen.</p>
+<p>En una de esas ejecuciones el prompt llegó a <strong>50.525 tokens</strong>. Con <code>UD-Q3_K_XL</code>, KV cache Q4_0 y el modelo completamente en GPU, generó 2.821 tokens en 176,63 segundos, alrededor de <strong>20,9 tokens/s</strong>, y respondió correctamente las diez preguntas del documento. Era bastante más lento que una request corta, pero seguía dentro de un rango con el que podía trabajar.</p>
+<h2 id="kv-cache-y-flash-attention">KV cache y Flash Attention</h2>
+<p>Al aumentar el contexto volvió a aparecer la presión sobre la VRAM.</p>
+<p>Durante la generación, el runtime mantiene una <strong>KV cache</strong> con información calculada sobre los tokens anteriores. Esto permite reutilizar parte del estado de attention en vez de recalcularlo desde cero con cada token nuevo. La consecuencia práctica para esta prueba es sencilla: cuanto más contexto quieres mantener, más memoria necesita esa cache.</p>
+<p><a href="https://beta.lmstudio.ai/docs/typescript/api-reference/llm-load-model-config">LM Studio permite cuantizar por separado las caches K y V</a>. Igual que con los pesos, reducir su precisión recorta consumo de memoria a cambio de un posible impacto en calidad. En este caso pasé ambas a <code>Q4_0</code>. No hice una evaluación específica de degradación de la KV cache, pero era una prueba razonable porque permitía recuperar bastante VRAM sin cambiar otra vez los pesos del modelo.</p>
+<p>También mantuve <strong>Flash Attention</strong> activado. <a href="https://lmstudio.ai/docs/developer/rest/load">LM Studio lo expone como una optimización que puede reducir el consumo de memoria y mejorar la velocidad de generación</a>. En mi configuración era además necesario para cuantizar la V cache.</p>
+<figure class="pub-figure pub-breakout-wide" data-preview="true"><p><img alt="Reparto de VRAM entre pesos del modelo, KV cache y overhead del runtime al aumentar el contexto" loading="lazy" decoding="async" width="1440" height="650" src="/_astro/context-vram.Cywduvvy_1nWphY.svg"></p><figcaption>Al crecer el contexto, la KV cache consume una parte mayor del mismo presupuesto de VRAM que utilizan los pesos y el runtime.</figcaption></figure>
+<p>Con K y V en Q4_0 pude mantener una ventana grande sin perder el full GPU offload. En una de las ejecuciones la memoria dedicada llegó a aproximadamente <strong>15,4 de 16 GB</strong>. El setup quedaba bastante ajustado, pero Windows seguía funcionando con normalidad y no necesitaba volver a mover capas a CPU.</p>
+<h2 id="configuración-final-en-lm-studio">Configuración final en LM Studio</h2>
+<p>La configuración que terminé utilizando combinaba los ajustes de memoria anteriores con los parámetros de sampling recomendados por Unsloth para el modelo.</p>
+<aside class="pub-callout note" role="note"><strong class="pub-callout-title">Configuración final de referencia</strong>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Ajuste</th><th>Valor</th></tr></thead><tbody><tr><td>Modelo</td><td>Qwen3.8-27B · <code>UD-Q3_K_XL</code></td></tr><tr><td>GPU offload</td><td>65 / máximo</td></tr><tr><td>CPU thread pool</td><td>8</td></tr><tr><td>Evaluation / physical batch</td><td>2048 / 512</td></tr><tr><td>Flash Attention</td><td>ON</td></tr><tr><td>K cache</td><td>Q4_0</td></tr><tr><td>V cache</td><td>Q4_0</td></tr><tr><td>KV cache en GPU</td><td>ON</td></tr><tr><td>Speculative decoding</td><td>OFF</td></tr><tr><td>Thinking</td><td>ON</td></tr><tr><td>Temperature</td><td>1.0</td></tr><tr><td>Top P / Top K</td><td>0.95 / 20</td></tr><tr><td>Min P</td><td>0</td></tr><tr><td>Presence / repetition penalty</td><td>0 / 1.0</td></tr></tbody></table></aside>
+<p><a href="https://huggingface.co/unsloth/Qwen3.8-27B-GGUF/blob/main/README.md">Unsloth recomienda</a> esos valores de sampling para el modo de reasoning. El contexto, el offload y la KV cache de la tabla son específicos de esta GPU y de este experimento.</p>
+<figure class="pub-figure" data-preview="true"><p><img alt="Configuración completa de LM Studio para Qwen3.8-27B UD-Q3_K_XL con 81920 tokens de contexto y GPU offload 65" loading="lazy" decoding="async" width="740" height="919" src="/_astro/q3-final-config.DaGF3kNU_Z1Cczus.webp"></p><figcaption>Configuración del Q3 en LM Studio con full GPU offload y margen adicional de contexto para el runtime.</figcaption></figure>
+<h2 id="ventanas-de-contexto-en-opencode-y-lm-studio">Ventanas de contexto en OpenCode y LM Studio</h2>
+<p>Para la parte agentic trabajé con <a href="https://opencode.ai/">OpenCode</a>, porque ya me daba el loop y las tools que quería probar: shell, filesystem, TODOs, sesiones largas y soporte para providers OpenAI-compatible. En el directorio de trabajo configuré el provider local mediante <code>opencode.json</code>, indicando la dirección de LM Studio y los límites que OpenCode debía utilizar para gestionar el modelo.</p>
+<p>El fragmento relevante era equivalente a este:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#E6EDF3">{</span></span>
+<span class="line"><span style="color:#7EE787">  "model"</span><span style="color:#E6EDF3">: </span><span style="color:#A5D6FF">"lmstudio/unsloth/qwen3.8-27b"</span><span style="color:#E6EDF3">,</span></span>
+<span class="line"><span style="color:#7EE787">  "provider"</span><span style="color:#E6EDF3">: {</span></span>
+<span class="line"><span style="color:#7EE787">    "lmstudio"</span><span style="color:#E6EDF3">: {</span></span>
+<span class="line"><span style="color:#7EE787">      "npm"</span><span style="color:#E6EDF3">: </span><span style="color:#A5D6FF">"@ai-sdk/openai-compatible"</span><span style="color:#E6EDF3">,</span></span>
+<span class="line"><span style="color:#7EE787">      "options"</span><span style="color:#E6EDF3">: {</span></span>
+<span class="line"><span style="color:#7EE787">        "baseURL"</span><span style="color:#E6EDF3">: </span><span style="color:#A5D6FF">"http://&#x3C;windows-host>:1234/v1"</span></span>
+<span class="line"><span style="color:#E6EDF3">      },</span></span>
+<span class="line"><span style="color:#7EE787">      "models"</span><span style="color:#E6EDF3">: {</span></span>
+<span class="line"><span style="color:#7EE787">        "unsloth/qwen3.8-27b"</span><span style="color:#E6EDF3">: {</span></span>
+<span class="line"><span style="color:#7EE787">          "limit"</span><span style="color:#E6EDF3">: {</span></span>
+<span class="line"><span style="color:#7EE787">            "context"</span><span style="color:#E6EDF3">: </span><span style="color:#79C0FF">65536</span><span style="color:#E6EDF3">,</span></span>
+<span class="line"><span style="color:#7EE787">            "output"</span><span style="color:#E6EDF3">: </span><span style="color:#79C0FF">12288</span></span>
+<span class="line"><span style="color:#E6EDF3">          }</span></span>
+<span class="line"><span style="color:#E6EDF3">        }</span></span>
+<span class="line"><span style="color:#E6EDF3">      }</span></span>
+<span class="line"><span style="color:#E6EDF3">    }</span></span>
+<span class="line"><span style="color:#E6EDF3">  },</span></span>
+<span class="line"><span style="color:#7EE787">  "compaction"</span><span style="color:#E6EDF3">: {</span></span>
+<span class="line"><span style="color:#7EE787">    "auto"</span><span style="color:#E6EDF3">: </span><span style="color:#79C0FF">true</span><span style="color:#E6EDF3">,</span></span>
+<span class="line"><span style="color:#7EE787">    "prune"</span><span style="color:#E6EDF3">: </span><span style="color:#79C0FF">true</span><span style="color:#E6EDF3">,</span></span>
+<span class="line"><span style="color:#7EE787">    "reserved"</span><span style="color:#E6EDF3">: </span><span style="color:#79C0FF">8192</span></span>
+<span class="line"><span style="color:#E6EDF3">  }</span></span>
+<span class="line"><span style="color:#E6EDF3">}</span></span></code></pre>
+<p><a href="https://opencode.ai/docs/providers">OpenCode utiliza los límites declarados en el provider</a> para gestionar cuánto contexto queda disponible y puede compactar automáticamente una sesión cuando se acerca al límite. En mi caso lo dejé en <strong>65.536 tokens</strong>.</p>
+<p>Durante las sesiones largas aparecieron algunas peticiones que superaban el límite cargado en LM Studio antes de que la compaction actuase como esperaba. El servidor respondía con un HTTP 400 por context overflow y el run quedaba interrumpido.</p>
+<p>Como la configuración Q3 con KV Q4_0 todavía permitía algo más de contexto, acabé cargando LM Studio con una ventana física de aproximadamente <strong>81K</strong>. OpenCode seguía gestionando la sesión como 64K. Los tokens adicionales quedaban como margen frente a esos pequeños overflows y evitaban trabajar exactamente contra el mismo límite en las dos capas.</p>
+<h2 id="lm-studio-como-backend-local">LM Studio como backend local</h2>
+<p>Con la inferencia ya estable levanté el servidor de LM Studio en el host Windows y habilité el acceso desde la red local. Desde Kali, OpenCode apuntaba a la IP privada del host en el puerto 1234. La VPN de Hack The Box y las herramientas de pentesting seguían dentro de la VM, mientras la inferencia utilizaba directamente la GPU de Windows.</p>
+<p>Esta separación también hacía más fácil pensar en cada pieza por separado. Qwen ejecutado por LM Studio quedaba como backend de inferencia. OpenCode añadía el loop agentic, las tools, shell, filesystem y la gestión de la sesión.</p>
+<p>Los logs de LM Studio dejaban bastante claro qué significaba eso. Las requests de OpenCode incluían, además del historial de mensajes, los schemas de herramientas como <code>bash</code>, lectura y escritura de archivos, búsquedas o TODOs. El modelo podía proponer una tool call y OpenCode ejecutaba la acción antes de devolverle el resultado.</p>
+<h2 id="prueba-de-hacking-en-devhub">Prueba de hacking en DevHub</h2>
+<p>Para probar el conjunto utilicé <strong>DevHub</strong>, una máquina Linux Medium de Hack The Box que seguía activa durante la preparación de este artículo. Por ese motivo no voy a describir su ruta de explotación ni los detalles concretos que permitan reconstruirla.</p>
+<p>El run empezó como una prueba normal: enumeración, análisis de la aplicación y actualización del estado a medida que aparecía información nueva. El modelo terminó investigando una aplicación que exponía una API y utilizó los recursos disponibles para entender cómo se comunicaban frontend y backend.</p>
+<p>A partir de ahí fue construyendo y descartando hipótesis hasta encontrar una primitive de ejecución de comandos. La vulnerabilidad ya era pública en el componente afectado, pero el agente no llegó a ella leyendo un walkthrough o una advisory. Las instrucciones de la prueba prohibían buscar soluciones de Hack The Box y, en la práctica, acabó trabajando esa parte sin búsquedas externas.</p>
+<p>Lo interesante de esa fase fue el camino hasta la explotación. El agente partió del comportamiento de la aplicación, relacionó parámetros de la API con las respuestas del servidor y terminó reproduciendo por su cuenta un problema que ya existía, sin partir del identificador de una CVE ni de un exploit preparado.</p>
+<p>Después del primer acceso tuvo que mantener lo que había conseguido mientras seguía enumerando para escalar privilegios. En uno de los pivots terminó interactuando con otro componente interno mediante pequeños scripts. Algunos fallaron, revisó sus propios payloads y corrigió un error que estaba provocando que el servidor descartase los mensajes.</p>
+<figure class="pub-figure pub-breakout-wide" data-preview="true"><p><img alt="OpenCode durante la sesión de DevHub, mostrando el razonamiento y la obtención del primer acceso" loading="lazy" decoding="async" width="2048" height="981" src="/_astro/devhub-reverse-shell.DELbpbAB_Z2tbGbg.webp"></p><figcaption>OpenCode durante la obtención de la primera reverse shell, con más de 36K tokens de contexto en la sesión.</figcaption></figure>
+<p>Esa secuencia muestra mejor el trabajo que quería observar que una captura de la flag. Para seguir avanzando tenía que conservar accesos anteriores, relacionar componentes descubiertos en momentos distintos y corregir intentos cuando algo no funcionaba.</p>
+<p>El proceso fue más lento y menos eficiente que con un buen modelo frontier. También dedicó tiempo a caminos que no aportaron nada. Aun así, mantuvo el run durante una sesión larga, utilizó sus herramientas y terminó la máquina.</p>
+<h2 id="qué-aportaba-el-harness">Qué aportaba el harness</h2>
+<p>OpenCode ya resolvía buena parte del harness: mantenía la conversación, exponía tools, ejecutaba shell y operaciones de filesystem, gestionaba TODOs y se encargaba de la compaction.</p>
+<p>Después repetí parte del experimento con un pequeño harness propio para HTB. El tiempo y el resultado fueron muy parecidos a la primera ejecución, así que lo trato como una variación del mismo experimento.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Componente</th><th>Función</th></tr></thead><tbody><tr><td>Instrucciones / skills</td><td>Dar metodología y restricciones más explícitas al agente</td></tr><tr><td>Estado persistente en Markdown</td><td>Conservar información importante fuera del contexto activo</td></tr><tr><td>Scripts deterministas</td><td>Resolver tareas repetitivas sin volver a gastar reasoning en ellas</td></tr></tbody></table>
+<p>Esta parte me interesa como línea de trabajo por separado, pero el experimento de DevHub no necesita una arquitectura de agentes más compleja para explicar lo que ocurrió.</p>
+<h2 id="limitaciones">Limitaciones</h2>
+<p>Los números de rendimiento son mediciones del setup que utilicé, no un benchmark formal entre cuantizaciones. Entre Q4 y Q3 cambiaron a la vez el formato de los pesos y el reparto CPU/GPU, así que no se puede atribuir toda la diferencia de tokens/s únicamente a la cuantización.</p>
+<p>Tampoco medí de forma sistemática la pérdida de calidad entre Q4, Q3 o las distintas precisiones de KV cache. Es una parte que tendría sentido estudiar de forma separada si el objetivo fuese escoger la mejor configuración general para esta GPU.</p>
+<p>Las mediciones con contexto grande proceden del benchmark de long context y de requests agentic reales. Sirven para saber cómo se comportó el sistema durante este trabajo, pero no para construir una curva precisa de throughput frente a longitud de contexto.</p>
+<p>DevHub sigue siendo una única máquina. El resultado demuestra que el conjunto pudo sostener una tarea de hacking bastante más compleja que un prompt aislado. No sirve para medir de forma general la capacidad de pentesting del modelo.</p>
+<h2 id="conclusiones">Conclusiones</h2>
+<p>El primer Q4 podía ejecutarse en 16 GB, pero dejar varias capas en CPU reducía el rendimiento hasta aproximadamente 9 tokens/s. <code>UD-Q3_K_XL</code> dejaba suficiente espacio para mantener la carga en GPU y las requests cortas pasaban a la zona de 40-45 tokens/s.</p>
+<p>Ese margen permitió aumentar el contexto antes de conectar OpenCode. Con 64K, la KV cache empezó a tener un impacto visible sobre la VRAM. Pasar K y V a Q4_0 permitió conservar una ventana grande y el full GPU offload. En el benchmark de unas 50K tokens de entrada, la generación seguía rondando los 21 tokens/s.</p>
+<p>En las sesiones agentic también aparecieron problemas que no veía usando el modelo como chat: compactions, peticiones que rozaban el límite y errores 400 por context overflow. Mantener 64K como límite lógico en OpenCode y dejar más margen en LM Studio resultó una solución práctica para ese setup.</p>
+<p>La prueba de DevHub fue la parte que más cambió mi percepción de los modelos locales. Hace unos meses me había costado obtener un comportamiento parecido incluso con modelos frontier. Aquí un 27B ejecutado en mi propia GPU pudo mantener una sesión larga de pentesting, usar herramientas, desarrollar una explotación a partir de la aplicación que tenía delante, pivotar entre componentes y corregir sus propios intentos hasta terminar una máquina Medium.</p>
+<p>Sigue habiendo diferencias claras frente a los mejores modelos hosted, tanto en velocidad como en consistencia. Aun así, el nivel actual de los modelos locales ya permite utilizar hardware doméstico para experimentos agentic bastante más serios que una demo de chat o un pequeño ejercicio de coding.</p></div><nav class="article-end-nav" aria-label="Volver a Artículos"><a href="/es/research/"><span>Volver a Artículos</span><strong>Artículos →</strong></a></nav></div></div></article><script>
+    if (window.matchMedia('(min-width: 1200px)').matches) {
+      document.querySelector('[data-article-toc-details]')?.setAttribute('open', '');
+    }
+  </script></main><footer class="site-footer"><div class="footer-inner"><a class="footer-wordmark" href="/es/">dful<span>.</span></a><span>Offensive Security · AI Security · Agentic Systems</span></div></footer><script>
+  (() => {
+    const init = () => {
+      const figures = [...document.querySelectorAll('.publishing-prose .pub-figure[data-preview="true"]')];
+      if (!figures.length) return;
+
+      const spanish = document.documentElement.lang === 'es';
+      const labels = spanish
+        ? {
+            open: 'Abrir vista ampliada',
+            close: 'Cerrar vista previa',
+            zoom: 'Zoom de imagen',
+            fit: 'Ajustar',
+            actual: 'Tamaño real',
+          }
+        : {
+            open: 'Open enlarged preview',
+            close: 'Close preview',
+            zoom: 'Image zoom',
+            fit: 'Fit',
+            actual: 'Actual size',
+          };
+
+      let dialog = document.querySelector('dialog[data-figure-preview]');
+      if (!(dialog instanceof HTMLDialogElement)) {
+        dialog = document.createElement('dialog');
+        dialog.className = 'figure-preview-dialog';
+        dialog.setAttribute('data-figure-preview', 'true');
+        dialog.dataset.mode = 'fit';
+
+        const toolbar = document.createElement('div');
+        toolbar.className = 'figure-preview-toolbar';
+
+        const modeGroup = document.createElement('div');
+        modeGroup.className = 'figure-preview-modes';
+        modeGroup.setAttribute('role', 'group');
+        modeGroup.setAttribute('aria-label', labels.zoom);
+
+        const fit = document.createElement('button');
+        fit.type = 'button';
+        fit.className = 'figure-preview-mode';
+        fit.setAttribute('data-figure-preview-fit', 'true');
+        fit.setAttribute('aria-pressed', 'true');
+        fit.textContent = labels.fit;
+
+        const actual = document.createElement('button');
+        actual.type = 'button';
+        actual.className = 'figure-preview-mode';
+        actual.setAttribute('data-figure-preview-actual', 'true');
+        actual.setAttribute('aria-pressed', 'false');
+        actual.setAttribute('title', labels.actual);
+        actual.textContent = '1:1';
+
+        const close = document.createElement('button');
+        close.type = 'button';
+        close.className = 'figure-preview-close';
+        close.setAttribute('data-figure-preview-close', 'true');
+        close.setAttribute('aria-label', labels.close);
+        close.textContent = '×';
+
+        const viewport = document.createElement('div');
+        viewport.className = 'figure-preview-viewport';
+        viewport.setAttribute('data-figure-preview-viewport', 'true');
+
+        const image = document.createElement('img');
+        image.className = 'figure-preview-image';
+        viewport.appendChild(image);
+
+        const caption = document.createElement('p');
+        caption.className = 'figure-preview-caption';
+        caption.id = 'figure-preview-caption';
+
+        modeGroup.append(fit, actual);
+        toolbar.append(modeGroup, close);
+        dialog.append(toolbar, viewport, caption);
+        document.body.appendChild(dialog);
+
+        const setMode = (mode) => {
+          const native = mode === 'native';
+          dialog.dataset.mode = native ? 'native' : 'fit';
+          fit.setAttribute('aria-pressed', native ? 'false' : 'true');
+          actual.setAttribute('aria-pressed', native ? 'true' : 'false');
+          if (!native) viewport.scrollTo({ top: 0, left: 0 });
+        };
+
+        fit.addEventListener('click', () => setMode('fit'));
+        actual.addEventListener('click', () => setMode('native'));
+        close.addEventListener('click', () => dialog.close());
+        dialog.addEventListener('click', (event) => {
+          if (event.target !== dialog) return;
+          const rect = dialog.getBoundingClientRect();
+          const outside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom;
+          if (outside) dialog.close();
+        });
+        dialog.addEventListener('close', () => {
+          setMode('fit');
+          const trigger = dialog.dataset.lastTrigger;
+          const source = trigger ? document.querySelector(`[data-preview-trigger="${trigger}"]`) : null;
+          if (source instanceof HTMLButtonElement) source.focus();
+          delete dialog.dataset.lastTrigger;
+        });
+      }
+
+      const close = dialog.querySelector('[data-figure-preview-close]');
+      const fit = dialog.querySelector('[data-figure-preview-fit]');
+      const actual = dialog.querySelector('[data-figure-preview-actual]');
+      const previewImage = dialog.querySelector('.figure-preview-image');
+      const viewport = dialog.querySelector('[data-figure-preview-viewport]');
+      const caption = dialog.querySelector('.figure-preview-caption');
+      if (!(close instanceof HTMLButtonElement) || !(fit instanceof HTMLButtonElement) || !(actual instanceof HTMLButtonElement) || !(previewImage instanceof HTMLImageElement) || !(viewport instanceof HTMLDivElement) || !(caption instanceof HTMLParagraphElement)) return;
+
+      const largestSource = (image) => {
+        const candidates = (image.srcset || '')
+          .split(',')
+          .map((candidate) => candidate.trim())
+          .filter(Boolean)
+          .map((candidate) => {
+            const parts = candidate.split(/\s+/);
+            const descriptor = parts.length > 1 ? parts.pop() : '';
+            const url = parts.join(' ') || candidate;
+            let score = 0;
+            if (descriptor.endsWith('w')) score = Number.parseFloat(descriptor);
+            else if (descriptor.endsWith('x')) score = Number.parseFloat(descriptor) * (image.naturalWidth || 1);
+            return { url, score: Number.isFinite(score) ? score : 0 };
+          })
+          .sort((a, b) => b.score - a.score);
+        return candidates[0]?.url || image.currentSrc || image.src;
+      };
+
+      figures.forEach((figure, index) => {
+        const image = figure.querySelector('img');
+        if (!(image instanceof HTMLImageElement) || figure.querySelector('[data-preview-trigger]')) return;
+
+        const trigger = document.createElement('button');
+        trigger.type = 'button';
+        trigger.className = 'figure-preview-trigger';
+        const triggerId = `figure-preview-trigger-${index + 1}`;
+        trigger.setAttribute('data-preview-trigger', triggerId);
+        const alt = image.alt || (spanish ? 'Imagen técnica' : 'Technical image');
+        trigger.setAttribute('aria-label', `${labels.open}: ${alt}`);
+        image.parentNode?.insertBefore(trigger, image);
+        trigger.appendChild(image);
+
+        trigger.addEventListener('click', () => {
+          previewImage.src = largestSource(image);
+          previewImage.alt = alt;
+          const figureCaption = figure.querySelector('figcaption')?.textContent?.trim() || alt;
+          caption.textContent = figureCaption;
+          dialog.setAttribute('aria-label', alt);
+          dialog.setAttribute('aria-describedby', caption.id);
+          dialog.dataset.lastTrigger = triggerId;
+          dialog.dataset.mode = 'fit';
+          fit.setAttribute('aria-pressed', 'true');
+          actual.setAttribute('aria-pressed', 'false');
+          viewport.scrollTo({ top: 0, left: 0 });
+
+          if (typeof dialog.showModal === 'function') {
+            dialog.showModal();
+            close.focus();
+          }
+        });
+      });
+    };
+
+    init();
+    document.addEventListener('astro:page-load', init);
+  })();
+</script><script type="module">var e=()=>{document.querySelectorAll(`.pub-tabs:not([data-enhanced])`).forEach((e,t)=>{e.setAttribute(`data-enhanced`,`true`);let n=[...e.querySelectorAll(`:scope > .pub-tab`)];if(!n.length)return;let r=document.createElement(`div`);r.className=`pub-tab-list`,r.setAttribute(`role`,`tablist`),n.forEach((e,i)=>{let a=`pub-tab-${t}-${i}`,o=`pub-tab-panel-${t}-${i}`,s=document.createElement(`button`);s.type=`button`,s.id=a,s.className=`pub-tab-button`,s.setAttribute(`role`,`tab`),s.setAttribute(`aria-controls`,o),s.setAttribute(`aria-selected`,i===0?`true`:`false`),s.tabIndex=i===0?0:-1,s.textContent=e.getAttribute(`data-tab-label`)||`Tab ${i+1}`,e.id=o,e.setAttribute(`role`,`tabpanel`),e.setAttribute(`aria-labelledby`,a),e.toggleAttribute(`hidden`,i!==0),s.addEventListener(`click`,()=>{[...r.querySelectorAll(`[role="tab"]`)].forEach(e=>{e.setAttribute(`aria-selected`,e===s?`true`:`false`),e.tabIndex=e===s?0:-1}),n.forEach(t=>t.toggleAttribute(`hidden`,t!==e)),s.focus()}),s.addEventListener(`keydown`,e=>{let t=[...r.querySelectorAll(`[role="tab"]`)],n=t.indexOf(s),i=n;if(e.key===`ArrowRight`)i=(n+1)%t.length;else if(e.key===`ArrowLeft`)i=(n-1+t.length)%t.length;else if(e.key===`Home`)i=0;else if(e.key===`End`)i=t.length-1;else return;e.preventDefault(),t[i].click()}),r.appendChild(s)}),e.prepend(r)})};e(),document.addEventListener(`astro:page-load`,e);</script><script type="module">var e=()=>{let e=document.documentElement.lang===`es`?{copy:`Copiar`,copied:`Copiado`}:{copy:`Copy`,copied:`Copied`};document.querySelectorAll(`pre`).forEach(t=>{if(t.closest(`.pub-filetree`)||t.parentElement?.classList.contains(`code-frame`))return;let n=document.createElement(`div`);n.className=`code-frame`,t.parentNode?.insertBefore(n,t),n.appendChild(t);let r=t.dataset.language??t.querySelector(`code`)?.className.match(/language-([\w-]+)/)?.[1];if(r){let e=document.createElement(`span`);e.className=`code-language`,e.textContent=r===`powershell`?`PowerShell`:r,n.appendChild(e)}let i=document.createElement(`button`);i.className=`copy-code`,i.type=`button`,i.textContent=e.copy,i.addEventListener(`click`,async()=>{try{await navigator.clipboard.writeText(t.textContent??``),i.textContent=e.copied,window.setTimeout(()=>{i.textContent=e.copy},1400)}catch{i.textContent=e.copy}}),n.appendChild(i)})};e(),document.addEventListener(`astro:page-load`,e);</script></body></html>

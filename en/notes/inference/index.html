@@ -1,0 +1,551 @@
+<!DOCTYPE html><html lang="en" data-theme="dful-dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"><script>
+      (() => {
+        const storageKey = 'dful-theme';
+        const schemaKey = 'dful-theme-schema';
+        const schemaVersion = '2';
+        const legacyStorageKey = 'dful-theme-preview';
+        const valid = new Set(["dful-dark","amber-dark","dful-light","flexoki-paper","phosphor","arcade","cobalt"]);
+        const dark = new Set(["dful-dark","amber-dark","phosphor","arcade","cobalt"]);
+        const fallback = "dful-dark";
+        let theme = fallback;
+        try {
+          const needsMigration = localStorage.getItem(schemaKey) !== schemaVersion;
+          let stored = localStorage.getItem(storageKey);
+          if (needsMigration) {
+            if (stored === 'graphite') stored = 'dful-dark';
+            else if (stored === 'dful-dark') stored = 'amber-dark';
+            localStorage.setItem(schemaKey, schemaVersion);
+            if (stored) localStorage.setItem(storageKey, stored);
+          }
+          if (valid.has(stored)) theme = stored;
+          else {
+            let legacy = localStorage.getItem(legacyStorageKey);
+            if (needsMigration) {
+              if (legacy === 'graphite') legacy = 'dful-dark';
+              else if (legacy === 'dful-dark') legacy = 'amber-dark';
+            }
+            if (valid.has(legacy)) {
+              theme = legacy;
+              localStorage.setItem(storageKey, legacy);
+            }
+            if (legacy) localStorage.removeItem(legacyStorageKey);
+          }
+          localStorage.setItem(storageKey, theme);
+        } catch {}
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = dark.has(theme) ? 'dark' : 'light';
+      })();</script><meta name="description" content="How a model processes input and generates output through prefill, decode, sampling, and streaming."><link rel="canonical" href="https://dful.github.io/en/notes/inference/"><link rel="alternate" hreflang="en" href="https://dful.github.io/en/notes/inference/"><link rel="alternate" hreflang="es" href="https://dful.github.io/es/notes/inferencia/"><link rel="alternate" hreflang="x-default" href="https://dful.github.io/en/notes/inference/"><meta property="og:url" content="https://dful.github.io/en/notes/inference/"><meta property="og:type" content="website"><meta property="og:site_name" content="dful"><meta property="og:title" content="Inference · dful"><meta property="og:description" content="How a model processes input and generates output through prefill, decode, sampling, and streaming."><meta property="og:locale" content="en_GB"><meta property="og:locale:alternate" content="es_ES"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="Inference · dful"><meta name="twitter:description" content="How a model processes input and generates output through prefill, decode, sampling, and streaming."><meta name="generator" content="Astro v7.3.2"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><title>Inference · dful</title><link rel="stylesheet" href="/_astro/notes.DkEzeG-w.css"><link rel="stylesheet" href="/_astro/BaseLayout.l85KjHsw.css"><link rel="stylesheet" href="/_astro/publishing.C5o61NTe.css"></head><body><a class="skip-link" href="#main">Skip to content</a><header class="site-header"><div class="header-inner"><a class="wordmark" href="/en/" aria-label="dful home">dful<span>.</span></a><nav class="primary-nav" aria-label="Primary"><a href="/en/" data-active="false">Home</a><a href="/en/notes/" data-active="true" aria-current="page">Notes</a><a href="/en/research/" data-active="false">Research</a><a href="/en/about/" data-active="false">About</a></nav><div class="header-actions"><details class="theme-picker" data-theme-picker data-astro-cid-hcqnpaxe><summary aria-label="Theme" data-astro-cid-hcqnpaxe><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.25a8.75 8.75 0 1 0 0 17.5h1.25a2.25 2.25 0 0 0 0-4.5h-.75a1.75 1.75 0 0 1 0-3.5h2.35A5.9 5.9 0 0 0 20.75 6.9C18.72 4.63 15.72 3.25 12 3.25Z"></path><circle cx="7.4" cy="10" r=".7" fill="currentColor" stroke="none"></circle><circle cx="9.25" cy="6.9" r=".7" fill="currentColor" stroke="none"></circle><circle cx="13" cy="6.2" r=".7" fill="currentColor" stroke="none"></circle><circle cx="16.25" cy="8" r=".7" fill="currentColor" stroke="none"></circle></svg><span class="theme-current" data-theme-current data-astro-cid-hcqnpaxe>Dful Dark</span></summary><div class="theme-menu" aria-label="Theme" data-astro-cid-hcqnpaxe><div class="theme-menu-head" data-astro-cid-hcqnpaxe>Theme</div><button type="button" aria-pressed="true" data-theme-option="dful-dark" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#111214" data-astro-cid-hcqnpaxe></i><i style="--swatch:#f0eee8" data-astro-cid-hcqnpaxe></i><i style="--swatch:#ff8b3d" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Dful Dark</span></button><button type="button" aria-pressed="false" data-theme-option="amber-dark" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#0c0c0b" data-astro-cid-hcqnpaxe></i><i style="--swatch:#f2efe7" data-astro-cid-hcqnpaxe></i><i style="--swatch:#ff9f2f" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Amber Dark</span></button><button type="button" aria-pressed="false" data-theme-option="dful-light" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#f7f3ea" data-astro-cid-hcqnpaxe></i><i style="--swatch:#171511" data-astro-cid-hcqnpaxe></i><i style="--swatch:#b94d08" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Dful Light</span></button><button type="button" aria-pressed="false" data-theme-option="flexoki-paper" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#fffcf0" data-astro-cid-hcqnpaxe></i><i style="--swatch:#100f0f" data-astro-cid-hcqnpaxe></i><i style="--swatch:#bc5215" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Flexoki Paper</span></button><button type="button" aria-pressed="false" data-theme-option="phosphor" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#030604" data-astro-cid-hcqnpaxe></i><i style="--swatch:#c8f7cf" data-astro-cid-hcqnpaxe></i><i style="--swatch:#48ff78" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Phosphor</span></button><button type="button" aria-pressed="false" data-theme-option="arcade" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#11102b" data-astro-cid-hcqnpaxe></i><i style="--swatch:#fff4d7" data-astro-cid-hcqnpaxe></i><i style="--swatch:#4de9ff" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Arcade</span></button><button type="button" aria-pressed="false" data-theme-option="cobalt" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#07111f" data-astro-cid-hcqnpaxe></i><i style="--swatch:#edf6ff" data-astro-cid-hcqnpaxe></i><i style="--swatch:#42b9ff" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Cobalt</span></button></div></details><script>
+  (() => {
+    const storageKey = 'dful-theme';
+    const themes = [{"id":"dful-dark","name":"Dful Dark","colorScheme":"dark"},{"id":"amber-dark","name":"Amber Dark","colorScheme":"dark"},{"id":"dful-light","name":"Dful Light","colorScheme":"light"},{"id":"flexoki-paper","name":"Flexoki Paper","colorScheme":"light"},{"id":"phosphor","name":"Phosphor","colorScheme":"dark"},{"id":"arcade","name":"Arcade","colorScheme":"dark"},{"id":"cobalt","name":"Cobalt","colorScheme":"dark"}];
+    const valid = new Set(themes.map(({ id }) => id));
+    const names = Object.fromEntries(themes.map(({ id, name }) => [id, name]));
+    const isDark = (theme) => themes.find((item) => item.id === theme)?.colorScheme === 'dark';
+    const apply = (theme) => {
+      const selected = valid.has(theme) ? theme : "dful-dark";
+      document.documentElement.dataset.theme = selected;
+      document.documentElement.style.colorScheme = isDark(selected) ? 'dark' : 'light';
+      try { localStorage.setItem(storageKey, selected); } catch {}
+      document.querySelectorAll('[data-theme-picker]').forEach((picker) => {
+        const current = picker.querySelector('[data-theme-current]');
+        if (current) current.textContent = names[selected];
+        picker.querySelectorAll('[data-theme-option]').forEach((button) => button.setAttribute('aria-pressed', button.getAttribute('data-theme-option') === selected ? 'true' : 'false'));
+      });
+    };
+    const enhance = () => {
+      document.querySelectorAll('[data-theme-picker]:not([data-enhanced])').forEach((picker) => {
+        picker.setAttribute('data-enhanced','true');
+        picker.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && picker.open) {
+            picker.removeAttribute('open');
+            picker.querySelector('summary').focus();
+          }
+        });
+        picker.querySelectorAll('[data-theme-option]').forEach((button) => button.addEventListener('click', () => {
+          apply(button.getAttribute('data-theme-option'));
+          picker.removeAttribute('open');
+          picker.querySelector('summary').focus();
+        }));
+      });
+      let stored = "dful-dark";
+      try { stored = localStorage.getItem(storageKey) || stored; } catch {}
+      apply(stored);
+    };
+    enhance();
+    document.addEventListener('astro:page-load', enhance);
+  })();</script><nav class="lang-switch" aria-label="Switch language"><a href="/en/notes/inference/" data-active="true" aria-current="page">EN</a><a href="/es/notes/inferencia/" data-active="false">ES</a></nav><div class="social-links" aria-label="Social links"><a href="https://github.com/dful" rel="me">GitHub</a><a href="https://www.linkedin.com/in/daniel-fulladosa/" rel="me">LinkedIn</a></div></div></div></header><main id="main"><div class="notes-page" data-note-slug="inference"><div class="notes-shell"><aside class="notes-tree" aria-label="Knowledge tree"><div class="notes-side-head"><strong>Knowledge tree</strong></div><script>
+  (() => { document.documentElement.setAttribute('data-notes-tree-pending', 'true'); })();
+</script><ul class="knowledge-tree" data-notes-tree data-notes-tree-locale="en"><li data-depth="0" data-node-type="category" data-tree-key="domain:ai" data-active-path="true"><details open><summary><span class="tree-category-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="2.5"></circle><circle cx="5" cy="6" r="1.75"></circle><circle cx="19" cy="6" r="1.75"></circle><circle cx="12" cy="20" r="1.75"></circle><path d="m10.2 10.4-3.8-3.2m7.4 3.2 3.8-3.2M12 14.5v3.75"></path></svg></span><span>AI</span></summary><ul><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:fundamentals" data-active-path="true"><details open><summary><span>Fundamentals</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:tokens-context" data-active-path="false"><a href="/en/notes/tokens-context/"><span>Tokens &amp; Context</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:inference" data-active-path="true"><a href="/en/notes/inference/" aria-current="page"><span>Inference</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:reasoning" data-active-path="false"><a href="/en/notes/reasoning/"><span>Reasoning</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:context-engineering" data-active-path="false"><a href="/en/notes/context-engineering/"><span>Context Engineering</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:agents" data-active-path="false"><details><summary><span>Agents</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:agent-loop" data-active-path="false"><a href="/en/notes/agent-loop/"><span>Agent Loop</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:agent-harness" data-active-path="false"><a href="/en/notes/agent-harness/"><span>Agent Harness</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:tool-use" data-active-path="false"><a href="/en/notes/tool-use/"><span>Tool Use</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:subagents" data-active-path="false"><a href="/en/notes/subagents/"><span>Subagents</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:security" data-active-path="false"><details><summary><span>Security</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:prompt-injection" data-active-path="false"><a href="/en/notes/prompt-injection/"><span>Prompt Injection</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:agent-permissions" data-active-path="false"><a href="/en/notes/agent-permissions/"><span>Agent Permissions</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:sandboxing-egress" data-active-path="false"><a href="/en/notes/sandboxing-egress/"><span>Sandboxing &amp; Egress</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:applied-ai" data-active-path="false"><details><summary><span>Applied AI</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:model-apis" data-active-path="false"><a href="/en/notes/model-apis/"><span>Model APIs</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:api-pricing" data-active-path="false"><a href="/en/notes/api-pricing/"><span>API Pricing</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:deployment-models" data-active-path="false"><a href="/en/notes/deployment-models/"><span>Deployment Models</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:local-inference" data-active-path="false"><a href="/en/notes/local-inference/"><span>Local Inference</span></a></li></ul></details></li></ul></details></li><li data-depth="0" data-node-type="category" data-tree-key="domain:offensive-security" data-active-path="false"><details open><summary><span class="tree-category-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2.75 19 5.4v5.45c0 4.65-2.8 8.15-7 10.4-4.2-2.25-7-5.75-7-10.4V5.4L12 2.75Z"></path><path d="m9 12 2 2 4-4"></path></svg></span><span>Offensive Security</span></summary><ul><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:shells" data-active-path="false"><details><summary><span>Shells</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:remote-access" data-active-path="false"><a href="/en/notes/remote-access/"><span>Remote Access</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:file-transfer" data-active-path="false"><details><summary><span>File Transfer</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:windows-file-transfers" data-active-path="false"><a href="/en/notes/windows-file-transfers/"><span>Windows File Transfers</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:linux-file-transfers" data-active-path="false"><a href="/en/notes/linux-file-transfers/"><span>Linux File Transfers</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:web-applications" data-active-path="false"><details><summary><span>Web Applications</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:php-web-testing" data-active-path="false"><a href="/en/notes/php-web-testing/"><span>PHP Web Testing</span></a></li></ul></details></li></ul></details></li></ul><script>
+  (() => {
+    if (globalThis.__dfulNotesTreeState) return;
+    globalThis.__dfulNotesTreeState = true;
+    const storagePrefix = 'dful-notes-tree:v1:';
+    let syncing = false;
+    const ignoredToggles = new WeakSet();
+
+    const trees = () => [...document.querySelectorAll('[data-notes-tree]')];
+    const details = () => trees().flatMap((tree) => [...tree.querySelectorAll('[data-tree-key] > details')]);
+    const keyFor = (detail) => detail.parentElement?.getAttribute('data-tree-key');
+    const activePath = (detail) => detail.parentElement?.getAttribute('data-active-path') === 'true';
+    const localeFor = () => document.querySelector('[data-notes-tree-locale]')?.getAttribute('data-notes-tree-locale') || 'en';
+    const storageKey = () => `${storagePrefix}${localeFor()}`;
+
+    const readState = () => {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(storageKey()) || '{}');
+        return parsed && typeof parsed === 'object' ? parsed : {};
+      } catch {
+        return {};
+      }
+    };
+
+    const writeState = (state) => {
+      try { localStorage.setItem(storageKey(), JSON.stringify(state)); } catch {}
+    };
+
+    const syncKey = (key, open) => {
+      syncing = true;
+      details().filter((detail) => keyFor(detail) === key).forEach((detail) => {
+        if (detail.open === open) return;
+        ignoredToggles.add(detail);
+        detail.open = open;
+      });
+      syncing = false;
+    };
+
+    const applyState = () => {
+      const state = readState();
+      syncing = true;
+      details().forEach((detail) => {
+        const key = keyFor(detail);
+        if (!key) return;
+        const item = detail.parentElement;
+        const defaultOpen = item?.getAttribute('data-depth') === '0';
+        detail.open = activePath(detail) || (typeof state[key] === 'boolean' ? state[key] : defaultOpen);
+      });
+      syncing = false;
+    };
+
+    const enhance = () => {
+      if (!trees().length) {
+        document.documentElement.removeAttribute('data-notes-tree-pending');
+        return;
+      }
+      try {
+        applyState();
+      } finally {
+        document.documentElement.removeAttribute('data-notes-tree-pending');
+      }
+      details().filter((detail) => !detail.hasAttribute('data-tree-state-bound')).forEach((detail) => {
+        detail.setAttribute('data-tree-state-bound', 'true');
+        detail.addEventListener('toggle', () => {
+          if (ignoredToggles.delete(detail)) return;
+          if (syncing) return;
+          const key = keyFor(detail);
+          if (!key) return;
+          if (activePath(detail) && !detail.open) {
+            const state = readState();
+            state[key] = false;
+            writeState(state);
+            syncKey(key, true);
+            return;
+          }
+          const state = readState();
+          state[key] = detail.open;
+          writeState(state);
+          syncKey(key, detail.open);
+        });
+      });
+    };
+
+    document.addEventListener('astro:page-load', enhance);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', enhance, { once:true });
+    else enhance();
+  })();
+</script></aside><div class="notes-detail-shell"><article class="notes-article"><div class="notes-mobile-nav"><details><summary>Knowledge tree</summary><div><script>
+  (() => { document.documentElement.setAttribute('data-notes-tree-pending', 'true'); })();
+</script><ul class="knowledge-tree" data-notes-tree data-notes-tree-locale="en"><li data-depth="0" data-node-type="category" data-tree-key="domain:ai" data-active-path="true"><details open><summary><span class="tree-category-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="2.5"></circle><circle cx="5" cy="6" r="1.75"></circle><circle cx="19" cy="6" r="1.75"></circle><circle cx="12" cy="20" r="1.75"></circle><path d="m10.2 10.4-3.8-3.2m7.4 3.2 3.8-3.2M12 14.5v3.75"></path></svg></span><span>AI</span></summary><ul><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:fundamentals" data-active-path="true"><details open><summary><span>Fundamentals</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:tokens-context" data-active-path="false"><a href="/en/notes/tokens-context/"><span>Tokens &amp; Context</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:inference" data-active-path="true"><a href="/en/notes/inference/" aria-current="page"><span>Inference</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:reasoning" data-active-path="false"><a href="/en/notes/reasoning/"><span>Reasoning</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:context-engineering" data-active-path="false"><a href="/en/notes/context-engineering/"><span>Context Engineering</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:agents" data-active-path="false"><details><summary><span>Agents</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:agent-loop" data-active-path="false"><a href="/en/notes/agent-loop/"><span>Agent Loop</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:agent-harness" data-active-path="false"><a href="/en/notes/agent-harness/"><span>Agent Harness</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:tool-use" data-active-path="false"><a href="/en/notes/tool-use/"><span>Tool Use</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:subagents" data-active-path="false"><a href="/en/notes/subagents/"><span>Subagents</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:security" data-active-path="false"><details><summary><span>Security</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:prompt-injection" data-active-path="false"><a href="/en/notes/prompt-injection/"><span>Prompt Injection</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:agent-permissions" data-active-path="false"><a href="/en/notes/agent-permissions/"><span>Agent Permissions</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:sandboxing-egress" data-active-path="false"><a href="/en/notes/sandboxing-egress/"><span>Sandboxing &amp; Egress</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:applied-ai" data-active-path="false"><details><summary><span>Applied AI</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:model-apis" data-active-path="false"><a href="/en/notes/model-apis/"><span>Model APIs</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:api-pricing" data-active-path="false"><a href="/en/notes/api-pricing/"><span>API Pricing</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:deployment-models" data-active-path="false"><a href="/en/notes/deployment-models/"><span>Deployment Models</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:local-inference" data-active-path="false"><a href="/en/notes/local-inference/"><span>Local Inference</span></a></li></ul></details></li></ul></details></li><li data-depth="0" data-node-type="category" data-tree-key="domain:offensive-security" data-active-path="false"><details open><summary><span class="tree-category-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2.75 19 5.4v5.45c0 4.65-2.8 8.15-7 10.4-4.2-2.25-7-5.75-7-10.4V5.4L12 2.75Z"></path><path d="m9 12 2 2 4-4"></path></svg></span><span>Offensive Security</span></summary><ul><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:shells" data-active-path="false"><details><summary><span>Shells</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:remote-access" data-active-path="false"><a href="/en/notes/remote-access/"><span>Remote Access</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:file-transfer" data-active-path="false"><details><summary><span>File Transfer</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:windows-file-transfers" data-active-path="false"><a href="/en/notes/windows-file-transfers/"><span>Windows File Transfers</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:linux-file-transfers" data-active-path="false"><a href="/en/notes/linux-file-transfers/"><span>Linux File Transfers</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:web-applications" data-active-path="false"><details><summary><span>Web Applications</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:php-web-testing" data-active-path="false"><a href="/en/notes/php-web-testing/"><span>PHP Web Testing</span></a></li></ul></details></li></ul></details></li></ul><script>
+  (() => {
+    if (globalThis.__dfulNotesTreeState) return;
+    globalThis.__dfulNotesTreeState = true;
+    const storagePrefix = 'dful-notes-tree:v1:';
+    let syncing = false;
+    const ignoredToggles = new WeakSet();
+
+    const trees = () => [...document.querySelectorAll('[data-notes-tree]')];
+    const details = () => trees().flatMap((tree) => [...tree.querySelectorAll('[data-tree-key] > details')]);
+    const keyFor = (detail) => detail.parentElement?.getAttribute('data-tree-key');
+    const activePath = (detail) => detail.parentElement?.getAttribute('data-active-path') === 'true';
+    const localeFor = () => document.querySelector('[data-notes-tree-locale]')?.getAttribute('data-notes-tree-locale') || 'en';
+    const storageKey = () => `${storagePrefix}${localeFor()}`;
+
+    const readState = () => {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(storageKey()) || '{}');
+        return parsed && typeof parsed === 'object' ? parsed : {};
+      } catch {
+        return {};
+      }
+    };
+
+    const writeState = (state) => {
+      try { localStorage.setItem(storageKey(), JSON.stringify(state)); } catch {}
+    };
+
+    const syncKey = (key, open) => {
+      syncing = true;
+      details().filter((detail) => keyFor(detail) === key).forEach((detail) => {
+        if (detail.open === open) return;
+        ignoredToggles.add(detail);
+        detail.open = open;
+      });
+      syncing = false;
+    };
+
+    const applyState = () => {
+      const state = readState();
+      syncing = true;
+      details().forEach((detail) => {
+        const key = keyFor(detail);
+        if (!key) return;
+        const item = detail.parentElement;
+        const defaultOpen = item?.getAttribute('data-depth') === '0';
+        detail.open = activePath(detail) || (typeof state[key] === 'boolean' ? state[key] : defaultOpen);
+      });
+      syncing = false;
+    };
+
+    const enhance = () => {
+      if (!trees().length) {
+        document.documentElement.removeAttribute('data-notes-tree-pending');
+        return;
+      }
+      try {
+        applyState();
+      } finally {
+        document.documentElement.removeAttribute('data-notes-tree-pending');
+      }
+      details().filter((detail) => !detail.hasAttribute('data-tree-state-bound')).forEach((detail) => {
+        detail.setAttribute('data-tree-state-bound', 'true');
+        detail.addEventListener('toggle', () => {
+          if (ignoredToggles.delete(detail)) return;
+          if (syncing) return;
+          const key = keyFor(detail);
+          if (!key) return;
+          if (activePath(detail) && !detail.open) {
+            const state = readState();
+            state[key] = false;
+            writeState(state);
+            syncKey(key, true);
+            return;
+          }
+          const state = readState();
+          state[key] = detail.open;
+          writeState(state);
+          syncKey(key, detail.open);
+        });
+      });
+    };
+
+    document.addEventListener('astro:page-load', enhance);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', enhance, { once:true });
+    else enhance();
+  })();
+</script></div></details><details><summary>On this page</summary><div><ul><li data-depth="2"><a href="#prefill">Prefill</a></li><li data-depth="2"><a href="#decode-and-autoregressive-generation">Decode and autoregressive generation</a></li><li data-depth="2"><a href="#sampling">Sampling</a></li><li data-depth="3"><a href="#temperature">Temperature</a></li><li data-depth="3"><a href="#top-p">Top-p</a></li><li data-depth="2"><a href="#streaming">Streaming</a></li><li data-depth="2"><a href="#speed-and-latency">Speed and latency</a></li><li data-depth="2"><a href="#references">References</a></li></ul></div></details></div><header class="notes-header"><div class="notes-header-pretitle"><nav class="notes-breadcrumb" aria-label="Breadcrumb"><span>AI</span><i aria-hidden="true">/</i><span>Fundamentals</span></nav></div><h1>Inference</h1><div class="notes-deck">How a model processes input and generates output through prefill, decode, sampling, and streaming.</div><small>Updated 28 Aug 2026</small></header><div class="publishing-prose"><p><strong>Inference</strong> is the execution of a trained model to produce output from new input. For a generative LLM, the practical path has two parts: process the input, then generate the output.</p>
+<figure class="pub-figure pub-breakout-wide pub-diagram"><div class="technical-visual-frame technical-visual-frame--timeline"><svg class="technical-visual technical-visual--desktop" viewBox="0 0 1200 430" role="img" aria-labelledby="tv-inference-en-desktop-title tv-inference-en-desktop-desc" preserveAspectRatio="xMidYMid meet">
+    <title id="tv-inference-en-desktop-title">Prefill and decode</title>
+    <desc id="tv-inference-en-desktop-desc">Prefill processes the existing input before the first output token. Decode then generates the response one token at a time.</desc>
+    <defs>
+    <marker id="tv-inference-en-desktop-arrow-primary" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="10" markerHeight="10" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-primary" d="M0 0L10 5L0 10Z"></path></marker>
+    <marker id="tv-inference-en-desktop-arrow-secondary" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="9" markerHeight="9" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-secondary" d="M0 0L10 5L0 10Z"></path></marker>
+    <marker id="tv-inference-en-desktop-arrow-attempted" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="9" markerHeight="9" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-attempted" d="M0 0L10 5L0 10Z"></path></marker>
+  </defs>
+    <text class="tv-edge-label tv-edge-label--primary" x="430" y="72" text-anchor="middle">TTFT · wait for the first token</text><path class="tv-measure tv-measure--primary" d="M54 92V108M54 100H674M674 92V108"></path>
+    <g class="tv-node tv-node--entry">
+    <rect class="tv-node-surface" x="44" y="146" width="208" height="108" rx="12"></rect>
+    <path class="tv-node-keyline" d="M56 147.5H240"></path>
+    <text class="tv-node-title" x="62" y="181">Input tokens</text>
+    <text class="tv-node-detail" x="62" y="208">Prompt + context</text>
+  </g>
+    <g class="tv-node tv-node--context">
+    <rect class="tv-node-surface" x="312" y="146" width="238" height="108" rx="12"></rect>
+    <path class="tv-node-keyline" d="M324 147.5H538"></path>
+    <text class="tv-node-title" x="330" y="181">Prefill</text>
+    <text class="tv-node-detail" x="330" y="208">Process existing input</text>
+  </g>
+    <g class="tv-node tv-node--state">
+    <rect class="tv-node-surface" x="628" y="146" width="180" height="108" rx="12"></rect>
+    <path class="tv-node-keyline" d="M640 147.5H796"></path>
+    <text class="tv-node-title" x="646" y="181">First token</text>
+    <text class="tv-node-detail" x="646" y="208">The answer begins</text>
+  </g>
+    <g class="tv-node tv-node--runtime">
+    <rect class="tv-node-surface" x="856" y="122" width="300" height="156" rx="12"></rect>
+    <path class="tv-node-keyline" d="M868 123.5H1144"></path>
+    <text class="tv-node-title" x="874" y="157">Decode</text>
+    <text class="tv-node-detail" x="874" y="184">Generate one token at a time</text>
+  </g>
+    <path class="tv-edge tv-edge--primary" d="M252 200H300" marker-end="url(#tv-inference-en-desktop-arrow-primary)"></path><path class="tv-edge tv-edge--primary" d="M550 200H616" marker-end="url(#tv-inference-en-desktop-arrow-primary)"></path><path class="tv-edge tv-edge--primary" d="M808 200H844" marker-end="url(#tv-inference-en-desktop-arrow-primary)"></path>
+    <g class="tv-token"><circle cx="914" cy="232" r="23"></circle><text x="914" y="236" text-anchor="middle">2</text></g><g class="tv-token"><circle cx="1002" cy="232" r="23"></circle><text x="1002" y="236" text-anchor="middle">3</text></g><g class="tv-token"><circle cx="1090" cy="232" r="23"></circle><text x="1090" y="236" text-anchor="middle">n</text></g>
+    <text class="tv-edge-label tv-edge-label--secondary" x="958" y="334" text-anchor="middle">Output continues token by token</text><path class="tv-measure" d="M914 300V314M914 307H1002M1002 300V314"></path>
+  </svg><svg class="technical-visual technical-visual--mobile" viewBox="0 0 520 900" role="img" aria-labelledby="tv-inference-en-mobile-title tv-inference-en-mobile-desc" preserveAspectRatio="xMidYMid meet">
+    <title id="tv-inference-en-mobile-title">Prefill and decode</title>
+    <desc id="tv-inference-en-mobile-desc">Prefill processes the existing input before the first output token. Decode then generates the response one token at a time.</desc>
+    <defs>
+    <marker id="tv-inference-en-mobile-arrow-primary" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="10" markerHeight="10" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-primary" d="M0 0L10 5L0 10Z"></path></marker>
+    <marker id="tv-inference-en-mobile-arrow-secondary" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="9" markerHeight="9" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-secondary" d="M0 0L10 5L0 10Z"></path></marker>
+    <marker id="tv-inference-en-mobile-arrow-attempted" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="9" markerHeight="9" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-attempted" d="M0 0L10 5L0 10Z"></path></marker>
+  </defs>
+    <g class="tv-node tv-node--entry">
+    <rect class="tv-node-surface" x="86" y="42" width="348" height="96" rx="12"></rect>
+    <path class="tv-node-keyline" d="M98 43.5H422"></path>
+    <text class="tv-node-title" x="104" y="73">Input tokens</text>
+    <text class="tv-node-detail" x="104" y="96">Prompt + context</text>
+  </g>
+    <g class="tv-node tv-node--context">
+    <rect class="tv-node-surface" x="86" y="198" width="348" height="96" rx="12"></rect>
+    <path class="tv-node-keyline" d="M98 199.5H422"></path>
+    <text class="tv-node-title" x="104" y="229">Prefill</text>
+    <text class="tv-node-detail" x="104" y="252">Process existing input</text>
+  </g>
+    <g class="tv-node tv-node--state">
+    <rect class="tv-node-surface" x="86" y="354" width="348" height="96" rx="12"></rect>
+    <path class="tv-node-keyline" d="M98 355.5H422"></path>
+    <text class="tv-node-title" x="104" y="385">First token</text>
+    <text class="tv-node-detail" x="104" y="408">The answer begins</text>
+  </g>
+    <g class="tv-node tv-node--runtime">
+    <rect class="tv-node-surface" x="86" y="510" width="348" height="252" rx="12"></rect>
+    <path class="tv-node-keyline" d="M98 511.5H422"></path>
+    <text class="tv-node-title" x="104" y="541">Decode</text>
+    <text class="tv-node-detail" x="104" y="564">Generate one token at a time</text>
+  </g>
+    <path class="tv-edge tv-edge--primary" d="M260 138V186" marker-end="url(#tv-inference-en-mobile-arrow-primary)"></path><path class="tv-edge tv-edge--primary" d="M260 294V342" marker-end="url(#tv-inference-en-mobile-arrow-primary)"></path><path class="tv-edge tv-edge--primary" d="M260 450V498" marker-end="url(#tv-inference-en-mobile-arrow-primary)"></path>
+    <text transform="rotate(-90 72 254)" class="tv-edge-label tv-edge-label--secondary" x="72" y="254" text-anchor="middle">TTFT · wait for the first token</text>
+    <g class="tv-token"><circle cx="156" cy="676" r="28"></circle><text x="156" y="681" text-anchor="middle">2</text></g><g class="tv-token"><circle cx="260" cy="676" r="28"></circle><text x="260" y="681" text-anchor="middle">3</text></g><g class="tv-token"><circle cx="364" cy="676" r="28"></circle><text x="364" y="681" text-anchor="middle">n</text></g>
+    <path class="tv-measure" d="M156 742V756M156 749H260M260 742V756"></path><text class="tv-edge-label tv-edge-label--secondary" x="208" y="802" text-anchor="middle">Output continues token by token</text>
+  </svg></div><figcaption>Figure 1. Prefill processes the input; decode then generates the response one token at a time.</figcaption></figure>
+<h2 id="prefill">Prefill</h2>
+<p>During <strong>prefill</strong>, the model processes the input tokens before it begins to answer. If a request contains 20K tokens across instructions, history, and documents, those tokens need to be processed before the first output token appears.</p>
+<p>Larger input normally means more initial work. From the client side, time to first token can also include network delay, queueing, and request preparation, so the complete wait is not necessarily model computation.</p>
+<p>In runtimes that use a <strong>KV cache</strong>, prefill also prepares state reused during generation. The practical effect is especially visible in local inference: more context takes more initial processing and more memory to retain.</p>
+<h2 id="decode-and-autoregressive-generation">Decode and autoregressive generation</h2>
+<p>After prefill, <strong>decode</strong> begins. The model generates one token, adds it to the sequence, then uses the updated sequence to generate the next. This is <strong>autoregressive</strong> generation.</p>
+<p>The response is not calculated as one finished block of text. It is built step by step:</p>
+<ol>
+<li>The model produces candidates for the next token.</li>
+<li>The generation settings select one.</li>
+<li>That token becomes part of the response context.</li>
+<li>The process repeats until generation stops.</li>
+</ol>
+<p>Generation may stop because the model emits an end token, reaches the output limit, or encounters a configured stop sequence. The maximum is a cap, not a target length.</p>
+<h2 id="sampling">Sampling</h2>
+<p>At every step, several next tokens are possible. <strong>Sampling</strong> controls how the runtime chooses among them.</p>
+<p>Greedy selection takes the highest-scoring candidate. Sampling selects from a distribution, which allows runs to vary.</p>
+<h3 id="temperature">Temperature</h3>
+<p><strong>Temperature</strong> changes how much weight lower-probability alternatives receive. A low value concentrates selection around the leading candidates. A higher value allows more variation.</p>
+<p>It is not a control for intelligence or reasoning depth. It affects token selection during decode.</p>
+<h3 id="top-p">Top-p</h3>
+<p><strong>Top-p</strong> limits candidates to the smallest set that contains a configured amount of cumulative probability, then samples within that set.</p>
+<p>Temperature and top-p can be combined, but values should not be copied between models as if they were equivalent. Defaults and recommendations depend on the model and runtime. Exact reproducibility is also not guaranteed merely by setting <code>temperature = 0</code>; version, backend, and hardware can still matter.</p>
+<h2 id="streaming">Streaming</h2>
+<p>Without streaming, the application waits for generation to finish and receives the completed response. With <strong>streaming</strong>, it receives fragments as they are produced.</p>
+<p>This lets a client display text or begin processing a tool call before the full response exists. It improves perceived responsiveness but does not make decode intrinsically faster.</p>
+<h2 id="speed-and-latency">Speed and latency</h2>
+<p>The two measurements I find most useful when reading local-inference results are:</p>
+<ul>
+<li><strong>Time to First Token (TTFT):</strong> delay before the first token arrives. It reflects prefill and, depending on the measurement, other request overhead.</li>
+<li><strong>Generation tokens/s:</strong> the rate at which output tokens arrive during decode.</li>
+</ul>
+<p>A tokens/s number is only comparable when tools measure the same interval. Some separate prefill and decode; others report a wider average.</p>
+<p>The <a href="/en/research/qwen3-8-27b-local-agentic-pentesting/"><strong>Qwen3.8-27B and OpenCode experiment</strong></a> shows the distinction in practice. A short request with the model fully on GPU generated around 40–45 tokens/s, while a test with roughly 50K input tokens took much longer to process and generated around 21 tokens/s. The result reflected input size and runtime pressure as well as the model itself.</p>
+<p><a href="/en/notes/local-inference/"><strong>Local Inference</strong></a> covers memory, offload, and hardware effects.</p>
+<h2 id="references">References</h2>
+<ul>
+<li><a href="https://huggingface.co/docs/transformers/main_classes/text_generation">Hugging Face Transformers — Generation</a></li>
+<li><a href="https://docs.nvidia.com/nim/large-language-models/latest/reference/benchmarking.html">NVIDIA NIM — Benchmarking</a></li>
+</ul></div><nav class="notes-related" aria-label="Related notes"><strong>Related notes</strong><ul><li><a href="/en/notes/tokens-context/"><span>AI / Fundamentals</span>Tokens &amp; Context</a></li><li><a href="/en/notes/local-inference/"><span>AI / Applied AI</span>Local Inference</a></li><li><a href="/en/notes/reasoning/"><span>AI / Fundamentals</span>Reasoning</a></li></ul></nav></article><aside class="notes-toc" aria-label="On this page"><strong>On this page</strong><ul><li data-depth="2"><a href="#prefill">Prefill</a></li><li data-depth="2"><a href="#decode-and-autoregressive-generation">Decode and autoregressive generation</a></li><li data-depth="2"><a href="#sampling">Sampling</a></li><li data-depth="3"><a href="#temperature">Temperature</a></li><li data-depth="3"><a href="#top-p">Top-p</a></li><li data-depth="2"><a href="#streaming">Streaming</a></li><li data-depth="2"><a href="#speed-and-latency">Speed and latency</a></li><li data-depth="2"><a href="#references">References</a></li></ul></aside></div></div></div><script>
+    (() => {
+      const root = document.querySelector('.notes-page');
+      if (!root) return;
+      const tocLinks = [...root.querySelectorAll('.notes-toc a')];
+      const targets = tocLinks.map((link) => document.getElementById(decodeURIComponent(link.hash.slice(1)))).filter(Boolean);
+      const markCurrent = (link, active) => active ? link.setAttribute('aria-current', 'location') : link.removeAttribute('aria-current');
+      tocLinks.forEach((selected) => selected.addEventListener('click', () => tocLinks.forEach((link) => markCurrent(link, link === selected))));
+      if (targets.length) {
+        const updateActiveHeading = () => {
+          const active = targets.reduce((current, target) => target.getBoundingClientRect().top <= 150 ? target : current, targets[0]);
+          tocLinks.forEach((link) => markCurrent(link, link.hash === `#${active.id}`));
+        };
+        updateActiveHeading();
+        window.addEventListener('scroll', updateActiveHeading, { passive:true });
+      }
+    })();
+  </script></main><footer class="site-footer"><div class="footer-inner"><a class="footer-wordmark" href="/en/">dful<span>.</span></a><span>Offensive Security · AI Security · Agentic Systems</span></div></footer><script>
+  (() => {
+    const init = () => {
+      const figures = [...document.querySelectorAll('.publishing-prose .pub-figure[data-preview="true"]')];
+      if (!figures.length) return;
+
+      const spanish = document.documentElement.lang === 'es';
+      const labels = spanish
+        ? {
+            open: 'Abrir vista ampliada',
+            close: 'Cerrar vista previa',
+            zoom: 'Zoom de imagen',
+            fit: 'Ajustar',
+            actual: 'Tamaño real',
+          }
+        : {
+            open: 'Open enlarged preview',
+            close: 'Close preview',
+            zoom: 'Image zoom',
+            fit: 'Fit',
+            actual: 'Actual size',
+          };
+
+      let dialog = document.querySelector('dialog[data-figure-preview]');
+      if (!(dialog instanceof HTMLDialogElement)) {
+        dialog = document.createElement('dialog');
+        dialog.className = 'figure-preview-dialog';
+        dialog.setAttribute('data-figure-preview', 'true');
+        dialog.dataset.mode = 'fit';
+
+        const toolbar = document.createElement('div');
+        toolbar.className = 'figure-preview-toolbar';
+
+        const modeGroup = document.createElement('div');
+        modeGroup.className = 'figure-preview-modes';
+        modeGroup.setAttribute('role', 'group');
+        modeGroup.setAttribute('aria-label', labels.zoom);
+
+        const fit = document.createElement('button');
+        fit.type = 'button';
+        fit.className = 'figure-preview-mode';
+        fit.setAttribute('data-figure-preview-fit', 'true');
+        fit.setAttribute('aria-pressed', 'true');
+        fit.textContent = labels.fit;
+
+        const actual = document.createElement('button');
+        actual.type = 'button';
+        actual.className = 'figure-preview-mode';
+        actual.setAttribute('data-figure-preview-actual', 'true');
+        actual.setAttribute('aria-pressed', 'false');
+        actual.setAttribute('title', labels.actual);
+        actual.textContent = '1:1';
+
+        const close = document.createElement('button');
+        close.type = 'button';
+        close.className = 'figure-preview-close';
+        close.setAttribute('data-figure-preview-close', 'true');
+        close.setAttribute('aria-label', labels.close);
+        close.textContent = '×';
+
+        const viewport = document.createElement('div');
+        viewport.className = 'figure-preview-viewport';
+        viewport.setAttribute('data-figure-preview-viewport', 'true');
+
+        const image = document.createElement('img');
+        image.className = 'figure-preview-image';
+        viewport.appendChild(image);
+
+        const caption = document.createElement('p');
+        caption.className = 'figure-preview-caption';
+        caption.id = 'figure-preview-caption';
+
+        modeGroup.append(fit, actual);
+        toolbar.append(modeGroup, close);
+        dialog.append(toolbar, viewport, caption);
+        document.body.appendChild(dialog);
+
+        const setMode = (mode) => {
+          const native = mode === 'native';
+          dialog.dataset.mode = native ? 'native' : 'fit';
+          fit.setAttribute('aria-pressed', native ? 'false' : 'true');
+          actual.setAttribute('aria-pressed', native ? 'true' : 'false');
+          if (!native) viewport.scrollTo({ top: 0, left: 0 });
+        };
+
+        fit.addEventListener('click', () => setMode('fit'));
+        actual.addEventListener('click', () => setMode('native'));
+        close.addEventListener('click', () => dialog.close());
+        dialog.addEventListener('click', (event) => {
+          if (event.target !== dialog) return;
+          const rect = dialog.getBoundingClientRect();
+          const outside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom;
+          if (outside) dialog.close();
+        });
+        dialog.addEventListener('close', () => {
+          setMode('fit');
+          const trigger = dialog.dataset.lastTrigger;
+          const source = trigger ? document.querySelector(`[data-preview-trigger="${trigger}"]`) : null;
+          if (source instanceof HTMLButtonElement) source.focus();
+          delete dialog.dataset.lastTrigger;
+        });
+      }
+
+      const close = dialog.querySelector('[data-figure-preview-close]');
+      const fit = dialog.querySelector('[data-figure-preview-fit]');
+      const actual = dialog.querySelector('[data-figure-preview-actual]');
+      const previewImage = dialog.querySelector('.figure-preview-image');
+      const viewport = dialog.querySelector('[data-figure-preview-viewport]');
+      const caption = dialog.querySelector('.figure-preview-caption');
+      if (!(close instanceof HTMLButtonElement) || !(fit instanceof HTMLButtonElement) || !(actual instanceof HTMLButtonElement) || !(previewImage instanceof HTMLImageElement) || !(viewport instanceof HTMLDivElement) || !(caption instanceof HTMLParagraphElement)) return;
+
+      const largestSource = (image) => {
+        const candidates = (image.srcset || '')
+          .split(',')
+          .map((candidate) => candidate.trim())
+          .filter(Boolean)
+          .map((candidate) => {
+            const parts = candidate.split(/\s+/);
+            const descriptor = parts.length > 1 ? parts.pop() : '';
+            const url = parts.join(' ') || candidate;
+            let score = 0;
+            if (descriptor.endsWith('w')) score = Number.parseFloat(descriptor);
+            else if (descriptor.endsWith('x')) score = Number.parseFloat(descriptor) * (image.naturalWidth || 1);
+            return { url, score: Number.isFinite(score) ? score : 0 };
+          })
+          .sort((a, b) => b.score - a.score);
+        return candidates[0]?.url || image.currentSrc || image.src;
+      };
+
+      figures.forEach((figure, index) => {
+        const image = figure.querySelector('img');
+        if (!(image instanceof HTMLImageElement) || figure.querySelector('[data-preview-trigger]')) return;
+
+        const trigger = document.createElement('button');
+        trigger.type = 'button';
+        trigger.className = 'figure-preview-trigger';
+        const triggerId = `figure-preview-trigger-${index + 1}`;
+        trigger.setAttribute('data-preview-trigger', triggerId);
+        const alt = image.alt || (spanish ? 'Imagen técnica' : 'Technical image');
+        trigger.setAttribute('aria-label', `${labels.open}: ${alt}`);
+        image.parentNode?.insertBefore(trigger, image);
+        trigger.appendChild(image);
+
+        trigger.addEventListener('click', () => {
+          previewImage.src = largestSource(image);
+          previewImage.alt = alt;
+          const figureCaption = figure.querySelector('figcaption')?.textContent?.trim() || alt;
+          caption.textContent = figureCaption;
+          dialog.setAttribute('aria-label', alt);
+          dialog.setAttribute('aria-describedby', caption.id);
+          dialog.dataset.lastTrigger = triggerId;
+          dialog.dataset.mode = 'fit';
+          fit.setAttribute('aria-pressed', 'true');
+          actual.setAttribute('aria-pressed', 'false');
+          viewport.scrollTo({ top: 0, left: 0 });
+
+          if (typeof dialog.showModal === 'function') {
+            dialog.showModal();
+            close.focus();
+          }
+        });
+      });
+    };
+
+    init();
+    document.addEventListener('astro:page-load', init);
+  })();
+</script><script type="module">var e=()=>{document.querySelectorAll(`.pub-tabs:not([data-enhanced])`).forEach((e,t)=>{e.setAttribute(`data-enhanced`,`true`);let n=[...e.querySelectorAll(`:scope > .pub-tab`)];if(!n.length)return;let r=document.createElement(`div`);r.className=`pub-tab-list`,r.setAttribute(`role`,`tablist`),n.forEach((e,i)=>{let a=`pub-tab-${t}-${i}`,o=`pub-tab-panel-${t}-${i}`,s=document.createElement(`button`);s.type=`button`,s.id=a,s.className=`pub-tab-button`,s.setAttribute(`role`,`tab`),s.setAttribute(`aria-controls`,o),s.setAttribute(`aria-selected`,i===0?`true`:`false`),s.tabIndex=i===0?0:-1,s.textContent=e.getAttribute(`data-tab-label`)||`Tab ${i+1}`,e.id=o,e.setAttribute(`role`,`tabpanel`),e.setAttribute(`aria-labelledby`,a),e.toggleAttribute(`hidden`,i!==0),s.addEventListener(`click`,()=>{[...r.querySelectorAll(`[role="tab"]`)].forEach(e=>{e.setAttribute(`aria-selected`,e===s?`true`:`false`),e.tabIndex=e===s?0:-1}),n.forEach(t=>t.toggleAttribute(`hidden`,t!==e)),s.focus()}),s.addEventListener(`keydown`,e=>{let t=[...r.querySelectorAll(`[role="tab"]`)],n=t.indexOf(s),i=n;if(e.key===`ArrowRight`)i=(n+1)%t.length;else if(e.key===`ArrowLeft`)i=(n-1+t.length)%t.length;else if(e.key===`Home`)i=0;else if(e.key===`End`)i=t.length-1;else return;e.preventDefault(),t[i].click()}),r.appendChild(s)}),e.prepend(r)})};e(),document.addEventListener(`astro:page-load`,e);</script><script type="module">var e=()=>{let e=document.documentElement.lang===`es`?{copy:`Copiar`,copied:`Copiado`}:{copy:`Copy`,copied:`Copied`};document.querySelectorAll(`pre`).forEach(t=>{if(t.closest(`.pub-filetree`)||t.parentElement?.classList.contains(`code-frame`))return;let n=document.createElement(`div`);n.className=`code-frame`,t.parentNode?.insertBefore(n,t),n.appendChild(t);let r=t.dataset.language??t.querySelector(`code`)?.className.match(/language-([\w-]+)/)?.[1];if(r){let e=document.createElement(`span`);e.className=`code-language`,e.textContent=r===`powershell`?`PowerShell`:r,n.appendChild(e)}let i=document.createElement(`button`);i.className=`copy-code`,i.type=`button`,i.textContent=e.copy,i.addEventListener(`click`,async()=>{try{await navigator.clipboard.writeText(t.textContent??``),i.textContent=e.copied,window.setTimeout(()=>{i.textContent=e.copy},1400)}catch{i.textContent=e.copy}}),n.appendChild(i)})};e(),document.addEventListener(`astro:page-load`,e);</script></body></html>

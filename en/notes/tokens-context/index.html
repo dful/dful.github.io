@@ -1,0 +1,481 @@
+<!DOCTYPE html><html lang="en" data-theme="dful-dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"><script>
+      (() => {
+        const storageKey = 'dful-theme';
+        const schemaKey = 'dful-theme-schema';
+        const schemaVersion = '2';
+        const legacyStorageKey = 'dful-theme-preview';
+        const valid = new Set(["dful-dark","amber-dark","dful-light","flexoki-paper","phosphor","arcade","cobalt"]);
+        const dark = new Set(["dful-dark","amber-dark","phosphor","arcade","cobalt"]);
+        const fallback = "dful-dark";
+        let theme = fallback;
+        try {
+          const needsMigration = localStorage.getItem(schemaKey) !== schemaVersion;
+          let stored = localStorage.getItem(storageKey);
+          if (needsMigration) {
+            if (stored === 'graphite') stored = 'dful-dark';
+            else if (stored === 'dful-dark') stored = 'amber-dark';
+            localStorage.setItem(schemaKey, schemaVersion);
+            if (stored) localStorage.setItem(storageKey, stored);
+          }
+          if (valid.has(stored)) theme = stored;
+          else {
+            let legacy = localStorage.getItem(legacyStorageKey);
+            if (needsMigration) {
+              if (legacy === 'graphite') legacy = 'dful-dark';
+              else if (legacy === 'dful-dark') legacy = 'amber-dark';
+            }
+            if (valid.has(legacy)) {
+              theme = legacy;
+              localStorage.setItem(storageKey, legacy);
+            }
+            if (legacy) localStorage.removeItem(legacyStorageKey);
+          }
+          localStorage.setItem(storageKey, theme);
+        } catch {}
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = dark.has(theme) ? 'dark' : 'light';
+      })();</script><meta name="description" content="How input becomes tokens, what occupies a context window, and what happens as a session grows."><link rel="canonical" href="https://dful.github.io/en/notes/tokens-context/"><link rel="alternate" hreflang="en" href="https://dful.github.io/en/notes/tokens-context/"><link rel="alternate" hreflang="es" href="https://dful.github.io/es/notes/tokens-y-contexto/"><link rel="alternate" hreflang="x-default" href="https://dful.github.io/en/notes/tokens-context/"><meta property="og:url" content="https://dful.github.io/en/notes/tokens-context/"><meta property="og:type" content="website"><meta property="og:site_name" content="dful"><meta property="og:title" content="Tokens &amp; Context · dful"><meta property="og:description" content="How input becomes tokens, what occupies a context window, and what happens as a session grows."><meta property="og:locale" content="en_GB"><meta property="og:locale:alternate" content="es_ES"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="Tokens &amp; Context · dful"><meta name="twitter:description" content="How input becomes tokens, what occupies a context window, and what happens as a session grows."><meta name="generator" content="Astro v7.3.2"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><title>Tokens &amp; Context · dful</title><link rel="stylesheet" href="/_astro/notes.DkEzeG-w.css"><link rel="stylesheet" href="/_astro/BaseLayout.l85KjHsw.css"><link rel="stylesheet" href="/_astro/publishing.C5o61NTe.css"></head><body><a class="skip-link" href="#main">Skip to content</a><header class="site-header"><div class="header-inner"><a class="wordmark" href="/en/" aria-label="dful home">dful<span>.</span></a><nav class="primary-nav" aria-label="Primary"><a href="/en/" data-active="false">Home</a><a href="/en/notes/" data-active="true" aria-current="page">Notes</a><a href="/en/research/" data-active="false">Research</a><a href="/en/about/" data-active="false">About</a></nav><div class="header-actions"><details class="theme-picker" data-theme-picker data-astro-cid-hcqnpaxe><summary aria-label="Theme" data-astro-cid-hcqnpaxe><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.25a8.75 8.75 0 1 0 0 17.5h1.25a2.25 2.25 0 0 0 0-4.5h-.75a1.75 1.75 0 0 1 0-3.5h2.35A5.9 5.9 0 0 0 20.75 6.9C18.72 4.63 15.72 3.25 12 3.25Z"></path><circle cx="7.4" cy="10" r=".7" fill="currentColor" stroke="none"></circle><circle cx="9.25" cy="6.9" r=".7" fill="currentColor" stroke="none"></circle><circle cx="13" cy="6.2" r=".7" fill="currentColor" stroke="none"></circle><circle cx="16.25" cy="8" r=".7" fill="currentColor" stroke="none"></circle></svg><span class="theme-current" data-theme-current data-astro-cid-hcqnpaxe>Dful Dark</span></summary><div class="theme-menu" aria-label="Theme" data-astro-cid-hcqnpaxe><div class="theme-menu-head" data-astro-cid-hcqnpaxe>Theme</div><button type="button" aria-pressed="true" data-theme-option="dful-dark" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#111214" data-astro-cid-hcqnpaxe></i><i style="--swatch:#f0eee8" data-astro-cid-hcqnpaxe></i><i style="--swatch:#ff8b3d" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Dful Dark</span></button><button type="button" aria-pressed="false" data-theme-option="amber-dark" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#0c0c0b" data-astro-cid-hcqnpaxe></i><i style="--swatch:#f2efe7" data-astro-cid-hcqnpaxe></i><i style="--swatch:#ff9f2f" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Amber Dark</span></button><button type="button" aria-pressed="false" data-theme-option="dful-light" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#f7f3ea" data-astro-cid-hcqnpaxe></i><i style="--swatch:#171511" data-astro-cid-hcqnpaxe></i><i style="--swatch:#b94d08" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Dful Light</span></button><button type="button" aria-pressed="false" data-theme-option="flexoki-paper" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#fffcf0" data-astro-cid-hcqnpaxe></i><i style="--swatch:#100f0f" data-astro-cid-hcqnpaxe></i><i style="--swatch:#bc5215" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Flexoki Paper</span></button><button type="button" aria-pressed="false" data-theme-option="phosphor" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#030604" data-astro-cid-hcqnpaxe></i><i style="--swatch:#c8f7cf" data-astro-cid-hcqnpaxe></i><i style="--swatch:#48ff78" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Phosphor</span></button><button type="button" aria-pressed="false" data-theme-option="arcade" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#11102b" data-astro-cid-hcqnpaxe></i><i style="--swatch:#fff4d7" data-astro-cid-hcqnpaxe></i><i style="--swatch:#4de9ff" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Arcade</span></button><button type="button" aria-pressed="false" data-theme-option="cobalt" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#07111f" data-astro-cid-hcqnpaxe></i><i style="--swatch:#edf6ff" data-astro-cid-hcqnpaxe></i><i style="--swatch:#42b9ff" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Cobalt</span></button></div></details><script>
+  (() => {
+    const storageKey = 'dful-theme';
+    const themes = [{"id":"dful-dark","name":"Dful Dark","colorScheme":"dark"},{"id":"amber-dark","name":"Amber Dark","colorScheme":"dark"},{"id":"dful-light","name":"Dful Light","colorScheme":"light"},{"id":"flexoki-paper","name":"Flexoki Paper","colorScheme":"light"},{"id":"phosphor","name":"Phosphor","colorScheme":"dark"},{"id":"arcade","name":"Arcade","colorScheme":"dark"},{"id":"cobalt","name":"Cobalt","colorScheme":"dark"}];
+    const valid = new Set(themes.map(({ id }) => id));
+    const names = Object.fromEntries(themes.map(({ id, name }) => [id, name]));
+    const isDark = (theme) => themes.find((item) => item.id === theme)?.colorScheme === 'dark';
+    const apply = (theme) => {
+      const selected = valid.has(theme) ? theme : "dful-dark";
+      document.documentElement.dataset.theme = selected;
+      document.documentElement.style.colorScheme = isDark(selected) ? 'dark' : 'light';
+      try { localStorage.setItem(storageKey, selected); } catch {}
+      document.querySelectorAll('[data-theme-picker]').forEach((picker) => {
+        const current = picker.querySelector('[data-theme-current]');
+        if (current) current.textContent = names[selected];
+        picker.querySelectorAll('[data-theme-option]').forEach((button) => button.setAttribute('aria-pressed', button.getAttribute('data-theme-option') === selected ? 'true' : 'false'));
+      });
+    };
+    const enhance = () => {
+      document.querySelectorAll('[data-theme-picker]:not([data-enhanced])').forEach((picker) => {
+        picker.setAttribute('data-enhanced','true');
+        picker.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && picker.open) {
+            picker.removeAttribute('open');
+            picker.querySelector('summary').focus();
+          }
+        });
+        picker.querySelectorAll('[data-theme-option]').forEach((button) => button.addEventListener('click', () => {
+          apply(button.getAttribute('data-theme-option'));
+          picker.removeAttribute('open');
+          picker.querySelector('summary').focus();
+        }));
+      });
+      let stored = "dful-dark";
+      try { stored = localStorage.getItem(storageKey) || stored; } catch {}
+      apply(stored);
+    };
+    enhance();
+    document.addEventListener('astro:page-load', enhance);
+  })();</script><nav class="lang-switch" aria-label="Switch language"><a href="/en/notes/tokens-context/" data-active="true" aria-current="page">EN</a><a href="/es/notes/tokens-y-contexto/" data-active="false">ES</a></nav><div class="social-links" aria-label="Social links"><a href="https://github.com/dful" rel="me">GitHub</a><a href="https://www.linkedin.com/in/daniel-fulladosa/" rel="me">LinkedIn</a></div></div></div></header><main id="main"><div class="notes-page" data-note-slug="tokens-context"><div class="notes-shell"><aside class="notes-tree" aria-label="Knowledge tree"><div class="notes-side-head"><strong>Knowledge tree</strong></div><script>
+  (() => { document.documentElement.setAttribute('data-notes-tree-pending', 'true'); })();
+</script><ul class="knowledge-tree" data-notes-tree data-notes-tree-locale="en"><li data-depth="0" data-node-type="category" data-tree-key="domain:ai" data-active-path="true"><details open><summary><span class="tree-category-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="2.5"></circle><circle cx="5" cy="6" r="1.75"></circle><circle cx="19" cy="6" r="1.75"></circle><circle cx="12" cy="20" r="1.75"></circle><path d="m10.2 10.4-3.8-3.2m7.4 3.2 3.8-3.2M12 14.5v3.75"></path></svg></span><span>AI</span></summary><ul><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:fundamentals" data-active-path="true"><details open><summary><span>Fundamentals</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:tokens-context" data-active-path="true"><a href="/en/notes/tokens-context/" aria-current="page"><span>Tokens &amp; Context</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:inference" data-active-path="false"><a href="/en/notes/inference/"><span>Inference</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:reasoning" data-active-path="false"><a href="/en/notes/reasoning/"><span>Reasoning</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:context-engineering" data-active-path="false"><a href="/en/notes/context-engineering/"><span>Context Engineering</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:agents" data-active-path="false"><details><summary><span>Agents</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:agent-loop" data-active-path="false"><a href="/en/notes/agent-loop/"><span>Agent Loop</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:agent-harness" data-active-path="false"><a href="/en/notes/agent-harness/"><span>Agent Harness</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:tool-use" data-active-path="false"><a href="/en/notes/tool-use/"><span>Tool Use</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:subagents" data-active-path="false"><a href="/en/notes/subagents/"><span>Subagents</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:security" data-active-path="false"><details><summary><span>Security</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:prompt-injection" data-active-path="false"><a href="/en/notes/prompt-injection/"><span>Prompt Injection</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:agent-permissions" data-active-path="false"><a href="/en/notes/agent-permissions/"><span>Agent Permissions</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:sandboxing-egress" data-active-path="false"><a href="/en/notes/sandboxing-egress/"><span>Sandboxing &amp; Egress</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:applied-ai" data-active-path="false"><details><summary><span>Applied AI</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:model-apis" data-active-path="false"><a href="/en/notes/model-apis/"><span>Model APIs</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:api-pricing" data-active-path="false"><a href="/en/notes/api-pricing/"><span>API Pricing</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:deployment-models" data-active-path="false"><a href="/en/notes/deployment-models/"><span>Deployment Models</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:local-inference" data-active-path="false"><a href="/en/notes/local-inference/"><span>Local Inference</span></a></li></ul></details></li></ul></details></li><li data-depth="0" data-node-type="category" data-tree-key="domain:offensive-security" data-active-path="false"><details open><summary><span class="tree-category-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2.75 19 5.4v5.45c0 4.65-2.8 8.15-7 10.4-4.2-2.25-7-5.75-7-10.4V5.4L12 2.75Z"></path><path d="m9 12 2 2 4-4"></path></svg></span><span>Offensive Security</span></summary><ul><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:shells" data-active-path="false"><details><summary><span>Shells</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:remote-access" data-active-path="false"><a href="/en/notes/remote-access/"><span>Remote Access</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:file-transfer" data-active-path="false"><details><summary><span>File Transfer</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:windows-file-transfers" data-active-path="false"><a href="/en/notes/windows-file-transfers/"><span>Windows File Transfers</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:linux-file-transfers" data-active-path="false"><a href="/en/notes/linux-file-transfers/"><span>Linux File Transfers</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:web-applications" data-active-path="false"><details><summary><span>Web Applications</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:php-web-testing" data-active-path="false"><a href="/en/notes/php-web-testing/"><span>PHP Web Testing</span></a></li></ul></details></li></ul></details></li></ul><script>
+  (() => {
+    if (globalThis.__dfulNotesTreeState) return;
+    globalThis.__dfulNotesTreeState = true;
+    const storagePrefix = 'dful-notes-tree:v1:';
+    let syncing = false;
+    const ignoredToggles = new WeakSet();
+
+    const trees = () => [...document.querySelectorAll('[data-notes-tree]')];
+    const details = () => trees().flatMap((tree) => [...tree.querySelectorAll('[data-tree-key] > details')]);
+    const keyFor = (detail) => detail.parentElement?.getAttribute('data-tree-key');
+    const activePath = (detail) => detail.parentElement?.getAttribute('data-active-path') === 'true';
+    const localeFor = () => document.querySelector('[data-notes-tree-locale]')?.getAttribute('data-notes-tree-locale') || 'en';
+    const storageKey = () => `${storagePrefix}${localeFor()}`;
+
+    const readState = () => {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(storageKey()) || '{}');
+        return parsed && typeof parsed === 'object' ? parsed : {};
+      } catch {
+        return {};
+      }
+    };
+
+    const writeState = (state) => {
+      try { localStorage.setItem(storageKey(), JSON.stringify(state)); } catch {}
+    };
+
+    const syncKey = (key, open) => {
+      syncing = true;
+      details().filter((detail) => keyFor(detail) === key).forEach((detail) => {
+        if (detail.open === open) return;
+        ignoredToggles.add(detail);
+        detail.open = open;
+      });
+      syncing = false;
+    };
+
+    const applyState = () => {
+      const state = readState();
+      syncing = true;
+      details().forEach((detail) => {
+        const key = keyFor(detail);
+        if (!key) return;
+        const item = detail.parentElement;
+        const defaultOpen = item?.getAttribute('data-depth') === '0';
+        detail.open = activePath(detail) || (typeof state[key] === 'boolean' ? state[key] : defaultOpen);
+      });
+      syncing = false;
+    };
+
+    const enhance = () => {
+      if (!trees().length) {
+        document.documentElement.removeAttribute('data-notes-tree-pending');
+        return;
+      }
+      try {
+        applyState();
+      } finally {
+        document.documentElement.removeAttribute('data-notes-tree-pending');
+      }
+      details().filter((detail) => !detail.hasAttribute('data-tree-state-bound')).forEach((detail) => {
+        detail.setAttribute('data-tree-state-bound', 'true');
+        detail.addEventListener('toggle', () => {
+          if (ignoredToggles.delete(detail)) return;
+          if (syncing) return;
+          const key = keyFor(detail);
+          if (!key) return;
+          if (activePath(detail) && !detail.open) {
+            const state = readState();
+            state[key] = false;
+            writeState(state);
+            syncKey(key, true);
+            return;
+          }
+          const state = readState();
+          state[key] = detail.open;
+          writeState(state);
+          syncKey(key, detail.open);
+        });
+      });
+    };
+
+    document.addEventListener('astro:page-load', enhance);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', enhance, { once:true });
+    else enhance();
+  })();
+</script></aside><div class="notes-detail-shell"><article class="notes-article"><div class="notes-mobile-nav"><details><summary>Knowledge tree</summary><div><script>
+  (() => { document.documentElement.setAttribute('data-notes-tree-pending', 'true'); })();
+</script><ul class="knowledge-tree" data-notes-tree data-notes-tree-locale="en"><li data-depth="0" data-node-type="category" data-tree-key="domain:ai" data-active-path="true"><details open><summary><span class="tree-category-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="2.5"></circle><circle cx="5" cy="6" r="1.75"></circle><circle cx="19" cy="6" r="1.75"></circle><circle cx="12" cy="20" r="1.75"></circle><path d="m10.2 10.4-3.8-3.2m7.4 3.2 3.8-3.2M12 14.5v3.75"></path></svg></span><span>AI</span></summary><ul><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:fundamentals" data-active-path="true"><details open><summary><span>Fundamentals</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:tokens-context" data-active-path="true"><a href="/en/notes/tokens-context/" aria-current="page"><span>Tokens &amp; Context</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:inference" data-active-path="false"><a href="/en/notes/inference/"><span>Inference</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:reasoning" data-active-path="false"><a href="/en/notes/reasoning/"><span>Reasoning</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:context-engineering" data-active-path="false"><a href="/en/notes/context-engineering/"><span>Context Engineering</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:agents" data-active-path="false"><details><summary><span>Agents</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:agent-loop" data-active-path="false"><a href="/en/notes/agent-loop/"><span>Agent Loop</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:agent-harness" data-active-path="false"><a href="/en/notes/agent-harness/"><span>Agent Harness</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:tool-use" data-active-path="false"><a href="/en/notes/tool-use/"><span>Tool Use</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:subagents" data-active-path="false"><a href="/en/notes/subagents/"><span>Subagents</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:security" data-active-path="false"><details><summary><span>Security</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:prompt-injection" data-active-path="false"><a href="/en/notes/prompt-injection/"><span>Prompt Injection</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:agent-permissions" data-active-path="false"><a href="/en/notes/agent-permissions/"><span>Agent Permissions</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:sandboxing-egress" data-active-path="false"><a href="/en/notes/sandboxing-egress/"><span>Sandboxing &amp; Egress</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:applied-ai" data-active-path="false"><details><summary><span>Applied AI</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:model-apis" data-active-path="false"><a href="/en/notes/model-apis/"><span>Model APIs</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:api-pricing" data-active-path="false"><a href="/en/notes/api-pricing/"><span>API Pricing</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:deployment-models" data-active-path="false"><a href="/en/notes/deployment-models/"><span>Deployment Models</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:local-inference" data-active-path="false"><a href="/en/notes/local-inference/"><span>Local Inference</span></a></li></ul></details></li></ul></details></li><li data-depth="0" data-node-type="category" data-tree-key="domain:offensive-security" data-active-path="false"><details open><summary><span class="tree-category-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2.75 19 5.4v5.45c0 4.65-2.8 8.15-7 10.4-4.2-2.25-7-5.75-7-10.4V5.4L12 2.75Z"></path><path d="m9 12 2 2 4-4"></path></svg></span><span>Offensive Security</span></summary><ul><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:shells" data-active-path="false"><details><summary><span>Shells</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:remote-access" data-active-path="false"><a href="/en/notes/remote-access/"><span>Remote Access</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:file-transfer" data-active-path="false"><details><summary><span>File Transfer</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:windows-file-transfers" data-active-path="false"><a href="/en/notes/windows-file-transfers/"><span>Windows File Transfers</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:linux-file-transfers" data-active-path="false"><a href="/en/notes/linux-file-transfers/"><span>Linux File Transfers</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:web-applications" data-active-path="false"><details><summary><span>Web Applications</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:php-web-testing" data-active-path="false"><a href="/en/notes/php-web-testing/"><span>PHP Web Testing</span></a></li></ul></details></li></ul></details></li></ul><script>
+  (() => {
+    if (globalThis.__dfulNotesTreeState) return;
+    globalThis.__dfulNotesTreeState = true;
+    const storagePrefix = 'dful-notes-tree:v1:';
+    let syncing = false;
+    const ignoredToggles = new WeakSet();
+
+    const trees = () => [...document.querySelectorAll('[data-notes-tree]')];
+    const details = () => trees().flatMap((tree) => [...tree.querySelectorAll('[data-tree-key] > details')]);
+    const keyFor = (detail) => detail.parentElement?.getAttribute('data-tree-key');
+    const activePath = (detail) => detail.parentElement?.getAttribute('data-active-path') === 'true';
+    const localeFor = () => document.querySelector('[data-notes-tree-locale]')?.getAttribute('data-notes-tree-locale') || 'en';
+    const storageKey = () => `${storagePrefix}${localeFor()}`;
+
+    const readState = () => {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(storageKey()) || '{}');
+        return parsed && typeof parsed === 'object' ? parsed : {};
+      } catch {
+        return {};
+      }
+    };
+
+    const writeState = (state) => {
+      try { localStorage.setItem(storageKey(), JSON.stringify(state)); } catch {}
+    };
+
+    const syncKey = (key, open) => {
+      syncing = true;
+      details().filter((detail) => keyFor(detail) === key).forEach((detail) => {
+        if (detail.open === open) return;
+        ignoredToggles.add(detail);
+        detail.open = open;
+      });
+      syncing = false;
+    };
+
+    const applyState = () => {
+      const state = readState();
+      syncing = true;
+      details().forEach((detail) => {
+        const key = keyFor(detail);
+        if (!key) return;
+        const item = detail.parentElement;
+        const defaultOpen = item?.getAttribute('data-depth') === '0';
+        detail.open = activePath(detail) || (typeof state[key] === 'boolean' ? state[key] : defaultOpen);
+      });
+      syncing = false;
+    };
+
+    const enhance = () => {
+      if (!trees().length) {
+        document.documentElement.removeAttribute('data-notes-tree-pending');
+        return;
+      }
+      try {
+        applyState();
+      } finally {
+        document.documentElement.removeAttribute('data-notes-tree-pending');
+      }
+      details().filter((detail) => !detail.hasAttribute('data-tree-state-bound')).forEach((detail) => {
+        detail.setAttribute('data-tree-state-bound', 'true');
+        detail.addEventListener('toggle', () => {
+          if (ignoredToggles.delete(detail)) return;
+          if (syncing) return;
+          const key = keyFor(detail);
+          if (!key) return;
+          if (activePath(detail) && !detail.open) {
+            const state = readState();
+            state[key] = false;
+            writeState(state);
+            syncKey(key, true);
+            return;
+          }
+          const state = readState();
+          state[key] = detail.open;
+          writeState(state);
+          syncKey(key, detail.open);
+        });
+      });
+    };
+
+    document.addEventListener('astro:page-load', enhance);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', enhance, { once:true });
+    else enhance();
+  })();
+</script></div></details><details><summary>On this page</summary><div><ul><li data-depth="2"><a href="#tokens-and-tokenization">Tokens and tokenization</a></li><li data-depth="2"><a href="#input-and-output">Input and output</a></li><li data-depth="2"><a href="#context">Context</a></li><li data-depth="2"><a href="#context-window">Context window</a></li><li data-depth="2"><a href="#session-growth">Session growth</a></li><li data-depth="2"><a href="#compaction">Compaction</a></li><li data-depth="2"><a href="#references">References</a></li></ul></div></details></div><header class="notes-header"><div class="notes-header-pretitle"><nav class="notes-breadcrumb" aria-label="Breadcrumb"><span>AI</span><i aria-hidden="true">/</i><span>Fundamentals</span></nav></div><h1>Tokens &amp; Context</h1><div class="notes-deck">How input becomes tokens, what occupies a context window, and what happens as a session grows.</div><small>Updated 28 Aug 2026</small></header><div class="publishing-prose"><h2 id="tokens-and-tokenization">Tokens and tokenization</h2>
+<p>A <strong>token</strong> is one unit of the representation processed by a model. It may be a complete word, part of a word, punctuation, or whitespace. The split depends on the tokenizer associated with the model.</p>
+<p><strong>Tokenization</strong> turns text into tokens and then into vocabulary identifiers. In the documented BERT base cased example below, <code>Transformer</code> becomes the two subwords <code>transform</code> and <code>##er</code>; the visual also shows the vocabulary ID assigned to each token.</p>
+<figure class="pub-figure pub-breakout-medium pub-diagram"><p><img alt="BERT base cased splits Using a Transformer network is simple into Using, a, transform, ##er, network, is, and simple, then maps them to IDs 7993, 170, 11303, 1200, 2443, 1110, and 3014." loading="lazy" decoding="async" width="1440" height="760" src="/_astro/tokenization.CzaqX9tS_Z1aK698.svg"></p><figcaption>Figure 1. The same sentence moves from text to tokens and then to the IDs processed by the model.</figcaption></figure>
+<p>Many tokenizers use <strong>subwords</strong>. A common word may occupy one token, while another word is split into several known pieces. This lets the vocabulary represent new words without storing every possible complete word.</p>
+<p>The same text does not necessarily occupy the same number of tokens in two models. Language, code, numbers, and punctuation can all affect the count. When a limit or price matters, use the counter for the actual model rather than a rough words-per-token rule.</p>
+<h2 id="input-and-output">Input and output</h2>
+<p><strong>Input tokens</strong> are supplied to the inference. <strong>Output tokens</strong> are generated by the model.</p>
+<p>In a chat request, input is not limited to the latest user message. It may also include instructions, history, tool definitions, and retrieved content. A short answer can require a large amount of processed input.</p>
+<p>APIs commonly use these counts for usage and pricing. Some add categories such as cached input or reasoning details, but those are not universal subdivisions represented identically by every API.</p>
+<h2 id="context">Context</h2>
+<p><strong>Context</strong> is the information available to the model during one inference. Information outside it cannot affect that call until the application retrieves and inserts it again.</p>
+<p>A coding-agent request may include:</p>
+<ul>
+<li>Rules from <code>AGENTS.md</code>.</li>
+<li>Conversation needed to maintain the task.</li>
+<li>Schemas for <code>read_file</code>, shell, and other tools.</li>
+<li>The latest test output and the file being edited.</li>
+</ul>
+<p>All of this consumes context even if the interface mainly shows conversation. A shell result with thousands of lines can occupy more space than many chat turns.</p>
+<figure class="pub-figure pub-breakout-wide pub-diagram"><p><img alt="A context window is divided into instructions, tool definitions, conversation, retrieved information, tool results, current input, and remaining capacity." loading="lazy" decoding="async" width="1440" height="1050" src="/_astro/context-anatomy.BEJXlIXP_ZOLJLa.svg"></p><figcaption>Figure 2. Instructions, history, tools, results, and current input share the same available capacity.</figcaption></figure>
+<h2 id="context-window">Context window</h2>
+<p>A <strong>context window</strong> limits how many tokens a model can handle in one inference. In many APIs, input and the new generation share that capacity.</p>
+<p>A nearly full window therefore leaves little room for an answer. If an application places 126K tokens into a 128K window, it should not expect an 8K response without first reducing the input.</p>
+<p>A larger window allows more material but does not make all of it useful. Duplicates, old decisions, and irrelevant output still consume tokens and can make the important information harder to use.</p>
+<p>In agent systems, the logical limit managed by a client and the physical limit loaded in a runtime can differ. In the <a href="/en/research/qwen3-8-27b-local-agentic-pentesting/"><strong>Qwen3.8-27B and OpenCode experiment</strong></a>, OpenCode managed the session as 64K while LM Studio loaded roughly 81K to leave headroom for small overflows.</p>
+<h2 id="session-growth">Session growth</h2>
+<p>In an API that resends history, each new turn may process much of the earlier conversation again. A session ending at 16K tokens does not mean the provider processed only 16K over its complete lifetime.</p>
+<p>Agents add more sources of growth. Every tool call returns a result, file contents may be sent again on later turns, and instructions are often repeated. Filtering a log or reading a focused line range can matter more than having a huge window.</p>
+<p><a href="/en/notes/context-engineering/"><strong>Context Engineering</strong></a> covers how to select that information.</p>
+<h2 id="compaction">Compaction</h2>
+<p><strong>Compaction</strong> replaces part of accumulated history with a smaller representation so the task can continue. It does not raise the model limit; it reduces the context in use.</p>
+<figure class="pub-figure pub-breakout-wide pub-diagram"><p><img alt="Before compaction, old conversation and a large result occupy most of the window. After compaction, earlier state is summarized and more capacity is available." loading="lazy" decoding="async" width="1440" height="880" src="/_astro/context-compaction.ChcVDKbA_Z1Kle1y.svg"></p><figcaption>Figure 3. Compaction summarizes part of earlier context and recovers space for the task to continue.</figcaption></figure>
+<p>A summary may preserve the goal, completed changes, and unresolved problems. It can still lose detail. For example, it may remember that a test is failing while omitting one exact stack-trace line.</p>
+<p>If that detail may be needed again, the complete log should remain in a retrievable file. Compaction maintains conversational continuity; it does not replace exact external evidence.</p>
+<p>Truncation is simpler: old content is removed to meet the limit. Compaction attempts to preserve its useful meaning. In either case, the application must assume that some original context is no longer directly available.</p>
+<h2 id="references">References</h2>
+<ul>
+<li><a href="https://huggingface.co/docs/course/chapter2/4">Hugging Face — Tokenizers</a></li>
+<li><a href="https://ai.google.dev/gemini-api/docs/tokens">Google AI for Developers — Understand and count tokens</a></li>
+<li><a href="https://platform.claude.com/docs/en/build-with-claude/context-windows">Anthropic — Context windows</a></li>
+<li><a href="https://platform.claude.com/docs/en/build-with-claude/compaction">Anthropic — Compaction</a></li>
+<li><a href="https://developers.openai.com/api/reference/resources/responses/methods/compact">OpenAI API — Compact a response</a></li>
+</ul></div></article><aside class="notes-toc" aria-label="On this page"><strong>On this page</strong><ul><li data-depth="2"><a href="#tokens-and-tokenization">Tokens and tokenization</a></li><li data-depth="2"><a href="#input-and-output">Input and output</a></li><li data-depth="2"><a href="#context">Context</a></li><li data-depth="2"><a href="#context-window">Context window</a></li><li data-depth="2"><a href="#session-growth">Session growth</a></li><li data-depth="2"><a href="#compaction">Compaction</a></li><li data-depth="2"><a href="#references">References</a></li></ul></aside></div></div></div><script>
+    (() => {
+      const root = document.querySelector('.notes-page');
+      if (!root) return;
+      const tocLinks = [...root.querySelectorAll('.notes-toc a')];
+      const targets = tocLinks.map((link) => document.getElementById(decodeURIComponent(link.hash.slice(1)))).filter(Boolean);
+      const markCurrent = (link, active) => active ? link.setAttribute('aria-current', 'location') : link.removeAttribute('aria-current');
+      tocLinks.forEach((selected) => selected.addEventListener('click', () => tocLinks.forEach((link) => markCurrent(link, link === selected))));
+      if (targets.length) {
+        const updateActiveHeading = () => {
+          const active = targets.reduce((current, target) => target.getBoundingClientRect().top <= 150 ? target : current, targets[0]);
+          tocLinks.forEach((link) => markCurrent(link, link.hash === `#${active.id}`));
+        };
+        updateActiveHeading();
+        window.addEventListener('scroll', updateActiveHeading, { passive:true });
+      }
+    })();
+  </script></main><footer class="site-footer"><div class="footer-inner"><a class="footer-wordmark" href="/en/">dful<span>.</span></a><span>Offensive Security · AI Security · Agentic Systems</span></div></footer><script>
+  (() => {
+    const init = () => {
+      const figures = [...document.querySelectorAll('.publishing-prose .pub-figure[data-preview="true"]')];
+      if (!figures.length) return;
+
+      const spanish = document.documentElement.lang === 'es';
+      const labels = spanish
+        ? {
+            open: 'Abrir vista ampliada',
+            close: 'Cerrar vista previa',
+            zoom: 'Zoom de imagen',
+            fit: 'Ajustar',
+            actual: 'Tamaño real',
+          }
+        : {
+            open: 'Open enlarged preview',
+            close: 'Close preview',
+            zoom: 'Image zoom',
+            fit: 'Fit',
+            actual: 'Actual size',
+          };
+
+      let dialog = document.querySelector('dialog[data-figure-preview]');
+      if (!(dialog instanceof HTMLDialogElement)) {
+        dialog = document.createElement('dialog');
+        dialog.className = 'figure-preview-dialog';
+        dialog.setAttribute('data-figure-preview', 'true');
+        dialog.dataset.mode = 'fit';
+
+        const toolbar = document.createElement('div');
+        toolbar.className = 'figure-preview-toolbar';
+
+        const modeGroup = document.createElement('div');
+        modeGroup.className = 'figure-preview-modes';
+        modeGroup.setAttribute('role', 'group');
+        modeGroup.setAttribute('aria-label', labels.zoom);
+
+        const fit = document.createElement('button');
+        fit.type = 'button';
+        fit.className = 'figure-preview-mode';
+        fit.setAttribute('data-figure-preview-fit', 'true');
+        fit.setAttribute('aria-pressed', 'true');
+        fit.textContent = labels.fit;
+
+        const actual = document.createElement('button');
+        actual.type = 'button';
+        actual.className = 'figure-preview-mode';
+        actual.setAttribute('data-figure-preview-actual', 'true');
+        actual.setAttribute('aria-pressed', 'false');
+        actual.setAttribute('title', labels.actual);
+        actual.textContent = '1:1';
+
+        const close = document.createElement('button');
+        close.type = 'button';
+        close.className = 'figure-preview-close';
+        close.setAttribute('data-figure-preview-close', 'true');
+        close.setAttribute('aria-label', labels.close);
+        close.textContent = '×';
+
+        const viewport = document.createElement('div');
+        viewport.className = 'figure-preview-viewport';
+        viewport.setAttribute('data-figure-preview-viewport', 'true');
+
+        const image = document.createElement('img');
+        image.className = 'figure-preview-image';
+        viewport.appendChild(image);
+
+        const caption = document.createElement('p');
+        caption.className = 'figure-preview-caption';
+        caption.id = 'figure-preview-caption';
+
+        modeGroup.append(fit, actual);
+        toolbar.append(modeGroup, close);
+        dialog.append(toolbar, viewport, caption);
+        document.body.appendChild(dialog);
+
+        const setMode = (mode) => {
+          const native = mode === 'native';
+          dialog.dataset.mode = native ? 'native' : 'fit';
+          fit.setAttribute('aria-pressed', native ? 'false' : 'true');
+          actual.setAttribute('aria-pressed', native ? 'true' : 'false');
+          if (!native) viewport.scrollTo({ top: 0, left: 0 });
+        };
+
+        fit.addEventListener('click', () => setMode('fit'));
+        actual.addEventListener('click', () => setMode('native'));
+        close.addEventListener('click', () => dialog.close());
+        dialog.addEventListener('click', (event) => {
+          if (event.target !== dialog) return;
+          const rect = dialog.getBoundingClientRect();
+          const outside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom;
+          if (outside) dialog.close();
+        });
+        dialog.addEventListener('close', () => {
+          setMode('fit');
+          const trigger = dialog.dataset.lastTrigger;
+          const source = trigger ? document.querySelector(`[data-preview-trigger="${trigger}"]`) : null;
+          if (source instanceof HTMLButtonElement) source.focus();
+          delete dialog.dataset.lastTrigger;
+        });
+      }
+
+      const close = dialog.querySelector('[data-figure-preview-close]');
+      const fit = dialog.querySelector('[data-figure-preview-fit]');
+      const actual = dialog.querySelector('[data-figure-preview-actual]');
+      const previewImage = dialog.querySelector('.figure-preview-image');
+      const viewport = dialog.querySelector('[data-figure-preview-viewport]');
+      const caption = dialog.querySelector('.figure-preview-caption');
+      if (!(close instanceof HTMLButtonElement) || !(fit instanceof HTMLButtonElement) || !(actual instanceof HTMLButtonElement) || !(previewImage instanceof HTMLImageElement) || !(viewport instanceof HTMLDivElement) || !(caption instanceof HTMLParagraphElement)) return;
+
+      const largestSource = (image) => {
+        const candidates = (image.srcset || '')
+          .split(',')
+          .map((candidate) => candidate.trim())
+          .filter(Boolean)
+          .map((candidate) => {
+            const parts = candidate.split(/\s+/);
+            const descriptor = parts.length > 1 ? parts.pop() : '';
+            const url = parts.join(' ') || candidate;
+            let score = 0;
+            if (descriptor.endsWith('w')) score = Number.parseFloat(descriptor);
+            else if (descriptor.endsWith('x')) score = Number.parseFloat(descriptor) * (image.naturalWidth || 1);
+            return { url, score: Number.isFinite(score) ? score : 0 };
+          })
+          .sort((a, b) => b.score - a.score);
+        return candidates[0]?.url || image.currentSrc || image.src;
+      };
+
+      figures.forEach((figure, index) => {
+        const image = figure.querySelector('img');
+        if (!(image instanceof HTMLImageElement) || figure.querySelector('[data-preview-trigger]')) return;
+
+        const trigger = document.createElement('button');
+        trigger.type = 'button';
+        trigger.className = 'figure-preview-trigger';
+        const triggerId = `figure-preview-trigger-${index + 1}`;
+        trigger.setAttribute('data-preview-trigger', triggerId);
+        const alt = image.alt || (spanish ? 'Imagen técnica' : 'Technical image');
+        trigger.setAttribute('aria-label', `${labels.open}: ${alt}`);
+        image.parentNode?.insertBefore(trigger, image);
+        trigger.appendChild(image);
+
+        trigger.addEventListener('click', () => {
+          previewImage.src = largestSource(image);
+          previewImage.alt = alt;
+          const figureCaption = figure.querySelector('figcaption')?.textContent?.trim() || alt;
+          caption.textContent = figureCaption;
+          dialog.setAttribute('aria-label', alt);
+          dialog.setAttribute('aria-describedby', caption.id);
+          dialog.dataset.lastTrigger = triggerId;
+          dialog.dataset.mode = 'fit';
+          fit.setAttribute('aria-pressed', 'true');
+          actual.setAttribute('aria-pressed', 'false');
+          viewport.scrollTo({ top: 0, left: 0 });
+
+          if (typeof dialog.showModal === 'function') {
+            dialog.showModal();
+            close.focus();
+          }
+        });
+      });
+    };
+
+    init();
+    document.addEventListener('astro:page-load', init);
+  })();
+</script><script type="module">var e=()=>{document.querySelectorAll(`.pub-tabs:not([data-enhanced])`).forEach((e,t)=>{e.setAttribute(`data-enhanced`,`true`);let n=[...e.querySelectorAll(`:scope > .pub-tab`)];if(!n.length)return;let r=document.createElement(`div`);r.className=`pub-tab-list`,r.setAttribute(`role`,`tablist`),n.forEach((e,i)=>{let a=`pub-tab-${t}-${i}`,o=`pub-tab-panel-${t}-${i}`,s=document.createElement(`button`);s.type=`button`,s.id=a,s.className=`pub-tab-button`,s.setAttribute(`role`,`tab`),s.setAttribute(`aria-controls`,o),s.setAttribute(`aria-selected`,i===0?`true`:`false`),s.tabIndex=i===0?0:-1,s.textContent=e.getAttribute(`data-tab-label`)||`Tab ${i+1}`,e.id=o,e.setAttribute(`role`,`tabpanel`),e.setAttribute(`aria-labelledby`,a),e.toggleAttribute(`hidden`,i!==0),s.addEventListener(`click`,()=>{[...r.querySelectorAll(`[role="tab"]`)].forEach(e=>{e.setAttribute(`aria-selected`,e===s?`true`:`false`),e.tabIndex=e===s?0:-1}),n.forEach(t=>t.toggleAttribute(`hidden`,t!==e)),s.focus()}),s.addEventListener(`keydown`,e=>{let t=[...r.querySelectorAll(`[role="tab"]`)],n=t.indexOf(s),i=n;if(e.key===`ArrowRight`)i=(n+1)%t.length;else if(e.key===`ArrowLeft`)i=(n-1+t.length)%t.length;else if(e.key===`Home`)i=0;else if(e.key===`End`)i=t.length-1;else return;e.preventDefault(),t[i].click()}),r.appendChild(s)}),e.prepend(r)})};e(),document.addEventListener(`astro:page-load`,e);</script><script type="module">var e=()=>{let e=document.documentElement.lang===`es`?{copy:`Copiar`,copied:`Copiado`}:{copy:`Copy`,copied:`Copied`};document.querySelectorAll(`pre`).forEach(t=>{if(t.closest(`.pub-filetree`)||t.parentElement?.classList.contains(`code-frame`))return;let n=document.createElement(`div`);n.className=`code-frame`,t.parentNode?.insertBefore(n,t),n.appendChild(t);let r=t.dataset.language??t.querySelector(`code`)?.className.match(/language-([\w-]+)/)?.[1];if(r){let e=document.createElement(`span`);e.className=`code-language`,e.textContent=r===`powershell`?`PowerShell`:r,n.appendChild(e)}let i=document.createElement(`button`);i.className=`copy-code`,i.type=`button`,i.textContent=e.copy,i.addEventListener(`click`,async()=>{try{await navigator.clipboard.writeText(t.textContent??``),i.textContent=e.copied,window.setTimeout(()=>{i.textContent=e.copy},1400)}catch{i.textContent=e.copy}}),n.appendChild(i)})};e(),document.addEventListener(`astro:page-load`,e);</script></body></html>

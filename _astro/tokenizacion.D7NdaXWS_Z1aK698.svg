@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="760" viewBox="0 0 1440 760" role="img" aria-labelledby="t d">
+  <title id="t">Ejemplo de tokenización con BERT base cased</title>
+  <desc id="d">La frase Using a Transformer network is simple se divide en los tokens Using, a, transform, ##er, network, is y simple, y se convierte en los IDs 7993, 170, 11303, 1200, 2443, 1110 y 3014.</desc>
+  <rect width="1440" height="760" fill="#0d0d0b"/>
+  <g font-family="ui-monospace, SFMono-Regular, Consolas, monospace">
+    <text x="76" y="68" fill="#918b80" font-size="18" letter-spacing="3">EJEMPLO DE TOKENIZACIÓN</text><text x="76" y="142" fill="#918b80" font-size="15" letter-spacing="2">TEXTO</text>
+    <rect x="76" y="170" width="1288" height="86" rx="4" fill="#151512" stroke="#454138"/><text x="108" y="224" fill="#f2efe7" font-size="27">Using a Transformer network is simple</text>
+    <path d="M720 272v58" stroke="#ff9f2f" stroke-width="2"/><path d="m712 319 8 11 8-11" fill="none" stroke="#ff9f2f" stroke-width="2"/><text x="76" y="372" fill="#918b80" font-size="15" letter-spacing="2">TOKENS</text>
+    <g fill="#151512" stroke="#454138"><rect x="76" y="398" width="140" height="66" rx="4"/><rect x="232" y="398" width="92" height="66" rx="4"/><rect x="340" y="398" width="204" height="66" rx="4"/><rect x="560" y="398" width="120" height="66" rx="4"/><rect x="696" y="398" width="178" height="66" rx="4"/><rect x="890" y="398" width="92" height="66" rx="4"/><rect x="998" y="398" width="174" height="66" rx="4"/></g>
+    <g fill="#f2efe7" font-size="20" text-anchor="middle"><text x="146" y="439">Using</text><text x="278" y="439">a</text><text x="442" y="439">transform</text><text x="620" y="439">##er</text><text x="785" y="439">network</text><text x="936" y="439">is</text><text x="1085" y="439">simple</text></g>
+    <path d="M720 482v54" stroke="#ff9f2f" stroke-width="2"/><path d="m712 525 8 11 8-11" fill="none" stroke="#ff9f2f" stroke-width="2"/><text x="76" y="574" fill="#918b80" font-size="15" letter-spacing="2">TOKEN IDS</text>
+    <g fill="#151512" stroke="#454138"><rect x="76" y="598" width="140" height="64" rx="4"/><rect x="232" y="598" width="92" height="64" rx="4"/><rect x="340" y="598" width="204" height="64" rx="4"/><rect x="560" y="598" width="120" height="64" rx="4"/><rect x="696" y="598" width="178" height="64" rx="4"/><rect x="890" y="598" width="92" height="64" rx="4"/><rect x="998" y="598" width="174" height="64" rx="4"/></g>
+    <g fill="#b3aca0" font-size="18" text-anchor="middle"><text x="146" y="638">7993</text><text x="278" y="638">170</text><text x="442" y="638">11303</text><text x="620" y="638">1200</text><text x="785" y="638">2443</text><text x="936" y="638">1110</text><text x="1085" y="638">3014</text></g>
+    <line x1="76" y1="700" x2="1364" y2="700" stroke="#454138"/><text x="76" y="735" fill="#918b80" font-size="15">bert-base-cased · ejemplo documentado por Hugging Face</text>
+  </g>
+</svg>

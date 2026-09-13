@@ -1,0 +1,629 @@
+<!DOCTYPE html><html lang="en" data-theme="dful-dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"><script>
+      (() => {
+        const storageKey = 'dful-theme';
+        const schemaKey = 'dful-theme-schema';
+        const schemaVersion = '2';
+        const legacyStorageKey = 'dful-theme-preview';
+        const valid = new Set(["dful-dark","amber-dark","dful-light","flexoki-paper","phosphor","arcade","cobalt"]);
+        const dark = new Set(["dful-dark","amber-dark","phosphor","arcade","cobalt"]);
+        const fallback = "dful-dark";
+        let theme = fallback;
+        try {
+          const needsMigration = localStorage.getItem(schemaKey) !== schemaVersion;
+          let stored = localStorage.getItem(storageKey);
+          if (needsMigration) {
+            if (stored === 'graphite') stored = 'dful-dark';
+            else if (stored === 'dful-dark') stored = 'amber-dark';
+            localStorage.setItem(schemaKey, schemaVersion);
+            if (stored) localStorage.setItem(storageKey, stored);
+          }
+          if (valid.has(stored)) theme = stored;
+          else {
+            let legacy = localStorage.getItem(legacyStorageKey);
+            if (needsMigration) {
+              if (legacy === 'graphite') legacy = 'dful-dark';
+              else if (legacy === 'dful-dark') legacy = 'amber-dark';
+            }
+            if (valid.has(legacy)) {
+              theme = legacy;
+              localStorage.setItem(storageKey, legacy);
+            }
+            if (legacy) localStorage.removeItem(legacyStorageKey);
+          }
+          localStorage.setItem(storageKey, theme);
+        } catch {}
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = dark.has(theme) ? 'dark' : 'light';
+      })();</script><meta name="description" content="How an agent's requested actions become real effects, under which identity, and with what authority."><link rel="canonical" href="https://dful.github.io/en/notes/agent-permissions/"><link rel="alternate" hreflang="en" href="https://dful.github.io/en/notes/agent-permissions/"><link rel="alternate" hreflang="es" href="https://dful.github.io/es/notes/permisos-de-agentes/"><link rel="alternate" hreflang="x-default" href="https://dful.github.io/en/notes/agent-permissions/"><meta property="og:url" content="https://dful.github.io/en/notes/agent-permissions/"><meta property="og:type" content="website"><meta property="og:site_name" content="dful"><meta property="og:title" content="Agent Permissions · dful"><meta property="og:description" content="How an agent's requested actions become real effects, under which identity, and with what authority."><meta property="og:locale" content="en_GB"><meta property="og:locale:alternate" content="es_ES"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="Agent Permissions · dful"><meta name="twitter:description" content="How an agent's requested actions become real effects, under which identity, and with what authority."><meta name="generator" content="Astro v7.3.2"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><title>Agent Permissions · dful</title><link rel="stylesheet" href="/_astro/notes.DkEzeG-w.css"><link rel="stylesheet" href="/_astro/BaseLayout.l85KjHsw.css"><link rel="stylesheet" href="/_astro/publishing.C5o61NTe.css"></head><body><a class="skip-link" href="#main">Skip to content</a><header class="site-header"><div class="header-inner"><a class="wordmark" href="/en/" aria-label="dful home">dful<span>.</span></a><nav class="primary-nav" aria-label="Primary"><a href="/en/" data-active="false">Home</a><a href="/en/notes/" data-active="true" aria-current="page">Notes</a><a href="/en/research/" data-active="false">Research</a><a href="/en/about/" data-active="false">About</a></nav><div class="header-actions"><details class="theme-picker" data-theme-picker data-astro-cid-hcqnpaxe><summary aria-label="Theme" data-astro-cid-hcqnpaxe><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.25a8.75 8.75 0 1 0 0 17.5h1.25a2.25 2.25 0 0 0 0-4.5h-.75a1.75 1.75 0 0 1 0-3.5h2.35A5.9 5.9 0 0 0 20.75 6.9C18.72 4.63 15.72 3.25 12 3.25Z"></path><circle cx="7.4" cy="10" r=".7" fill="currentColor" stroke="none"></circle><circle cx="9.25" cy="6.9" r=".7" fill="currentColor" stroke="none"></circle><circle cx="13" cy="6.2" r=".7" fill="currentColor" stroke="none"></circle><circle cx="16.25" cy="8" r=".7" fill="currentColor" stroke="none"></circle></svg><span class="theme-current" data-theme-current data-astro-cid-hcqnpaxe>Dful Dark</span></summary><div class="theme-menu" aria-label="Theme" data-astro-cid-hcqnpaxe><div class="theme-menu-head" data-astro-cid-hcqnpaxe>Theme</div><button type="button" aria-pressed="true" data-theme-option="dful-dark" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#111214" data-astro-cid-hcqnpaxe></i><i style="--swatch:#f0eee8" data-astro-cid-hcqnpaxe></i><i style="--swatch:#ff8b3d" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Dful Dark</span></button><button type="button" aria-pressed="false" data-theme-option="amber-dark" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#0c0c0b" data-astro-cid-hcqnpaxe></i><i style="--swatch:#f2efe7" data-astro-cid-hcqnpaxe></i><i style="--swatch:#ff9f2f" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Amber Dark</span></button><button type="button" aria-pressed="false" data-theme-option="dful-light" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#f7f3ea" data-astro-cid-hcqnpaxe></i><i style="--swatch:#171511" data-astro-cid-hcqnpaxe></i><i style="--swatch:#b94d08" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Dful Light</span></button><button type="button" aria-pressed="false" data-theme-option="flexoki-paper" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#fffcf0" data-astro-cid-hcqnpaxe></i><i style="--swatch:#100f0f" data-astro-cid-hcqnpaxe></i><i style="--swatch:#bc5215" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Flexoki Paper</span></button><button type="button" aria-pressed="false" data-theme-option="phosphor" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#030604" data-astro-cid-hcqnpaxe></i><i style="--swatch:#c8f7cf" data-astro-cid-hcqnpaxe></i><i style="--swatch:#48ff78" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Phosphor</span></button><button type="button" aria-pressed="false" data-theme-option="arcade" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#11102b" data-astro-cid-hcqnpaxe></i><i style="--swatch:#fff4d7" data-astro-cid-hcqnpaxe></i><i style="--swatch:#4de9ff" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Arcade</span></button><button type="button" aria-pressed="false" data-theme-option="cobalt" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#07111f" data-astro-cid-hcqnpaxe></i><i style="--swatch:#edf6ff" data-astro-cid-hcqnpaxe></i><i style="--swatch:#42b9ff" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Cobalt</span></button></div></details><script>
+  (() => {
+    const storageKey = 'dful-theme';
+    const themes = [{"id":"dful-dark","name":"Dful Dark","colorScheme":"dark"},{"id":"amber-dark","name":"Amber Dark","colorScheme":"dark"},{"id":"dful-light","name":"Dful Light","colorScheme":"light"},{"id":"flexoki-paper","name":"Flexoki Paper","colorScheme":"light"},{"id":"phosphor","name":"Phosphor","colorScheme":"dark"},{"id":"arcade","name":"Arcade","colorScheme":"dark"},{"id":"cobalt","name":"Cobalt","colorScheme":"dark"}];
+    const valid = new Set(themes.map(({ id }) => id));
+    const names = Object.fromEntries(themes.map(({ id, name }) => [id, name]));
+    const isDark = (theme) => themes.find((item) => item.id === theme)?.colorScheme === 'dark';
+    const apply = (theme) => {
+      const selected = valid.has(theme) ? theme : "dful-dark";
+      document.documentElement.dataset.theme = selected;
+      document.documentElement.style.colorScheme = isDark(selected) ? 'dark' : 'light';
+      try { localStorage.setItem(storageKey, selected); } catch {}
+      document.querySelectorAll('[data-theme-picker]').forEach((picker) => {
+        const current = picker.querySelector('[data-theme-current]');
+        if (current) current.textContent = names[selected];
+        picker.querySelectorAll('[data-theme-option]').forEach((button) => button.setAttribute('aria-pressed', button.getAttribute('data-theme-option') === selected ? 'true' : 'false'));
+      });
+    };
+    const enhance = () => {
+      document.querySelectorAll('[data-theme-picker]:not([data-enhanced])').forEach((picker) => {
+        picker.setAttribute('data-enhanced','true');
+        picker.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && picker.open) {
+            picker.removeAttribute('open');
+            picker.querySelector('summary').focus();
+          }
+        });
+        picker.querySelectorAll('[data-theme-option]').forEach((button) => button.addEventListener('click', () => {
+          apply(button.getAttribute('data-theme-option'));
+          picker.removeAttribute('open');
+          picker.querySelector('summary').focus();
+        }));
+      });
+      let stored = "dful-dark";
+      try { stored = localStorage.getItem(storageKey) || stored; } catch {}
+      apply(stored);
+    };
+    enhance();
+    document.addEventListener('astro:page-load', enhance);
+  })();</script><nav class="lang-switch" aria-label="Switch language"><a href="/en/notes/agent-permissions/" data-active="true" aria-current="page">EN</a><a href="/es/notes/permisos-de-agentes/" data-active="false">ES</a></nav><div class="social-links" aria-label="Social links"><a href="https://github.com/dful" rel="me">GitHub</a><a href="https://www.linkedin.com/in/daniel-fulladosa/" rel="me">LinkedIn</a></div></div></div></header><main id="main"><div class="notes-page" data-note-slug="agent-permissions"><div class="notes-shell"><aside class="notes-tree" aria-label="Knowledge tree"><div class="notes-side-head"><strong>Knowledge tree</strong></div><script>
+  (() => { document.documentElement.setAttribute('data-notes-tree-pending', 'true'); })();
+</script><ul class="knowledge-tree" data-notes-tree data-notes-tree-locale="en"><li data-depth="0" data-node-type="category" data-tree-key="domain:ai" data-active-path="true"><details open><summary><span class="tree-category-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="2.5"></circle><circle cx="5" cy="6" r="1.75"></circle><circle cx="19" cy="6" r="1.75"></circle><circle cx="12" cy="20" r="1.75"></circle><path d="m10.2 10.4-3.8-3.2m7.4 3.2 3.8-3.2M12 14.5v3.75"></path></svg></span><span>AI</span></summary><ul><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:fundamentals" data-active-path="false"><details><summary><span>Fundamentals</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:tokens-context" data-active-path="false"><a href="/en/notes/tokens-context/"><span>Tokens &amp; Context</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:inference" data-active-path="false"><a href="/en/notes/inference/"><span>Inference</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:reasoning" data-active-path="false"><a href="/en/notes/reasoning/"><span>Reasoning</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:context-engineering" data-active-path="false"><a href="/en/notes/context-engineering/"><span>Context Engineering</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:agents" data-active-path="false"><details><summary><span>Agents</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:agent-loop" data-active-path="false"><a href="/en/notes/agent-loop/"><span>Agent Loop</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:agent-harness" data-active-path="false"><a href="/en/notes/agent-harness/"><span>Agent Harness</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:tool-use" data-active-path="false"><a href="/en/notes/tool-use/"><span>Tool Use</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:subagents" data-active-path="false"><a href="/en/notes/subagents/"><span>Subagents</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:security" data-active-path="true"><details open><summary><span>Security</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:prompt-injection" data-active-path="false"><a href="/en/notes/prompt-injection/"><span>Prompt Injection</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:agent-permissions" data-active-path="true"><a href="/en/notes/agent-permissions/" aria-current="page"><span>Agent Permissions</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:sandboxing-egress" data-active-path="false"><a href="/en/notes/sandboxing-egress/"><span>Sandboxing &amp; Egress</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:applied-ai" data-active-path="false"><details><summary><span>Applied AI</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:model-apis" data-active-path="false"><a href="/en/notes/model-apis/"><span>Model APIs</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:api-pricing" data-active-path="false"><a href="/en/notes/api-pricing/"><span>API Pricing</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:deployment-models" data-active-path="false"><a href="/en/notes/deployment-models/"><span>Deployment Models</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:local-inference" data-active-path="false"><a href="/en/notes/local-inference/"><span>Local Inference</span></a></li></ul></details></li></ul></details></li><li data-depth="0" data-node-type="category" data-tree-key="domain:offensive-security" data-active-path="false"><details open><summary><span class="tree-category-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2.75 19 5.4v5.45c0 4.65-2.8 8.15-7 10.4-4.2-2.25-7-5.75-7-10.4V5.4L12 2.75Z"></path><path d="m9 12 2 2 4-4"></path></svg></span><span>Offensive Security</span></summary><ul><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:shells" data-active-path="false"><details><summary><span>Shells</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:remote-access" data-active-path="false"><a href="/en/notes/remote-access/"><span>Remote Access</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:file-transfer" data-active-path="false"><details><summary><span>File Transfer</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:windows-file-transfers" data-active-path="false"><a href="/en/notes/windows-file-transfers/"><span>Windows File Transfers</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:linux-file-transfers" data-active-path="false"><a href="/en/notes/linux-file-transfers/"><span>Linux File Transfers</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:web-applications" data-active-path="false"><details><summary><span>Web Applications</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:php-web-testing" data-active-path="false"><a href="/en/notes/php-web-testing/"><span>PHP Web Testing</span></a></li></ul></details></li></ul></details></li></ul><script>
+  (() => {
+    if (globalThis.__dfulNotesTreeState) return;
+    globalThis.__dfulNotesTreeState = true;
+    const storagePrefix = 'dful-notes-tree:v1:';
+    let syncing = false;
+    const ignoredToggles = new WeakSet();
+
+    const trees = () => [...document.querySelectorAll('[data-notes-tree]')];
+    const details = () => trees().flatMap((tree) => [...tree.querySelectorAll('[data-tree-key] > details')]);
+    const keyFor = (detail) => detail.parentElement?.getAttribute('data-tree-key');
+    const activePath = (detail) => detail.parentElement?.getAttribute('data-active-path') === 'true';
+    const localeFor = () => document.querySelector('[data-notes-tree-locale]')?.getAttribute('data-notes-tree-locale') || 'en';
+    const storageKey = () => `${storagePrefix}${localeFor()}`;
+
+    const readState = () => {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(storageKey()) || '{}');
+        return parsed && typeof parsed === 'object' ? parsed : {};
+      } catch {
+        return {};
+      }
+    };
+
+    const writeState = (state) => {
+      try { localStorage.setItem(storageKey(), JSON.stringify(state)); } catch {}
+    };
+
+    const syncKey = (key, open) => {
+      syncing = true;
+      details().filter((detail) => keyFor(detail) === key).forEach((detail) => {
+        if (detail.open === open) return;
+        ignoredToggles.add(detail);
+        detail.open = open;
+      });
+      syncing = false;
+    };
+
+    const applyState = () => {
+      const state = readState();
+      syncing = true;
+      details().forEach((detail) => {
+        const key = keyFor(detail);
+        if (!key) return;
+        const item = detail.parentElement;
+        const defaultOpen = item?.getAttribute('data-depth') === '0';
+        detail.open = activePath(detail) || (typeof state[key] === 'boolean' ? state[key] : defaultOpen);
+      });
+      syncing = false;
+    };
+
+    const enhance = () => {
+      if (!trees().length) {
+        document.documentElement.removeAttribute('data-notes-tree-pending');
+        return;
+      }
+      try {
+        applyState();
+      } finally {
+        document.documentElement.removeAttribute('data-notes-tree-pending');
+      }
+      details().filter((detail) => !detail.hasAttribute('data-tree-state-bound')).forEach((detail) => {
+        detail.setAttribute('data-tree-state-bound', 'true');
+        detail.addEventListener('toggle', () => {
+          if (ignoredToggles.delete(detail)) return;
+          if (syncing) return;
+          const key = keyFor(detail);
+          if (!key) return;
+          if (activePath(detail) && !detail.open) {
+            const state = readState();
+            state[key] = false;
+            writeState(state);
+            syncKey(key, true);
+            return;
+          }
+          const state = readState();
+          state[key] = detail.open;
+          writeState(state);
+          syncKey(key, detail.open);
+        });
+      });
+    };
+
+    document.addEventListener('astro:page-load', enhance);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', enhance, { once:true });
+    else enhance();
+  })();
+</script></aside><div class="notes-detail-shell"><article class="notes-article"><div class="notes-mobile-nav"><details><summary>Knowledge tree</summary><div><script>
+  (() => { document.documentElement.setAttribute('data-notes-tree-pending', 'true'); })();
+</script><ul class="knowledge-tree" data-notes-tree data-notes-tree-locale="en"><li data-depth="0" data-node-type="category" data-tree-key="domain:ai" data-active-path="true"><details open><summary><span class="tree-category-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="2.5"></circle><circle cx="5" cy="6" r="1.75"></circle><circle cx="19" cy="6" r="1.75"></circle><circle cx="12" cy="20" r="1.75"></circle><path d="m10.2 10.4-3.8-3.2m7.4 3.2 3.8-3.2M12 14.5v3.75"></path></svg></span><span>AI</span></summary><ul><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:fundamentals" data-active-path="false"><details><summary><span>Fundamentals</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:tokens-context" data-active-path="false"><a href="/en/notes/tokens-context/"><span>Tokens &amp; Context</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:inference" data-active-path="false"><a href="/en/notes/inference/"><span>Inference</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:reasoning" data-active-path="false"><a href="/en/notes/reasoning/"><span>Reasoning</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:context-engineering" data-active-path="false"><a href="/en/notes/context-engineering/"><span>Context Engineering</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:agents" data-active-path="false"><details><summary><span>Agents</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:agent-loop" data-active-path="false"><a href="/en/notes/agent-loop/"><span>Agent Loop</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:agent-harness" data-active-path="false"><a href="/en/notes/agent-harness/"><span>Agent Harness</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:tool-use" data-active-path="false"><a href="/en/notes/tool-use/"><span>Tool Use</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:subagents" data-active-path="false"><a href="/en/notes/subagents/"><span>Subagents</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:security" data-active-path="true"><details open><summary><span>Security</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:prompt-injection" data-active-path="false"><a href="/en/notes/prompt-injection/"><span>Prompt Injection</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:agent-permissions" data-active-path="true"><a href="/en/notes/agent-permissions/" aria-current="page"><span>Agent Permissions</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:sandboxing-egress" data-active-path="false"><a href="/en/notes/sandboxing-egress/"><span>Sandboxing &amp; Egress</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:ai:applied-ai" data-active-path="false"><details><summary><span>Applied AI</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:model-apis" data-active-path="false"><a href="/en/notes/model-apis/"><span>Model APIs</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:api-pricing" data-active-path="false"><a href="/en/notes/api-pricing/"><span>API Pricing</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:deployment-models" data-active-path="false"><a href="/en/notes/deployment-models/"><span>Deployment Models</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:local-inference" data-active-path="false"><a href="/en/notes/local-inference/"><span>Local Inference</span></a></li></ul></details></li></ul></details></li><li data-depth="0" data-node-type="category" data-tree-key="domain:offensive-security" data-active-path="false"><details open><summary><span class="tree-category-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2.75 19 5.4v5.45c0 4.65-2.8 8.15-7 10.4-4.2-2.25-7-5.75-7-10.4V5.4L12 2.75Z"></path><path d="m9 12 2 2 4-4"></path></svg></span><span>Offensive Security</span></summary><ul><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:shells" data-active-path="false"><details><summary><span>Shells</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:remote-access" data-active-path="false"><a href="/en/notes/remote-access/"><span>Remote Access</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:file-transfer" data-active-path="false"><details><summary><span>File Transfer</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:windows-file-transfers" data-active-path="false"><a href="/en/notes/windows-file-transfers/"><span>Windows File Transfers</span></a></li><li data-depth="2" data-node-type="note" data-tree-key="note:linux-file-transfers" data-active-path="false"><a href="/en/notes/linux-file-transfers/"><span>Linux File Transfers</span></a></li></ul></details></li><li data-depth="1" data-node-type="category" data-tree-key="category:domain:offensive-security:web-applications" data-active-path="false"><details><summary><span>Web Applications</span></summary><ul><li data-depth="2" data-node-type="note" data-tree-key="note:php-web-testing" data-active-path="false"><a href="/en/notes/php-web-testing/"><span>PHP Web Testing</span></a></li></ul></details></li></ul></details></li></ul><script>
+  (() => {
+    if (globalThis.__dfulNotesTreeState) return;
+    globalThis.__dfulNotesTreeState = true;
+    const storagePrefix = 'dful-notes-tree:v1:';
+    let syncing = false;
+    const ignoredToggles = new WeakSet();
+
+    const trees = () => [...document.querySelectorAll('[data-notes-tree]')];
+    const details = () => trees().flatMap((tree) => [...tree.querySelectorAll('[data-tree-key] > details')]);
+    const keyFor = (detail) => detail.parentElement?.getAttribute('data-tree-key');
+    const activePath = (detail) => detail.parentElement?.getAttribute('data-active-path') === 'true';
+    const localeFor = () => document.querySelector('[data-notes-tree-locale]')?.getAttribute('data-notes-tree-locale') || 'en';
+    const storageKey = () => `${storagePrefix}${localeFor()}`;
+
+    const readState = () => {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(storageKey()) || '{}');
+        return parsed && typeof parsed === 'object' ? parsed : {};
+      } catch {
+        return {};
+      }
+    };
+
+    const writeState = (state) => {
+      try { localStorage.setItem(storageKey(), JSON.stringify(state)); } catch {}
+    };
+
+    const syncKey = (key, open) => {
+      syncing = true;
+      details().filter((detail) => keyFor(detail) === key).forEach((detail) => {
+        if (detail.open === open) return;
+        ignoredToggles.add(detail);
+        detail.open = open;
+      });
+      syncing = false;
+    };
+
+    const applyState = () => {
+      const state = readState();
+      syncing = true;
+      details().forEach((detail) => {
+        const key = keyFor(detail);
+        if (!key) return;
+        const item = detail.parentElement;
+        const defaultOpen = item?.getAttribute('data-depth') === '0';
+        detail.open = activePath(detail) || (typeof state[key] === 'boolean' ? state[key] : defaultOpen);
+      });
+      syncing = false;
+    };
+
+    const enhance = () => {
+      if (!trees().length) {
+        document.documentElement.removeAttribute('data-notes-tree-pending');
+        return;
+      }
+      try {
+        applyState();
+      } finally {
+        document.documentElement.removeAttribute('data-notes-tree-pending');
+      }
+      details().filter((detail) => !detail.hasAttribute('data-tree-state-bound')).forEach((detail) => {
+        detail.setAttribute('data-tree-state-bound', 'true');
+        detail.addEventListener('toggle', () => {
+          if (ignoredToggles.delete(detail)) return;
+          if (syncing) return;
+          const key = keyFor(detail);
+          if (!key) return;
+          if (activePath(detail) && !detail.open) {
+            const state = readState();
+            state[key] = false;
+            writeState(state);
+            syncKey(key, true);
+            return;
+          }
+          const state = readState();
+          state[key] = detail.open;
+          writeState(state);
+          syncKey(key, detail.open);
+        });
+      });
+    };
+
+    document.addEventListener('astro:page-load', enhance);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', enhance, { once:true });
+    else enhance();
+  })();
+</script></div></details><details><summary>On this page</summary><div><ul><li data-depth="2"><a href="#capability-and-authority">Capability and authority</a></li><li data-depth="2"><a href="#permission-gates">Permission gates</a></li><li data-depth="3"><a href="#approval">Approval</a></li><li data-depth="2"><a href="#effective-capability">Effective capability</a></li><li data-depth="2"><a href="#delegated-identity">Delegated identity</a></li><li data-depth="2"><a href="#example-email-agent">Example: email agent</a></li><li data-depth="2"><a href="#least-privilege-and-blast-radius">Least privilege and blast radius</a></li><li data-depth="2"><a href="#permission-boundary-and-execution-boundary">Permission boundary and execution boundary</a></li><li data-depth="2"><a href="#references">References</a></li></ul></div></details></div><header class="notes-header"><div class="notes-header-pretitle"><nav class="notes-breadcrumb" aria-label="Breadcrumb"><span>AI</span><i aria-hidden="true">/</i><span>Security</span></nav></div><h1>Agent Permissions</h1><div class="notes-deck">How an agent&#39;s requested actions become real effects, under which identity, and with what authority.</div><small>Updated 1 Sept 2026</small></header><div class="publishing-prose"><p>An agent can decide that it needs to read a file, send an email, or run a command. That decision should not grant it authority to do so by itself.</p>
+<p><strong>Permissions</strong> are the controls that determine which actions can move from a model decision to a real operation. They can apply to a specific tool, require approval, constrain which identity or credential is used, or cause the system to reject an operation even when the model requests it correctly.</p>
+<p>This introduces an important separation: <strong>capability and authority are not the same thing</strong>. The model being able to express an action does not mean it is authorized to produce its effect.</p>
+<h2 id="capability-and-authority">Capability and authority</h2>
+<p>A tool expands the actions the model can request. The <a href="/en/notes/agent-harness/"><strong>Agent Harness</strong></a> exposes that capability to the model and turns an accepted <a href="/en/notes/tool-use/"><strong>tool call</strong></a> into a real operation.</p>
+<p>A permission boundary can exist between those steps.</p>
+<p>For example, an agent may know about a <code>send_email</code> tool. The model can produce a valid call with a recipient, subject, and body, while the harness can still:</p>
+<ul>
+<li>Allow it directly.</li>
+<li>Request approval.</li>
+<li>Deny it.</li>
+<li>Execute it under an identity that lacks permission to send.</li>
+<li>Apply an additional policy to the recipient or operation.</li>
+</ul>
+<p>Looking only at the available tools therefore does not describe the agent’s real authority.</p>
+<p>From a security perspective, the complete path matters:</p>
+<p><strong>requested action → permission control → executing identity → reachable resource → effect</strong></p>
+<p>A <a href="/en/notes/prompt-injection/"><strong>prompt injection</strong></a> can alter the model’s decision. Permissions determine what that decision can achieve afterwards.</p>
+<h2 id="permission-gates">Permission gates</h2>
+<p>Agentic systems can place controls in front of particular actions.</p>
+<p>A configuration may allow low-impact operations automatically while stopping others for approval. It may also disable a tool entirely or apply rules to particular uses of it.</p>
+<p>The terminology depends on the harness. Some products expose policies equivalent to <code>allow</code>, <code>ask</code>, and <code>deny</code>; others combine execution modes, administrative configuration, and per-action approvals. The principle is the same: <strong>the model requests an action and an external component decides whether it can run</strong>.</p>
+<p>That control is deterministic with respect to the rule being enforced. An instruction inside the prompt may convince the model to request a different operation, but it does not by itself change a <code>deny</code> rule enforced by the harness.</p>
+<h3 id="approval">Approval</h3>
+<p>Human approval adds another decision before the effect.</p>
+<p>If an action requires confirmation, the agent can explain that it needs to send a message or modify a resource and wait for a person to allow it. This is useful when intent cannot be decided from a static policy alone.</p>
+<p>But <strong>approval is not the same as least privilege</strong>.</p>
+<p>Approving an operation once does not necessarily reduce the authority of the credential behind it, and an interface that asks for confirmation continuously can turn approvals into a routine click. Approval works best as a gate for decisions where human context matters, rather than as the only boundary in front of an excessively powerful capability.</p>
+<h2 id="effective-capability">Effective capability</h2>
+<p>Permissions need to be analyzed according to the <strong>effect the agent can produce</strong>, not only the name of each tool.</p>
+<p>Suppose an agent has:</p>
+<ul>
+<li><code>delete_file</code>.</li>
+<li><code>bash</code>.</li>
+</ul>
+<p>The policy denies <code>delete_file</code>.</p>
+<p>That prevents the agent from using that particular path. It does not necessarily prevent the file from being deleted: <code>bash</code> can run <code>rm</code>.</p>
+<p>The same pattern appears with other capabilities. Blocking a dedicated web-access tool does not remove web access if a shell can run <code>curl</code> or <code>wget</code> and the runtime still has network connectivity. Restricting a specific Git operation does not necessarily prevent the same effect if Bash, the <code>git</code> binary, and suitable credentials remain available.</p>
+<p>Therefore:</p>
+<p><strong>denied tool ≠ denied capability</strong></p>
+<p>A permission boundary is effective when it covers all relevant paths to the effect it is intended to control.</p>
+<figure class="pub-figure pub-breakout-wide pub-diagram"><div class="technical-visual-frame technical-visual-frame--hierarchy"><svg class="technical-visual technical-visual--desktop" viewBox="0 0 1200 500" role="img" aria-labelledby="tv-agent-permissions-en-desktop-title tv-agent-permissions-en-desktop-desc" preserveAspectRatio="xMidYMid meet">
+    <title id="tv-agent-permissions-en-desktop-title">Denied tool, reachable capability</title>
+    <desc id="tv-agent-permissions-en-desktop-desc">The delete_file route is denied and stops before the target. A separate route through bash and rm remains available and reaches the same target file.</desc>
+    <defs>
+    <marker id="tv-agent-permissions-en-desktop-arrow-primary" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="10" markerHeight="10" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-primary" d="M0 0L10 5L0 10Z"></path></marker>
+    <marker id="tv-agent-permissions-en-desktop-arrow-secondary" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="9" markerHeight="9" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-secondary" d="M0 0L10 5L0 10Z"></path></marker>
+    <marker id="tv-agent-permissions-en-desktop-arrow-attempted" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="9" markerHeight="9" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-attempted" d="M0 0L10 5L0 10Z"></path></marker>
+  </defs>
+    <g class="tv-node tv-node--neutral">
+    <rect class="tv-node-surface" x="62" y="80" width="238" height="104" rx="12"></rect>
+    <path class="tv-node-keyline" d="M74 81.5H288"></path>
+    <text class="tv-node-title" x="80" y="111">delete_file</text>
+    
+  </g>
+    <g class="tv-node tv-node--guard">
+    <rect class="tv-node-surface" x="392" y="80" width="238" height="104" rx="12"></rect>
+    <path class="tv-node-keyline" d="M404 81.5H618"></path>
+    <text class="tv-node-title" x="410" y="111">Permission denial</text>
+    
+  </g>
+    <g class="tv-node tv-node--neutral">
+    <rect class="tv-node-surface" x="62" y="316" width="238" height="104" rx="12"></rect>
+    <path class="tv-node-keyline" d="M74 317.5H288"></path>
+    <text class="tv-node-title" x="80" y="347">bash</text>
+    
+  </g>
+    <g class="tv-node tv-node--neutral">
+    <rect class="tv-node-surface" x="392" y="316" width="238" height="104" rx="12"></rect>
+    <path class="tv-node-keyline" d="M404 317.5H618"></path>
+    <text class="tv-node-title" x="410" y="347">rm</text>
+    
+  </g>
+    <g class="tv-node tv-node--state">
+    <rect class="tv-node-surface" x="900" y="198" width="246" height="112" rx="12"></rect>
+    <path class="tv-node-keyline" d="M912 199.5H1134"></path>
+    <text class="tv-node-title" x="918" y="229">Target file</text>
+    <text class="tv-node-detail" x="918" y="252">Same final effect</text>
+  </g>
+    <path class="tv-edge tv-edge--secondary" d="M300 132H380" marker-end="url(#tv-agent-permissions-en-desktop-arrow-secondary)"></path><path class="tv-edge tv-edge--attempted" d="M630 132H744"></path><g class="tv-blocked-stop">
+    <circle cx="758" cy="132" r="10"></circle>
+    <path d="M754 128L762 136M762 128L754 136"></path>
+    <text x="758" y="114" text-anchor="middle">DENY</text>
+  </g>
+    <path class="tv-edge tv-edge--primary" d="M300 368H380" marker-end="url(#tv-agent-permissions-en-desktop-arrow-primary)"></path><path class="tv-edge tv-edge--primary" d="M630 368H812V254H888" marker-end="url(#tv-agent-permissions-en-desktop-arrow-primary)"></path>
+  </svg><svg class="technical-visual technical-visual--mobile" viewBox="0 0 520 620" role="img" aria-labelledby="tv-agent-permissions-en-mobile-title tv-agent-permissions-en-mobile-desc" preserveAspectRatio="xMidYMid meet">
+    <title id="tv-agent-permissions-en-mobile-title">Denied tool, reachable capability</title>
+    <desc id="tv-agent-permissions-en-mobile-desc">The delete_file route is denied and stops before the target. A separate route through bash and rm remains available and reaches the same target file.</desc>
+    <defs>
+    <marker id="tv-agent-permissions-en-mobile-arrow-primary" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="10" markerHeight="10" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-primary" d="M0 0L10 5L0 10Z"></path></marker>
+    <marker id="tv-agent-permissions-en-mobile-arrow-secondary" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="9" markerHeight="9" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-secondary" d="M0 0L10 5L0 10Z"></path></marker>
+    <marker id="tv-agent-permissions-en-mobile-arrow-attempted" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="9" markerHeight="9" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-attempted" d="M0 0L10 5L0 10Z"></path></marker>
+  </defs>
+    <g class="tv-node tv-node--neutral">
+    <rect class="tv-node-surface" x="34" y="34" width="210" height="92" rx="12"></rect>
+    <path class="tv-node-keyline" d="M46 35.5H232"></path>
+    <text class="tv-node-title" x="52" y="65">delete_file</text>
+    
+  </g>
+    <g class="tv-node tv-node--neutral">
+    <rect class="tv-node-surface" x="276" y="34" width="210" height="92" rx="12"></rect>
+    <path class="tv-node-keyline" d="M288 35.5H474"></path>
+    <text class="tv-node-title" x="294" y="65">bash</text>
+    
+  </g>
+    <g class="tv-node tv-node--guard">
+    <rect class="tv-node-surface" x="34" y="184" width="210" height="92" rx="12"></rect>
+    <path class="tv-node-keyline" d="M46 185.5H232"></path>
+    <text class="tv-node-title" x="52" y="215">Permission denial</text>
+    
+  </g>
+    <g class="tv-node tv-node--neutral">
+    <rect class="tv-node-surface" x="276" y="184" width="210" height="92" rx="12"></rect>
+    <path class="tv-node-keyline" d="M288 185.5H474"></path>
+    <text class="tv-node-title" x="294" y="215">rm</text>
+    
+  </g>
+    <g class="tv-node tv-node--state">
+    <rect class="tv-node-surface" x="86" y="448" width="348" height="104" rx="12"></rect>
+    <path class="tv-node-keyline" d="M98 449.5H422"></path>
+    <text class="tv-node-title" x="104" y="479">Target file</text>
+    <text class="tv-node-detail" x="104" y="502">Same final effect</text>
+  </g>
+    <path class="tv-edge tv-edge--secondary" d="M139 126V172" marker-end="url(#tv-agent-permissions-en-mobile-arrow-secondary)"></path><path class="tv-edge tv-edge--attempted" d="M139 276V350H230"></path><g class="tv-blocked-stop">
+    <circle cx="244" cy="350" r="10"></circle>
+    <path d="M240 346L248 354M248 346L240 354"></path>
+    <text x="244" y="332" text-anchor="middle">DENY</text>
+  </g>
+    <path class="tv-edge tv-edge--primary" d="M381 126V172" marker-end="url(#tv-agent-permissions-en-mobile-arrow-primary)"></path><path class="tv-edge tv-edge--primary" d="M381 276V350H260V436" marker-end="url(#tv-agent-permissions-en-mobile-arrow-primary)"></path>
+  </svg></div><figcaption>Figure 1. Denying one tool removes that route, but the capability remains if another available interface can produce the same effect.</figcaption></figure>
+<p>This makes generic tools particularly important. A narrowly scoped tool usually exposes a limited set of effects. A shell, an authenticated browser, or a generic HTTP client can represent many different capabilities behind one interface.</p>
+<p>From a pentesting perspective, the useful inventory is the set of effects reachable through any available path. The list of allowed tools is only part of it.</p>
+<h2 id="delegated-identity">Delegated identity</h2>
+<p>Many agent actions execute <strong>on behalf of another identity</strong>.</p>
+<p>An agent working with GitHub, Gmail, Slack, or an MCP server may use a credential associated with a user, service account, or application. That identity has its own permissions in the target system.</p>
+<p>The model does not automatically receive all authority that the service supports. It receives the authority it can exercise through the credentials and operations the system has delegated to it.</p>
+<p>For example, a token that only allows reading email can make a <code>send_email</code> call fail even if the tool exists and the permission control allows it. With a credential that also permits sending, the same model decision can produce an external effect.</p>
+<p>Scopes are a common way to express part of that authority. In OAuth-based systems, including MCP over HTTP, the server can validate which identity presented the token and which scopes it carries before allowing an operation.</p>
+<p>Effective authority can be viewed as:</p>
+<p><strong>available tool → allowed execution → presented credential → resource permissions</strong></p>
+<p>If any layer rejects the operation, that path does not reach the effect.</p>
+<p>The opposite can also happen: an excessively powerful credential can greatly increase the impact of a bad decision even when the original task needed only a small subset of its permissions.</p>
+<h2 id="example-email-agent">Example: email agent</h2>
+<p>Suppose an agent receives this task:</p>
+<blockquote>
+<p>Summarize the pending emails that require my attention.</p>
+</blockquote>
+<p>It has two capabilities for doing so:</p>
+<ul>
+<li>Read email.</li>
+<li>Send email.</li>
+</ul>
+<p>One retrieved message contains an indirect prompt injection that tries to convince the agent to forward information from other messages to an attacker-controlled address.</p>
+<p>The <a href="/en/notes/prompt-injection/"><strong>prompt injection</strong></a> occurs when that untrusted content causes the model to request an action outside the user’s intent. Permissions then determine whether the request can execute.</p>
+<p>If <code>send_email</code> is disabled, the manipulated decision cannot use that tool. If sending requires approval, the operation stops before execution and the user can reject it. If the credential is read-only, the email service should also reject the send.</p>
+<p>If, however, the agent is automatically allowed to send messages and operates under an identity that can do so, the same manipulated decision has a path to an external effect.</p>
+<p>The complete chain is:</p>
+<p><strong>attacker-controlled email → manipulated decision → send request → permission control → delegated identity → external email</strong></p>
+<p>The attack does not fundamentally change because the model uses a different tool or API. What matters is whether an authorized path exists from the decision to the effect.</p>
+<p>This scenario also shows why blocking only <code>send_email</code> may not be sufficient in a broader architecture. If the agent retains an authenticated browser, a shell with access to an email API, or any equivalent capability, those routes need to be checked for the same outcome.</p>
+<h2 id="least-privilege-and-blast-radius">Least privilege and blast radius</h2>
+<p>The authority granted to an agent should start from the task it needs to perform.</p>
+<p>If an agent only has to summarize email, it needs to read messages. The ability to send them, delete them, or modify mailbox rules expands its authority without being required for that task.</p>
+<p>The difference can be expressed simply:</p>
+<p><strong>required authority &#x3C; granted authority → unnecessary blast radius</strong></p>
+<p>This matters even when the model behaves correctly most of the time. A prompt injection, a reasoning error, or an ambiguous instruction can only produce effects through the capabilities the system places within reach.</p>
+<p>Least privilege does not remove those failures. <strong>It reduces what they can achieve.</strong></p>
+<p>The same principle applies to identity granularity. A credential restricted to one repository exposes a different surface from one with write access across an organization. A read-only email token has a different blast radius from a complete user session.</p>
+<p>When evaluating an agent, it is useful to compare:</p>
+<ol>
+<li>What the task requires.</li>
+<li>Which actions the agent can request.</li>
+<li>Which alternate paths can produce the same effect.</li>
+<li>What authority the identities behind those paths actually have.</li>
+</ol>
+<p>The difference between the first and fourth points describes much of the unnecessary blast radius.</p>
+<h2 id="permission-boundary-and-execution-boundary">Permission boundary and execution boundary</h2>
+<p>Permissions do not fully describe what can happen after an action starts running.</p>
+<p>A harness may authorize <code>bash</code> to run <code>npm test</code>. That decision answers <strong>whether the command may start</strong>.</p>
+<p>Once started, the process may be able to access other files, environment variables, processes, or network connections depending on the environment in which it runs. Those capabilities belong to another boundary.</p>
+<p>Approval and sandboxing often appear together in real systems, but they answer different questions:</p>
+<p><strong>Permission boundary:</strong> may this action start?</p>
+<p><strong>Execution boundary:</strong> once it starts, what can its execution actually reach?</p>
+<p><a href="/en/notes/sandboxing-egress/"><strong>Sandboxing &#x26; Egress</strong></a> covers that second boundary: what execution can reach and how it can communicate outside the environment.</p>
+<h2 id="references">References</h2>
+<ul>
+<li><a href="https://platform.claude.com/docs/en/managed-agents/permission-policies">Anthropic — Permission policies</a></li>
+<li><a href="https://code.claude.com/docs/en/permissions">Anthropic — Configure permissions</a></li>
+<li><a href="https://www.anthropic.com/engineering/how-we-contain-claude">Anthropic — How we contain Claude across products</a></li>
+<li><a href="https://openai.com/index/running-codex-safely/">OpenAI — Running Codex safely</a></li>
+<li><a href="https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization">Model Context Protocol — Authorization</a></li>
+</ul></div><nav class="notes-related" aria-label="Related notes"><strong>Related notes</strong><ul><li><a href="/en/notes/prompt-injection/"><span>AI / Security</span>Prompt Injection</a></li><li><a href="/en/notes/agent-harness/"><span>AI / Agents</span>Agent Harness</a></li><li><a href="/en/notes/sandboxing-egress/"><span>AI / Security</span>Sandboxing &amp; Egress</a></li><li><a href="/en/notes/tool-use/"><span>AI / Agents</span>Tool Use</a></li></ul></nav></article><aside class="notes-toc" aria-label="On this page"><strong>On this page</strong><ul><li data-depth="2"><a href="#capability-and-authority">Capability and authority</a></li><li data-depth="2"><a href="#permission-gates">Permission gates</a></li><li data-depth="3"><a href="#approval">Approval</a></li><li data-depth="2"><a href="#effective-capability">Effective capability</a></li><li data-depth="2"><a href="#delegated-identity">Delegated identity</a></li><li data-depth="2"><a href="#example-email-agent">Example: email agent</a></li><li data-depth="2"><a href="#least-privilege-and-blast-radius">Least privilege and blast radius</a></li><li data-depth="2"><a href="#permission-boundary-and-execution-boundary">Permission boundary and execution boundary</a></li><li data-depth="2"><a href="#references">References</a></li></ul></aside></div></div></div><script>
+    (() => {
+      const root = document.querySelector('.notes-page');
+      if (!root) return;
+      const tocLinks = [...root.querySelectorAll('.notes-toc a')];
+      const targets = tocLinks.map((link) => document.getElementById(decodeURIComponent(link.hash.slice(1)))).filter(Boolean);
+      const markCurrent = (link, active) => active ? link.setAttribute('aria-current', 'location') : link.removeAttribute('aria-current');
+      tocLinks.forEach((selected) => selected.addEventListener('click', () => tocLinks.forEach((link) => markCurrent(link, link === selected))));
+      if (targets.length) {
+        const updateActiveHeading = () => {
+          const active = targets.reduce((current, target) => target.getBoundingClientRect().top <= 150 ? target : current, targets[0]);
+          tocLinks.forEach((link) => markCurrent(link, link.hash === `#${active.id}`));
+        };
+        updateActiveHeading();
+        window.addEventListener('scroll', updateActiveHeading, { passive:true });
+      }
+    })();
+  </script></main><footer class="site-footer"><div class="footer-inner"><a class="footer-wordmark" href="/en/">dful<span>.</span></a><span>Offensive Security · AI Security · Agentic Systems</span></div></footer><script>
+  (() => {
+    const init = () => {
+      const figures = [...document.querySelectorAll('.publishing-prose .pub-figure[data-preview="true"]')];
+      if (!figures.length) return;
+
+      const spanish = document.documentElement.lang === 'es';
+      const labels = spanish
+        ? {
+            open: 'Abrir vista ampliada',
+            close: 'Cerrar vista previa',
+            zoom: 'Zoom de imagen',
+            fit: 'Ajustar',
+            actual: 'Tamaño real',
+          }
+        : {
+            open: 'Open enlarged preview',
+            close: 'Close preview',
+            zoom: 'Image zoom',
+            fit: 'Fit',
+            actual: 'Actual size',
+          };
+
+      let dialog = document.querySelector('dialog[data-figure-preview]');
+      if (!(dialog instanceof HTMLDialogElement)) {
+        dialog = document.createElement('dialog');
+        dialog.className = 'figure-preview-dialog';
+        dialog.setAttribute('data-figure-preview', 'true');
+        dialog.dataset.mode = 'fit';
+
+        const toolbar = document.createElement('div');
+        toolbar.className = 'figure-preview-toolbar';
+
+        const modeGroup = document.createElement('div');
+        modeGroup.className = 'figure-preview-modes';
+        modeGroup.setAttribute('role', 'group');
+        modeGroup.setAttribute('aria-label', labels.zoom);
+
+        const fit = document.createElement('button');
+        fit.type = 'button';
+        fit.className = 'figure-preview-mode';
+        fit.setAttribute('data-figure-preview-fit', 'true');
+        fit.setAttribute('aria-pressed', 'true');
+        fit.textContent = labels.fit;
+
+        const actual = document.createElement('button');
+        actual.type = 'button';
+        actual.className = 'figure-preview-mode';
+        actual.setAttribute('data-figure-preview-actual', 'true');
+        actual.setAttribute('aria-pressed', 'false');
+        actual.setAttribute('title', labels.actual);
+        actual.textContent = '1:1';
+
+        const close = document.createElement('button');
+        close.type = 'button';
+        close.className = 'figure-preview-close';
+        close.setAttribute('data-figure-preview-close', 'true');
+        close.setAttribute('aria-label', labels.close);
+        close.textContent = '×';
+
+        const viewport = document.createElement('div');
+        viewport.className = 'figure-preview-viewport';
+        viewport.setAttribute('data-figure-preview-viewport', 'true');
+
+        const image = document.createElement('img');
+        image.className = 'figure-preview-image';
+        viewport.appendChild(image);
+
+        const caption = document.createElement('p');
+        caption.className = 'figure-preview-caption';
+        caption.id = 'figure-preview-caption';
+
+        modeGroup.append(fit, actual);
+        toolbar.append(modeGroup, close);
+        dialog.append(toolbar, viewport, caption);
+        document.body.appendChild(dialog);
+
+        const setMode = (mode) => {
+          const native = mode === 'native';
+          dialog.dataset.mode = native ? 'native' : 'fit';
+          fit.setAttribute('aria-pressed', native ? 'false' : 'true');
+          actual.setAttribute('aria-pressed', native ? 'true' : 'false');
+          if (!native) viewport.scrollTo({ top: 0, left: 0 });
+        };
+
+        fit.addEventListener('click', () => setMode('fit'));
+        actual.addEventListener('click', () => setMode('native'));
+        close.addEventListener('click', () => dialog.close());
+        dialog.addEventListener('click', (event) => {
+          if (event.target !== dialog) return;
+          const rect = dialog.getBoundingClientRect();
+          const outside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom;
+          if (outside) dialog.close();
+        });
+        dialog.addEventListener('close', () => {
+          setMode('fit');
+          const trigger = dialog.dataset.lastTrigger;
+          const source = trigger ? document.querySelector(`[data-preview-trigger="${trigger}"]`) : null;
+          if (source instanceof HTMLButtonElement) source.focus();
+          delete dialog.dataset.lastTrigger;
+        });
+      }
+
+      const close = dialog.querySelector('[data-figure-preview-close]');
+      const fit = dialog.querySelector('[data-figure-preview-fit]');
+      const actual = dialog.querySelector('[data-figure-preview-actual]');
+      const previewImage = dialog.querySelector('.figure-preview-image');
+      const viewport = dialog.querySelector('[data-figure-preview-viewport]');
+      const caption = dialog.querySelector('.figure-preview-caption');
+      if (!(close instanceof HTMLButtonElement) || !(fit instanceof HTMLButtonElement) || !(actual instanceof HTMLButtonElement) || !(previewImage instanceof HTMLImageElement) || !(viewport instanceof HTMLDivElement) || !(caption instanceof HTMLParagraphElement)) return;
+
+      const largestSource = (image) => {
+        const candidates = (image.srcset || '')
+          .split(',')
+          .map((candidate) => candidate.trim())
+          .filter(Boolean)
+          .map((candidate) => {
+            const parts = candidate.split(/\s+/);
+            const descriptor = parts.length > 1 ? parts.pop() : '';
+            const url = parts.join(' ') || candidate;
+            let score = 0;
+            if (descriptor.endsWith('w')) score = Number.parseFloat(descriptor);
+            else if (descriptor.endsWith('x')) score = Number.parseFloat(descriptor) * (image.naturalWidth || 1);
+            return { url, score: Number.isFinite(score) ? score : 0 };
+          })
+          .sort((a, b) => b.score - a.score);
+        return candidates[0]?.url || image.currentSrc || image.src;
+      };
+
+      figures.forEach((figure, index) => {
+        const image = figure.querySelector('img');
+        if (!(image instanceof HTMLImageElement) || figure.querySelector('[data-preview-trigger]')) return;
+
+        const trigger = document.createElement('button');
+        trigger.type = 'button';
+        trigger.className = 'figure-preview-trigger';
+        const triggerId = `figure-preview-trigger-${index + 1}`;
+        trigger.setAttribute('data-preview-trigger', triggerId);
+        const alt = image.alt || (spanish ? 'Imagen técnica' : 'Technical image');
+        trigger.setAttribute('aria-label', `${labels.open}: ${alt}`);
+        image.parentNode?.insertBefore(trigger, image);
+        trigger.appendChild(image);
+
+        trigger.addEventListener('click', () => {
+          previewImage.src = largestSource(image);
+          previewImage.alt = alt;
+          const figureCaption = figure.querySelector('figcaption')?.textContent?.trim() || alt;
+          caption.textContent = figureCaption;
+          dialog.setAttribute('aria-label', alt);
+          dialog.setAttribute('aria-describedby', caption.id);
+          dialog.dataset.lastTrigger = triggerId;
+          dialog.dataset.mode = 'fit';
+          fit.setAttribute('aria-pressed', 'true');
+          actual.setAttribute('aria-pressed', 'false');
+          viewport.scrollTo({ top: 0, left: 0 });
+
+          if (typeof dialog.showModal === 'function') {
+            dialog.showModal();
+            close.focus();
+          }
+        });
+      });
+    };
+
+    init();
+    document.addEventListener('astro:page-load', init);
+  })();
+</script><script type="module">var e=()=>{document.querySelectorAll(`.pub-tabs:not([data-enhanced])`).forEach((e,t)=>{e.setAttribute(`data-enhanced`,`true`);let n=[...e.querySelectorAll(`:scope > .pub-tab`)];if(!n.length)return;let r=document.createElement(`div`);r.className=`pub-tab-list`,r.setAttribute(`role`,`tablist`),n.forEach((e,i)=>{let a=`pub-tab-${t}-${i}`,o=`pub-tab-panel-${t}-${i}`,s=document.createElement(`button`);s.type=`button`,s.id=a,s.className=`pub-tab-button`,s.setAttribute(`role`,`tab`),s.setAttribute(`aria-controls`,o),s.setAttribute(`aria-selected`,i===0?`true`:`false`),s.tabIndex=i===0?0:-1,s.textContent=e.getAttribute(`data-tab-label`)||`Tab ${i+1}`,e.id=o,e.setAttribute(`role`,`tabpanel`),e.setAttribute(`aria-labelledby`,a),e.toggleAttribute(`hidden`,i!==0),s.addEventListener(`click`,()=>{[...r.querySelectorAll(`[role="tab"]`)].forEach(e=>{e.setAttribute(`aria-selected`,e===s?`true`:`false`),e.tabIndex=e===s?0:-1}),n.forEach(t=>t.toggleAttribute(`hidden`,t!==e)),s.focus()}),s.addEventListener(`keydown`,e=>{let t=[...r.querySelectorAll(`[role="tab"]`)],n=t.indexOf(s),i=n;if(e.key===`ArrowRight`)i=(n+1)%t.length;else if(e.key===`ArrowLeft`)i=(n-1+t.length)%t.length;else if(e.key===`Home`)i=0;else if(e.key===`End`)i=t.length-1;else return;e.preventDefault(),t[i].click()}),r.appendChild(s)}),e.prepend(r)})};e(),document.addEventListener(`astro:page-load`,e);</script><script type="module">var e=()=>{let e=document.documentElement.lang===`es`?{copy:`Copiar`,copied:`Copiado`}:{copy:`Copy`,copied:`Copied`};document.querySelectorAll(`pre`).forEach(t=>{if(t.closest(`.pub-filetree`)||t.parentElement?.classList.contains(`code-frame`))return;let n=document.createElement(`div`);n.className=`code-frame`,t.parentNode?.insertBefore(n,t),n.appendChild(t);let r=t.dataset.language??t.querySelector(`code`)?.className.match(/language-([\w-]+)/)?.[1];if(r){let e=document.createElement(`span`);e.className=`code-language`,e.textContent=r===`powershell`?`PowerShell`:r,n.appendChild(e)}let i=document.createElement(`button`);i.className=`copy-code`,i.type=`button`,i.textContent=e.copy,i.addEventListener(`click`,async()=>{try{await navigator.clipboard.writeText(t.textContent??``),i.textContent=e.copied,window.setTimeout(()=>{i.textContent=e.copy},1400)}catch{i.textContent=e.copy}}),n.appendChild(i)})};e(),document.addEventListener(`astro:page-load`,e);</script></body></html>

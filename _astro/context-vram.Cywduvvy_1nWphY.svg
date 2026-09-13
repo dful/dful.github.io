@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="650" viewBox="0 0 1440 650" role="img" aria-labelledby="t d">
+<title id="t">Cómo el contexto presiona la VRAM</title>
+<desc id="d">Al crecer la ventana de contexto crece la KV cache, queda menos margen de VRAM para los pesos y el runtime, y puede reducirse el full GPU offload.</desc>
+<defs><marker id="a" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#ff8b3d"/></marker></defs>
+<rect width="1440" height="650" rx="24" fill="#111214"/>
+<text x="70" y="72" fill="#f0eee8" font-family="Inter,system-ui,sans-serif" font-size="34" font-weight="700">Contexto y presupuesto de VRAM</text>
+<text x="70" y="108" fill="#8d9199" font-family="Inter,system-ui,sans-serif" font-size="18">Más contexto aumenta la memoria ocupada por la KV cache</text>
+<rect x="70" y="170" width="370" height="310" rx="20" fill="#191b1f" stroke="#454b55" stroke-width="2"/>
+<text x="105" y="218" fill="#c8c6c0" font-family="Inter,system-ui,sans-serif" font-size="20" font-weight="700">16 GB VRAM</text>
+<rect x="105" y="250" width="300" height="70" rx="12" fill="#ff8b3d" opacity=".18"/><text x="125" y="293" fill="#f0eee8" font-family="Inter,system-ui,sans-serif" font-size="20">Model weights</text>
+<rect x="105" y="335" width="300" height="70" rx="12" fill="#7faee0" opacity=".16"/><text x="125" y="378" fill="#f0eee8" font-family="Inter,system-ui,sans-serif" font-size="20">KV cache</text>
+<rect x="105" y="420" width="300" height="38" rx="10" fill="#8d9199" opacity=".18"/><text x="125" y="445" fill="#c8c6c0" font-family="Inter,system-ui,sans-serif" font-size="16">Runtime / overhead</text>
+<line x1="465" y1="325" x2="635" y2="325" stroke="#ff8b3d" stroke-width="4" marker-end="url(#a)"/>
+<text x="550" y="300" text-anchor="middle" fill="#ff8b3d" font-family="Inter,system-ui,sans-serif" font-size="17" font-weight="700">context ↑</text>
+<rect x="660" y="205" width="300" height="240" rx="20" fill="#191b1f" stroke="#454b55" stroke-width="2"/>
+<text x="810" y="260" text-anchor="middle" fill="#7faee0" font-family="Inter,system-ui,sans-serif" font-size="24" font-weight="700">KV cache ↑</text>
+<text x="810" y="306" text-anchor="middle" fill="#c8c6c0" font-family="Inter,system-ui,sans-serif" font-size="18">Más tokens previos que</text>
+<text x="810" y="334" text-anchor="middle" fill="#c8c6c0" font-family="Inter,system-ui,sans-serif" font-size="18">mantener durante la inferencia.</text>
+<text x="810" y="392" text-anchor="middle" fill="#8d9199" font-family="Inter,system-ui,sans-serif" font-size="16">Q4_0 K/V redujo este coste</text>
+<line x1="985" y1="325" x2="1125" y2="325" stroke="#ff8b3d" stroke-width="4" marker-end="url(#a)"/>
+<rect x="1150" y="205" width="220" height="240" rx="20" fill="#191b1f" stroke="#454b55" stroke-width="2"/>
+<text x="1260" y="260" text-anchor="middle" fill="#f0eee8" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700">Menos margen</text>
+<text x="1260" y="294" text-anchor="middle" fill="#f0eee8" font-family="Inter,system-ui,sans-serif" font-size="22" font-weight="700">para el modelo</text>
+<text x="1260" y="356" text-anchor="middle" fill="#8d9199" font-family="Inter,system-ui,sans-serif" font-size="16">Si deja de caber,</text>
+<text x="1260" y="382" text-anchor="middle" fill="#8d9199" font-family="Inter,system-ui,sans-serif" font-size="16">parte vuelve a CPU/RAM.</text>
+<rect x="285" y="535" width="870" height="70" rx="14" fill="#202329" stroke="#2d3138"/>
+<text x="720" y="578" text-anchor="middle" fill="#c8c6c0" font-family="Inter,system-ui,sans-serif" font-size="19">Cuantizar K y V permitió conservar un contexto grande sin perder el full GPU offload.</text>
+</svg>
