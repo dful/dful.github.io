@@ -1,0 +1,734 @@
+<!DOCTYPE html><html lang="en" data-theme="dful-dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"><script>
+      (() => {
+        const storageKey = 'dful-theme';
+        const schemaKey = 'dful-theme-schema';
+        const schemaVersion = '2';
+        const legacyStorageKey = 'dful-theme-preview';
+        const valid = new Set(["dful-dark","amber-dark","dful-light","flexoki-paper","phosphor","arcade","cobalt"]);
+        const dark = new Set(["dful-dark","amber-dark","phosphor","arcade","cobalt"]);
+        const fallback = "dful-dark";
+        let theme = fallback;
+        try {
+          const needsMigration = localStorage.getItem(schemaKey) !== schemaVersion;
+          let stored = localStorage.getItem(storageKey);
+          if (needsMigration) {
+            if (stored === 'graphite') stored = 'dful-dark';
+            else if (stored === 'dful-dark') stored = 'amber-dark';
+            localStorage.setItem(schemaKey, schemaVersion);
+            if (stored) localStorage.setItem(storageKey, stored);
+          }
+          if (valid.has(stored)) theme = stored;
+          else {
+            let legacy = localStorage.getItem(legacyStorageKey);
+            if (needsMigration) {
+              if (legacy === 'graphite') legacy = 'dful-dark';
+              else if (legacy === 'dful-dark') legacy = 'amber-dark';
+            }
+            if (valid.has(legacy)) {
+              theme = legacy;
+              localStorage.setItem(storageKey, legacy);
+            }
+            if (legacy) localStorage.removeItem(legacyStorageKey);
+          }
+          localStorage.setItem(storageKey, theme);
+        } catch {}
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = dark.has(theme) ? 'dark' : 'light';
+      })();</script><meta name="description" content="Models, providers, APIs, subscriptions and harnesses can make getting started with agents look more complicated than it really is. This is the map I wish I had when I started experimenting with them."><link rel="canonical" href="https://dful.github.io/en/research/from-chatgpt-to-agents/"><link rel="alternate" hreflang="en" href="https://dful.github.io/en/research/from-chatgpt-to-agents/"><link rel="alternate" hreflang="es" href="https://dful.github.io/es/research/de-chatgpt-a-agentes/"><link rel="alternate" hreflang="x-default" href="https://dful.github.io/en/research/from-chatgpt-to-agents/"><meta property="og:url" content="https://dful.github.io/en/research/from-chatgpt-to-agents/"><meta property="og:type" content="article"><meta property="og:site_name" content="dful"><meta property="og:title" content="From ChatGPT to agents: what you need to understand to get started today · dful"><meta property="og:description" content="Models, providers, APIs, subscriptions and harnesses can make getting started with agents look more complicated than it really is. This is the map I wish I had when I started experimenting with them."><meta property="og:image" content="https://dful.github.io/social/en/research/from-chatgpt-to-agents.png"><meta property="og:image:type" content="image/png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="Social preview for the Research article “From ChatGPT to agents: what you need to understand to get started today”."><meta property="og:locale" content="en_GB"><meta property="og:locale:alternate" content="es_ES"><meta property="article:published_time" content="2026-10-06T00:00:00.000Z"><meta property="article:author" content="https://www.linkedin.com/in/daniel-fulladosa/"><meta property="article:section" content="AI · Agentic Systems"><meta property="article:tag" content="agents"><meta property="article:tag" content="llm"><meta property="article:tag" content="harness"><meta property="article:tag" content="apis"><meta property="article:tag" content="local-models"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="From ChatGPT to agents: what you need to understand to get started today · dful"><meta name="twitter:description" content="Models, providers, APIs, subscriptions and harnesses can make getting started with agents look more complicated than it really is. This is the map I wish I had when I started experimenting with them."><meta name="twitter:image" content="https://dful.github.io/social/en/research/from-chatgpt-to-agents.png"><meta name="twitter:image:alt" content="Social preview for the Research article “From ChatGPT to agents: what you need to understand to get started today”."><meta name="generator" content="Astro v7.3.2"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><title>From ChatGPT to agents: what you need to understand to get started today · dful</title><link rel="stylesheet" href="/_astro/research.CdZQXa2k.css"><link rel="stylesheet" href="/_astro/publishing.C5o61NTe.css"><link rel="stylesheet" href="/_astro/BaseLayout.D1RqTdBE.css"></head><body><a class="skip-link" href="#main">Skip to content</a><header class="site-header"><div class="header-inner"><a class="wordmark" href="/en/" aria-label="dful home">dful<span>.</span></a><nav class="primary-nav" aria-label="Primary"><a href="/en/" data-active="false">Home</a><a href="/en/notes/" data-active="false">Notes</a><a href="/en/research/" data-active="true" aria-current="page">Research</a><a href="/en/about/" data-active="false">About</a></nav><div class="header-actions"><details class="theme-picker" data-theme-picker data-astro-cid-hcqnpaxe><summary aria-label="Theme" data-astro-cid-hcqnpaxe><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.25a8.75 8.75 0 1 0 0 17.5h1.25a2.25 2.25 0 0 0 0-4.5h-.75a1.75 1.75 0 0 1 0-3.5h2.35A5.9 5.9 0 0 0 20.75 6.9C18.72 4.63 15.72 3.25 12 3.25Z"></path><circle cx="7.4" cy="10" r=".7" fill="currentColor" stroke="none"></circle><circle cx="9.25" cy="6.9" r=".7" fill="currentColor" stroke="none"></circle><circle cx="13" cy="6.2" r=".7" fill="currentColor" stroke="none"></circle><circle cx="16.25" cy="8" r=".7" fill="currentColor" stroke="none"></circle></svg><span class="theme-current" data-theme-current data-astro-cid-hcqnpaxe>Dful Dark</span></summary><div class="theme-menu" aria-label="Theme" data-astro-cid-hcqnpaxe><div class="theme-menu-head" data-astro-cid-hcqnpaxe>Theme</div><button type="button" aria-pressed="true" data-theme-option="dful-dark" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#111214" data-astro-cid-hcqnpaxe></i><i style="--swatch:#f0eee8" data-astro-cid-hcqnpaxe></i><i style="--swatch:#ff8b3d" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Dful Dark</span></button><button type="button" aria-pressed="false" data-theme-option="amber-dark" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#0c0c0b" data-astro-cid-hcqnpaxe></i><i style="--swatch:#f2efe7" data-astro-cid-hcqnpaxe></i><i style="--swatch:#ff9f2f" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Amber Dark</span></button><button type="button" aria-pressed="false" data-theme-option="dful-light" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#f7f3ea" data-astro-cid-hcqnpaxe></i><i style="--swatch:#171511" data-astro-cid-hcqnpaxe></i><i style="--swatch:#b94d08" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Dful Light</span></button><button type="button" aria-pressed="false" data-theme-option="flexoki-paper" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#fffcf0" data-astro-cid-hcqnpaxe></i><i style="--swatch:#100f0f" data-astro-cid-hcqnpaxe></i><i style="--swatch:#bc5215" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Flexoki Paper</span></button><button type="button" aria-pressed="false" data-theme-option="phosphor" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#030604" data-astro-cid-hcqnpaxe></i><i style="--swatch:#c8f7cf" data-astro-cid-hcqnpaxe></i><i style="--swatch:#48ff78" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Phosphor</span></button><button type="button" aria-pressed="false" data-theme-option="arcade" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#11102b" data-astro-cid-hcqnpaxe></i><i style="--swatch:#fff4d7" data-astro-cid-hcqnpaxe></i><i style="--swatch:#4de9ff" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Arcade</span></button><button type="button" aria-pressed="false" data-theme-option="cobalt" data-astro-cid-hcqnpaxe><span class="theme-swatches" aria-hidden="true" data-astro-cid-hcqnpaxe><i style="--swatch:#07111f" data-astro-cid-hcqnpaxe></i><i style="--swatch:#edf6ff" data-astro-cid-hcqnpaxe></i><i style="--swatch:#42b9ff" data-astro-cid-hcqnpaxe></i></span><span data-astro-cid-hcqnpaxe>Cobalt</span></button></div></details><script>
+  (() => {
+    const storageKey = 'dful-theme';
+    const themes = [{"id":"dful-dark","name":"Dful Dark","colorScheme":"dark"},{"id":"amber-dark","name":"Amber Dark","colorScheme":"dark"},{"id":"dful-light","name":"Dful Light","colorScheme":"light"},{"id":"flexoki-paper","name":"Flexoki Paper","colorScheme":"light"},{"id":"phosphor","name":"Phosphor","colorScheme":"dark"},{"id":"arcade","name":"Arcade","colorScheme":"dark"},{"id":"cobalt","name":"Cobalt","colorScheme":"dark"}];
+    const valid = new Set(themes.map(({ id }) => id));
+    const names = Object.fromEntries(themes.map(({ id, name }) => [id, name]));
+    const isDark = (theme) => themes.find((item) => item.id === theme)?.colorScheme === 'dark';
+    const apply = (theme) => {
+      const selected = valid.has(theme) ? theme : "dful-dark";
+      document.documentElement.dataset.theme = selected;
+      document.documentElement.style.colorScheme = isDark(selected) ? 'dark' : 'light';
+      try { localStorage.setItem(storageKey, selected); } catch {}
+      document.querySelectorAll('[data-theme-picker]').forEach((picker) => {
+        const current = picker.querySelector('[data-theme-current]');
+        if (current) current.textContent = names[selected];
+        picker.querySelectorAll('[data-theme-option]').forEach((button) => button.setAttribute('aria-pressed', button.getAttribute('data-theme-option') === selected ? 'true' : 'false'));
+      });
+    };
+    const enhance = () => {
+      document.querySelectorAll('[data-theme-picker]:not([data-enhanced])').forEach((picker) => {
+        picker.setAttribute('data-enhanced','true');
+        picker.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && picker.open) {
+            picker.removeAttribute('open');
+            picker.querySelector('summary').focus();
+          }
+        });
+        picker.querySelectorAll('[data-theme-option]').forEach((button) => button.addEventListener('click', () => {
+          apply(button.getAttribute('data-theme-option'));
+          picker.removeAttribute('open');
+          picker.querySelector('summary').focus();
+        }));
+      });
+      let stored = "dful-dark";
+      try { stored = localStorage.getItem(storageKey) || stored; } catch {}
+      apply(stored);
+    };
+    enhance();
+    document.addEventListener('astro:page-load', enhance);
+  })();</script><nav class="lang-switch" aria-label="Switch language"><a href="/en/research/from-chatgpt-to-agents/" data-active="true" aria-current="page">EN</a><a href="/es/research/de-chatgpt-a-agentes/" data-active="false">ES</a></nav><div class="social-links" aria-label="Professional profile"><a href="https://www.linkedin.com/in/daniel-fulladosa/" rel="me">LinkedIn</a></div></div></div></header><main id="main"><article class="article-page" data-article-page><header class="article-header"><div class="article-header-content"><div class="article-pretitle"><p class="article-eyebrow">AI · Agentic Systems</p></div><h1>From ChatGPT to agents: what you need to understand to get started today</h1><p class="article-deck">Models, providers, APIs, subscriptions and harnesses can make getting started with agents look more complicated than it really is. This is the map I wish I had when I started experimenting with them.</p><div class="article-meta"><span>Daniel Fulladosa</span><time datetime="2026-10-06T00:00:00.000Z">6 Oct 2026</time><span class="article-meta-reading"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7v5l3.2 2"></path></svg>27 min read</span></div></div></header><div class="article-layout"><aside class="article-rail" data-article-rail aria-label="On this article"><div class="article-rail-block article-rail-context"><p class="article-rail-label">Article</p><dl><div><dt>Published</dt><dd><time datetime="2026-10-06T00:00:00.000Z">6 Oct 2026</time></dd></div><div><dt>Areas</dt><dd>AI · Agentic Systems</dd></div></dl></div><div class="article-rail-block article-rail-tags"><p class="article-rail-label">Tags</p><ul><li><a href="/en/research/?tag=agents" data-tag-slug="agents">agents</a></li><li><a href="/en/research/?tag=llm" data-tag-slug="llm">llm</a></li><li><a href="/en/research/?tag=harness" data-tag-slug="harness">harness</a></li><li><a href="/en/research/?tag=apis" data-tag-slug="apis">apis</a></li><li><a href="/en/research/?tag=local-models" data-tag-slug="local-models">local-models</a></li></ul></div><div class="article-rail-block article-rail-toc"><details data-article-toc-details><summary>On this article</summary><nav aria-label="On this article"><ul><li><a href="#from-talking-to-a-chatbot-to-giving-work-to-an-agent">From talking to a chatbot to giving work to an agent</a></li><li><a href="#model-provider-harness-and-environment">Model, provider, harness and environment</a></li><li><a href="#subscription-api-or-local">Subscription, API or local</a></li><li><a href="#the-harness-matters-much-more-than-it-seems">The harness matters much more than it seems</a></li><li><a href="#what-i-would-try-as-a-first-experience">What I would try as a first experience</a></li><li><a href="#from-prompt-to-context">From prompt to context</a></li><li><a href="#adding-mcp-skills-and-subagents-when-they-become-useful">Adding MCP, skills and subagents when they become useful</a></li><li><a href="#why-an-agentic-session-can-cost-much-more-than-it-seems">Why an agentic session can cost much more than it seems</a></li><li><a href="#choosing-models-for-your-own-workflow">Choosing models for your own workflow</a></li><li><a href="#a-particularly-awkward-case-cybersecurity">A particularly awkward case: cybersecurity</a></li><li><a href="#what-i-would-recommend-right-now">What I would recommend right now</a></li><li><a href="#start-with-the-smallest-useful-setup">Start with the smallest useful setup</a></li><li><a href="#from-chatbot-to-system">From chatbot to system</a></li></ul></nav></details></div></aside><div class="article-main-lane"><div class="publishing-prose article-prose"><p>ChatGPT hardly needs an introduction anymore. A huge number of people have at least once typed a question into a text box, waited a few seconds and received an answer. Some use it every day for work. Others still see it as a kind of glorified Google that simply writes longer text.</p>
+<p>The jump starts to feel much larger once you move beyond that chat. Suddenly you see someone open a terminal, launch Codex, Claude Code or OpenCode, ask it to review an entire project, and let the model read files, run commands, search documentation, modify code, execute tests and recover from its own mistakes. Keep going down the rabbit hole and you run into models, providers, APIs, tokens, context windows, MCP, skills, plugins, subagents, routers, local models, quantization and a lot of people arguing about which piece is best. From the outside, getting started with agents can look far more complicated than it needs to be.</p>
+<p>I got into this space by trying one thing after another, and for quite a while I mixed together concepts that now feel clearly different. I would try one model because someone said it was better, then another harness, then an API, OpenRouter and eventually local models. Over time I understood why two people can say they are using “the same model” and still have very different experiences: the model is only one part of the system around it.</p>
+<p>This article is my attempt to organise that map for someone who already knows ChatGPT and wants to start using agents. I want to explain the pieces that took me a while to separate, how they fit together, and what I would try today if I were starting again without first learning transformer internals, building my own infrastructure or chasing every new model release.</p>
+<h2 id="from-talking-to-a-chatbot-to-giving-work-to-an-agent">From talking to a chatbot to giving work to an agent</h2>
+<p>A chat interface can already do quite a lot. You can upload a document and ask for a summary, pass it a screenshot and ask it to interpret it, discuss an idea for an hour, or paste code and ask it to look for a bug. Current products have also added web search, code execution, file analysis and other tools, so the line between “chat” and “agent” is not completely rigid.</p>
+<p>The practical difference becomes clearer when we want the model to work on an environment rather than only on what we can put into the conversation.</p>
+<p>Imagine a fairly boring task: I have a folder with hundreds of messy files and I want to classify them according to a set of rules, rename the ones that do not follow a convention, and generate a small report at the end with the changes.</p>
+<p>With a chatbot, I could explain the problem, upload a few examples and ask it to write me a script. Then I would have to copy it, run it, discover that it did not account for one of the cases, go back to the chat, paste the error and repeat the process.</p>
+<p>With an agent that has access to that folder and a terminal, I can describe the outcome I want and let it first inspect what is actually there. It can list the files, detect patterns, propose a strategy, write the script, execute it, check the result and correct it if something goes wrong.</p>
+<p>The intelligence can come from exactly the same model. What has changed is the environment in which we are using it.</p>
+<p>The same is true in development. Asking a chat “why is this function failing?” and pasting 50 lines of code is very different from giving the agent access to a repository and asking it to locate the source of a bug. In the second case it may discover that the function we are looking at is not even the real problem, follow a reference into another module, review the existing tests, run the application and validate the change.</p>
+<p>The image of an “agent” as a fully autonomous entity working for days while we sleep makes the idea sound more exotic than it needs to be. A useful starting point is simply a model inside a loop with access to tools:</p>
+<p><strong>receive context → decide what to do → use a tool → observe the result → decide again.</strong></p>
+<p>That loop might last two steps or two hundred iterations. What changes in practice is how much the model can observe, which actions it can take, and how the results of those actions feed into the next decision.</p>
+<figure class="pub-figure pub-breakout-wide pub-diagram"><div class="technical-visual-frame technical-visual-frame--architecture"><svg class="technical-visual technical-visual--desktop technical-visual--article-handoff" viewBox="0 0 1200 580" role="img" aria-labelledby="tv-chat-vs-agent-en-desktop-title tv-chat-vs-agent-en-desktop-desc" preserveAspectRatio="xMidYMid meet">
+    <title id="tv-chat-vs-agent-en-desktop-title">Chat and agent interaction</title>
+    <desc id="tv-chat-vs-agent-en-desktop-desc">A chat can return a response from a model. An agent harness gives the model access to files, a terminal and tools, then returns observations so it can decide what to do next. Both experiences can use the same model.</desc>
+    <defs>
+    <marker id="tv-chat-vs-agent-en-desktop-arrow-primary" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="10" markerHeight="10" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-primary" d="M0 0L10 5L0 10Z"></path></marker>
+    <marker id="tv-chat-vs-agent-en-desktop-arrow-secondary" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="9" markerHeight="9" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-secondary" d="M0 0L10 5L0 10Z"></path></marker>
+    <marker id="tv-chat-vs-agent-en-desktop-arrow-attempted" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="9" markerHeight="9" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-attempted" d="M0 0L10 5L0 10Z"></path></marker>
+  </defs>
+    <text class="tv-section-label" x="28" y="66" text-anchor="start">Chat</text><text class="tv-section-label" x="505" y="66" text-anchor="start">Agent</text>
+    <path class="tv-measure" d="M468 78V548"></path>
+    <path class="tv-edge tv-edge--feedback" d="M223 180V132H940V180"></path>
+    <text class="tv-section-label" x="704" y="120" text-anchor="middle">The same model can work in both</text>
+    <g class="tv-node tv-node--entry">
+    <rect class="tv-node-surface" x="28" y="180" width="110" height="108" rx="12"></rect>
+    <path class="tv-node-keyline" d="M40 181.5H126"></path>
+    <text class="tv-node-title" x="46" y="215">User</text>
+    
+  </g>
+    <g class="tv-node tv-node--model">
+    <rect class="tv-node-surface" x="168" y="180" width="110" height="108" rx="12"></rect>
+    <path class="tv-node-keyline" d="M180 181.5H266"></path>
+    <text class="tv-node-title" x="186" y="215">Model</text>
+    
+  </g>
+    <g class="tv-node tv-node--state">
+    <rect class="tv-node-surface" x="308" y="180" width="130" height="108" rx="12"></rect>
+    <path class="tv-node-keyline" d="M320 181.5H426"></path>
+    <text class="tv-node-title" x="326" y="215">Response</text>
+    
+  </g>
+    <path class="tv-edge tv-edge--primary" d="M138 234H156" marker-end="url(#tv-chat-vs-agent-en-desktop-arrow-primary)"></path><path class="tv-edge tv-edge--primary" d="M278 234H296" marker-end="url(#tv-chat-vs-agent-en-desktop-arrow-primary)"></path>
+    <g class="tv-node tv-node--entry">
+    <rect class="tv-node-surface" x="505" y="180" width="110" height="108" rx="12"></rect>
+    <path class="tv-node-keyline" d="M517 181.5H603"></path>
+    <text class="tv-node-title" x="523" y="215">User</text>
+    
+  </g>
+    <g class="tv-node tv-node--context">
+    <rect class="tv-node-surface" x="650" y="180" width="160" height="108" rx="12"></rect>
+    <path class="tv-node-keyline" d="M662 181.5H798"></path>
+    <text class="tv-node-title" x="668" y="215">Harness</text>
+    
+  </g>
+    <g class="tv-node tv-node--model">
+    <rect class="tv-node-surface" x="860" y="180" width="160" height="108" rx="12"></rect>
+    <path class="tv-node-keyline" d="M872 181.5H1008"></path>
+    <text class="tv-node-title" x="878" y="215">Model</text>
+    
+  </g>
+    <path class="tv-edge tv-edge--primary" d="M615 234H638" marker-end="url(#tv-chat-vs-agent-en-desktop-arrow-primary)"></path><path class="tv-edge tv-edge--primary" d="M810 234H848" marker-end="url(#tv-chat-vs-agent-en-desktop-arrow-primary)"></path><text class="tv-edge-label tv-edge-label--secondary" x="829" y="220" text-anchor="middle">Context</text>
+    <g class="tv-node tv-node--capability">
+    <rect class="tv-node-surface" x="670" y="420" width="350" height="112" rx="12"></rect>
+    <path class="tv-node-keyline" d="M682 421.5H1008"></path>
+    <text class="tv-node-title" x="688" y="455">Tools and environment</text>
+    <text class="tv-node-detail" x="688" y="482">Files · Terminal</text><text class="tv-node-detail" x="688" y="504">Tools / Web</text>
+  </g>
+    <path class="tv-edge tv-edge--secondary" d="M730 288V410"></path><text class="tv-edge-label tv-edge-label--secondary" x="670" y="355" text-anchor="end">provides access</text>
+    <path class="tv-edge tv-edge--primary" d="M900 288V350H755V410" marker-end="url(#tv-chat-vs-agent-en-desktop-arrow-primary)"></path><text class="tv-edge-label tv-edge-label--primary" x="824" y="385" text-anchor="middle">Tool call</text>
+    <path class="tv-edge tv-edge--secondary" d="M970 420V366H1000V300" marker-end="url(#tv-chat-vs-agent-en-desktop-arrow-secondary)"></path><text class="tv-edge-label tv-edge-label--secondary" x="1028" y="370" text-anchor="start">Observation</text>
+  </svg><svg class="technical-visual technical-visual--mobile technical-visual--article-handoff" viewBox="0 0 520 1320" role="img" aria-labelledby="tv-chat-vs-agent-en-mobile-title tv-chat-vs-agent-en-mobile-desc" preserveAspectRatio="xMidYMid meet">
+    <title id="tv-chat-vs-agent-en-mobile-title">Chat and agent interaction</title>
+    <desc id="tv-chat-vs-agent-en-mobile-desc">A chat can return a response from a model. An agent harness gives the model access to files, a terminal and tools, then returns observations so it can decide what to do next. Both experiences can use the same model.</desc>
+    <defs>
+    <marker id="tv-chat-vs-agent-en-mobile-arrow-primary" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="10" markerHeight="10" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-primary" d="M0 0L10 5L0 10Z"></path></marker>
+    <marker id="tv-chat-vs-agent-en-mobile-arrow-secondary" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="9" markerHeight="9" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-secondary" d="M0 0L10 5L0 10Z"></path></marker>
+    <marker id="tv-chat-vs-agent-en-mobile-arrow-attempted" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="9" markerHeight="9" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-attempted" d="M0 0L10 5L0 10Z"></path></marker>
+  </defs>
+    <text class="tv-section-label" x="64" y="42" text-anchor="start">Chat</text>
+    <g class="tv-node tv-node--entry">
+    <rect class="tv-node-surface" x="86" y="66" width="348" height="92" rx="12"></rect>
+    <path class="tv-node-keyline" d="M98 67.5H422"></path>
+    <text class="tv-node-title" x="104" y="97">User</text>
+    
+  </g>
+    <g class="tv-node tv-node--model">
+    <rect class="tv-node-surface" x="86" y="202" width="348" height="92" rx="12"></rect>
+    <path class="tv-node-keyline" d="M98 203.5H422"></path>
+    <text class="tv-node-title" x="104" y="233">Model</text>
+    
+  </g>
+    <g class="tv-node tv-node--state">
+    <rect class="tv-node-surface" x="86" y="338" width="348" height="92" rx="12"></rect>
+    <path class="tv-node-keyline" d="M98 339.5H422"></path>
+    <text class="tv-node-title" x="104" y="369">Response</text>
+    
+  </g>
+    <path class="tv-edge tv-edge--primary" d="M260 158V190" marker-end="url(#tv-chat-vs-agent-en-mobile-arrow-primary)"></path><path class="tv-edge tv-edge--primary" d="M260 294V326" marker-end="url(#tv-chat-vs-agent-en-mobile-arrow-primary)"></path>
+    <text class="tv-section-label" x="260" y="488" text-anchor="middle">The same model can work in both</text>
+    <text class="tv-section-label" x="64" y="555" text-anchor="start">Agent</text>
+    <g class="tv-node tv-node--entry">
+    <rect class="tv-node-surface" x="86" y="580" width="348" height="92" rx="12"></rect>
+    <path class="tv-node-keyline" d="M98 581.5H422"></path>
+    <text class="tv-node-title" x="104" y="611">User</text>
+    
+  </g>
+    <g class="tv-node tv-node--context">
+    <rect class="tv-node-surface" x="86" y="720" width="348" height="98" rx="12"></rect>
+    <path class="tv-node-keyline" d="M98 721.5H422"></path>
+    <text class="tv-node-title" x="104" y="751">Harness</text>
+    
+  </g>
+    <g class="tv-node tv-node--model">
+    <rect class="tv-node-surface" x="86" y="866" width="348" height="98" rx="12"></rect>
+    <path class="tv-node-keyline" d="M98 867.5H422"></path>
+    <text class="tv-node-title" x="104" y="897">Model</text>
+    
+  </g>
+    <g class="tv-node tv-node--capability">
+    <rect class="tv-node-surface" x="86" y="1100" width="348" height="118" rx="12"></rect>
+    <path class="tv-node-keyline" d="M98 1101.5H422"></path>
+    <text class="tv-node-title" x="104" y="1131">Tools and environment</text>
+    <text class="tv-node-detail" x="104" y="1154">Files · Terminal</text><text class="tv-node-detail" x="104" y="1176">Tools / Web</text>
+  </g>
+    <path class="tv-edge tv-edge--primary" d="M260 672V708" marker-end="url(#tv-chat-vs-agent-en-mobile-arrow-primary)"></path><path class="tv-edge tv-edge--primary" d="M260 818V854" marker-end="url(#tv-chat-vs-agent-en-mobile-arrow-primary)"></path>
+    <path class="tv-edge tv-edge--primary" d="M180 964V1090" marker-end="url(#tv-chat-vs-agent-en-mobile-arrow-primary)"></path><text class="tv-edge-label tv-edge-label--primary" x="170" y="1030" text-anchor="end">Tool call</text>
+    <path class="tv-edge tv-edge--secondary" d="M340 1100V976" marker-end="url(#tv-chat-vs-agent-en-mobile-arrow-secondary)"></path><text class="tv-edge-label tv-edge-label--secondary" x="350" y="1047" text-anchor="start">Observation</text>
+    <text class="tv-edge-label tv-edge-label--secondary" x="260" y="1083" text-anchor="middle">via harness</text>
+  </svg></div><figcaption>Moving from a chatbot to an agent does not necessarily require changing the model. The main difference is the surrounding context, tools and ability to act.</figcaption></figure>
+<h2 id="model-provider-harness-and-environment">Model, provider, harness and environment</h2>
+<p>A lot of the confusion starts here because products such as ChatGPT hide most of these layers. You open the application, maybe select a model, and start typing. With more open tools, those pieces stop arriving as one package and it helps to separate them mentally.</p>
+<p>The simplified map I wish I had at the beginning is this:</p>
+<p><strong>model → provider → harness → tools and environment</strong></p>
+<p>It is deliberately simple. The point is to keep the responsibilities clear, not to define a universal architecture for AI systems.</p>
+<h3 id="the-model">The model</h3>
+<p>GPT, Claude, Gemini, Qwen, DeepSeek, Kimi or GLM are model families.</p>
+<p>We could spend hours talking about parameters, training, reasoning, context or benchmarks, but you do not need that to get started. What matters here is that the model is the component that receives the context we have prepared for it and generates the next output: a response to us, code, structured data or an indication that it wants to use a tool.</p>
+<p>In practical terms, there is a rough distinction that is useful for beginners, even if it is a simplification.</p>
+<p>On one side there are the large proprietary or frontier models from companies such as OpenAI, Anthropic or Google. These are usually the models we first see integrated into major commercial products, and the ones competing for top spots in many benchmarks.</p>
+<p>On the other side there is a huge ecosystem of open-weight models. In recent years, a lot of the most interesting activity in this second group has come from Asian labs: Qwen, DeepSeek, Kimi, GLM, MiniMax and many others.</p>
+<p>I use that distinction as orientation, not as a quality ranking. One of the things that changed most for me after trying different models was realising that, for learning, experimentation and even a lot of real work, <strong>you do not always need the most powerful model available that week</strong>.</p>
+<p>A cheaper and faster model may fit repetitive tasks better; another may follow instructions in a way that suits your workflow. Some open models are already capable enough to use tools, write code and sustain fairly long agentic sessions. For a first setup, choosing something good enough and actually working with it is usually more useful than staying stuck in the search for “the best model”.</p>
+<h3 id="the-provider">The provider</h3>
+<p>This is another distinction that can go unnoticed at first.</p>
+<p>The company that creates a model and the company that runs that model for you do not have to be the same.</p>
+<p>If you consume the OpenAI API directly in order to use a GPT model, developer and provider are the same. But there are models that may be deployed simultaneously by many different companies.</p>
+<p>This creates an interesting situation: <strong>the same model can feel different depending on who is serving it</strong>. The underlying capability remains the same, but hardware, configuration, speed, availability, limits, feature support, caching, region and price all shape the experience around it.</p>
+<p>OpenRouter makes this especially visible. It aggregates hundreds of models and many providers behind a common API, and for many endpoints it exposes measurements such as time to first token, throughput and uptime. Its router can also select providers according to criteria such as price, speed or reliability.</p>
+<p>This is one of those details that seems irrelevant until you start using APIs heavily. Two endpoints serving the same model can give you a noticeably different experience.</p>
+<h3 id="the-harness">The harness</h3>
+<p>This is probably the piece I paid the least attention to at the beginning, and one of the ones I value most now.</p>
+<p>Codex, Claude Code and OpenCode are all examples of harnesses.</p>
+<p>The term <em>harness</em> is used somewhat flexibly. The definition that is most useful to me is simple: <strong>it is the software layer that puts the model to work</strong>.</p>
+<p>A model on its own generates an output. In order to inspect our filesystem, run <code>git diff</code>, execute a command, search for a file or open a page, something has to provide those capabilities.</p>
+<p>The harness prepares the context the model will see, describes which tools exist, receives a tool-use request, executes the corresponding action, feeds the result back into context and continues the loop.</p>
+<p>It can also handle many other things: permissions, session history, context compaction, project instructions, file management, subagents, MCPs, skills or Git interaction.</p>
+<p>That is why the same model can produce a noticeably different experience in two different harnesses. Over time I stopped asking only <strong>“which model are you using?”</strong> and started asking <strong>“where are you using it?”</strong> as well.</p>
+<figure class="pub-figure pub-breakout-wide pub-diagram"><div class="technical-visual-frame technical-visual-frame--architecture"><svg class="technical-visual technical-visual--desktop technical-visual--article-handoff" viewBox="0 0 1280 520" role="img" aria-labelledby="tv-model-provider-harness-environment-en-desktop-title tv-model-provider-harness-environment-en-desktop-desc" preserveAspectRatio="xMidYMid meet">
+    <title id="tv-model-provider-harness-environment-en-desktop-title">Model, provider, harness and environment</title>
+    <desc id="tv-model-provider-harness-environment-en-desktop-desc">The model receives inference through a provider. A harness uses that model and connects it to an execution environment. The user gives work to the harness rather than adding another layer.</desc>
+    <defs>
+    <marker id="tv-model-provider-harness-environment-en-desktop-arrow-primary" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="10" markerHeight="10" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-primary" d="M0 0L10 5L0 10Z"></path></marker>
+    <marker id="tv-model-provider-harness-environment-en-desktop-arrow-secondary" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="9" markerHeight="9" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-secondary" d="M0 0L10 5L0 10Z"></path></marker>
+    <marker id="tv-model-provider-harness-environment-en-desktop-arrow-attempted" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="9" markerHeight="9" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-attempted" d="M0 0L10 5L0 10Z"></path></marker>
+  </defs>
+    <g class="tv-node tv-node--model">
+    <rect class="tv-node-surface" x="25" y="165" width="255" height="176" rx="12"></rect>
+    <path class="tv-node-keyline" d="M37 166.5H268"></path>
+    <text class="tv-node-title" x="43" y="200">Model</text>
+    <text class="tv-node-detail" x="43" y="227">GPT · Claude · Qwen</text><text class="tv-node-detail" x="43" y="249">DeepSeek</text>
+  </g>
+    <g class="tv-node tv-node--runtime">
+    <rect class="tv-node-surface" x="350" y="165" width="255" height="176" rx="12"></rect>
+    <path class="tv-node-keyline" d="M362 166.5H593"></path>
+    <text class="tv-node-title" x="368" y="200">Provider</text>
+    <text class="tv-node-detail" x="368" y="227">Direct provider</text><text class="tv-node-detail" x="368" y="249">Router / hosting</text><text class="tv-node-detail" x="368" y="271">Local runtime</text>
+  </g>
+    <g class="tv-node tv-node--context">
+    <rect class="tv-node-surface" x="675" y="165" width="255" height="176" rx="12"></rect>
+    <path class="tv-node-keyline" d="M687 166.5H918"></path>
+    <text class="tv-node-title" x="693" y="200">Harness</text>
+    <text class="tv-node-detail" x="693" y="227">Codex · Claude Code</text><text class="tv-node-detail" x="693" y="249">OpenCode</text>
+  </g>
+    <g class="tv-node tv-node--capability">
+    <rect class="tv-node-surface" x="1000" y="165" width="255" height="176" rx="12"></rect>
+    <path class="tv-node-keyline" d="M1012 166.5H1243"></path>
+    <text class="tv-node-title" x="1018" y="200">Environment</text>
+    <text class="tv-node-detail" x="1018" y="227">Filesystem · terminal</text><text class="tv-node-detail" x="1018" y="249">Git · browser · tools</text>
+  </g>
+    <path class="tv-edge tv-edge--primary" d="M280 253H338" marker-end="url(#tv-model-provider-harness-environment-en-desktop-arrow-primary)"></path><text class="tv-edge-label tv-edge-label--secondary" x="310" y="232" text-anchor="middle">served by</text>
+    <path class="tv-edge tv-edge--primary" d="M605 253H663" marker-end="url(#tv-model-provider-harness-environment-en-desktop-arrow-primary)"></path><text class="tv-edge-label tv-edge-label--secondary" x="635" y="232" text-anchor="middle">used by</text>
+    <path class="tv-edge tv-edge--primary" d="M930 253H988" marker-end="url(#tv-model-provider-harness-environment-en-desktop-arrow-primary)"></path><text class="tv-edge-label tv-edge-label--secondary" x="960" y="232" text-anchor="middle">acts on</text>
+    <g class="tv-node tv-node--entry">
+    <rect class="tv-node-surface" x="697" y="410" width="210" height="88" rx="12"></rect>
+    <path class="tv-node-keyline" d="M709 411.5H895"></path>
+    <text class="tv-node-title" x="715" y="441">User</text>
+    
+  </g>
+    <path class="tv-edge tv-edge--secondary" d="M802 410V353" marker-end="url(#tv-model-provider-harness-environment-en-desktop-arrow-secondary)"></path><text class="tv-edge-label tv-edge-label--secondary" x="834" y="386" text-anchor="start">Task</text>
+  </svg><svg class="technical-visual technical-visual--mobile technical-visual--article-handoff" viewBox="0 0 520 840" role="img" aria-labelledby="tv-model-provider-harness-environment-en-mobile-title tv-model-provider-harness-environment-en-mobile-desc" preserveAspectRatio="xMidYMid meet">
+    <title id="tv-model-provider-harness-environment-en-mobile-title">Model, provider, harness and environment</title>
+    <desc id="tv-model-provider-harness-environment-en-mobile-desc">The model receives inference through a provider. A harness uses that model and connects it to an execution environment. The user gives work to the harness rather than adding another layer.</desc>
+    <defs>
+    <marker id="tv-model-provider-harness-environment-en-mobile-arrow-primary" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="10" markerHeight="10" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-primary" d="M0 0L10 5L0 10Z"></path></marker>
+    <marker id="tv-model-provider-harness-environment-en-mobile-arrow-secondary" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="9" markerHeight="9" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-secondary" d="M0 0L10 5L0 10Z"></path></marker>
+    <marker id="tv-model-provider-harness-environment-en-mobile-arrow-attempted" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="9" markerHeight="9" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-attempted" d="M0 0L10 5L0 10Z"></path></marker>
+  </defs>
+    <g class="tv-node tv-node--model">
+    <rect class="tv-node-surface" x="86" y="30" width="348" height="132" rx="12"></rect>
+    <path class="tv-node-keyline" d="M98 31.5H422"></path>
+    <text class="tv-node-title" x="104" y="61">Model</text>
+    <text class="tv-node-detail" x="104" y="84">GPT · Claude · Qwen</text><text class="tv-node-detail" x="104" y="106">DeepSeek</text>
+  </g>
+    <g class="tv-node tv-node--runtime">
+    <rect class="tv-node-surface" x="86" y="215" width="348" height="150" rx="12"></rect>
+    <path class="tv-node-keyline" d="M98 216.5H422"></path>
+    <text class="tv-node-title" x="104" y="246">Provider</text>
+    <text class="tv-node-detail" x="104" y="269">Direct provider</text><text class="tv-node-detail" x="104" y="291">Router / hosting</text><text class="tv-node-detail" x="104" y="313">Local runtime</text>
+  </g>
+    <g class="tv-node tv-node--context">
+    <rect class="tv-node-surface" x="140" y="415" width="340" height="150" rx="12"></rect>
+    <path class="tv-node-keyline" d="M152 416.5H468"></path>
+    <text class="tv-node-title" x="158" y="446">Harness</text>
+    <text class="tv-node-detail" x="158" y="469">Codex · Claude Code</text><text class="tv-node-detail" x="158" y="491">OpenCode</text>
+  </g>
+    <g class="tv-node tv-node--capability">
+    <rect class="tv-node-surface" x="86" y="615" width="348" height="132" rx="12"></rect>
+    <path class="tv-node-keyline" d="M98 616.5H422"></path>
+    <text class="tv-node-title" x="104" y="646">Environment</text>
+    <text class="tv-node-detail" x="104" y="669">Filesystem · terminal</text><text class="tv-node-detail" x="104" y="691">Git · browser · tools</text>
+  </g>
+    <g class="tv-node tv-node--entry">
+    <rect class="tv-node-surface" x="16" y="445" width="104" height="88" rx="12"></rect>
+    <path class="tv-node-keyline" d="M28 446.5H108"></path>
+    <text class="tv-node-title" x="34" y="476">User</text>
+    
+  </g>
+    <path class="tv-edge tv-edge--primary" d="M260 162V203" marker-end="url(#tv-model-provider-harness-environment-en-mobile-arrow-primary)"></path><text class="tv-edge-label tv-edge-label--secondary" x="300" y="191" text-anchor="start">served by</text>
+    <path class="tv-edge tv-edge--primary" d="M260 365V403" marker-end="url(#tv-model-provider-harness-environment-en-mobile-arrow-primary)"></path><text class="tv-edge-label tv-edge-label--secondary" x="300" y="390" text-anchor="start">used by</text>
+    <path class="tv-edge tv-edge--primary" d="M260 565V603" marker-end="url(#tv-model-provider-harness-environment-en-mobile-arrow-primary)"></path><text class="tv-edge-label tv-edge-label--secondary" x="300" y="590" text-anchor="start">acts on</text>
+    <path class="tv-edge tv-edge--secondary" d="M120 489H138" marker-end="url(#tv-model-provider-harness-environment-en-mobile-arrow-secondary)"></path>
+  </svg></div><figcaption>Saying which model we use only describes one piece. The provider determines how we receive the inference; the harness builds the agentic experience and connects the model to an environment where it can act.</figcaption></figure>
+<h2 id="subscription-api-or-local">Subscription, API or local</h2>
+<p>Once those pieces are separated, the next decision is how to get access to the model. There are many combinations, but for a first map I would reduce them to three: <strong>subscription, API or local execution</strong>. For a first experience, I would usually recommend the subscription route.</p>
+<h3 id="a-subscription-is-the-easy-way-to-experiment">A subscription is the easy way to experiment</h3>
+<p>The idea is the same as in many other digital products: you pay a recurring fee and receive a certain amount of usage.</p>
+<p>The exact implementation varies widely between services. Some use rolling windows, weekly limits, monthly limits, credits or combinations of several mechanisms.</p>
+<p>For a first experiment, the exact quota mechanics matter less than one practical advantage: <strong>the cost is predictable</strong>.</p>
+<p>When you are experimenting, it is very easy to be wildly inefficient.</p>
+<p>You can give the agent a poorly defined task and discover twenty minutes later that it has read half a repository for no reason. You can open multiple sessions. You can use an expensive model for a trivial task. You can let context grow far more than necessary. Or you can simply spend an afternoon testing how the system behaves.</p>
+<p>With an API, every one of those decisions has a real cost.</p>
+<p>With a subscription, you still have limits, but within them you can make mistakes with much more peace of mind.</p>
+<p>That is why I think it is a good first route to discover whether this way of working is actually useful to you.</p>
+<p>At the time of writing, ChatGPT Plus costs $20 per month and offers higher limits plus additional models and tools compared with the free plan; API usage remains separate. Anthropic follows a similar split: Claude Pro includes Claude Code, while Anthropic API usage is billed separately, and Claude and Claude Code share subscription usage limits.</p>
+<p>That distinction matters because a subscription <strong>is not the same thing as an unlimited flat-rate API</strong>.</p>
+<p>In most cases you are buying access to a particular set of products under a particular set of usage rules.</p>
+<h3 id="api-paying-for-exactly-what-you-consume">API: paying for exactly what you consume</h3>
+<p>The second route is the API.</p>
+<p>The experience changes here.</p>
+<p>You create an account with a provider, obtain an API key, configure that credential in the software that will use it, and usage is normally billed according to consumption.</p>
+<p>The unit you will hear about most often is the <strong>token</strong>.</p>
+<p>To understand the bill, a rough approximation is enough without getting into the details of tokenization yet:</p>
+<ul>
+<li>there are tokens we send to the model;</li>
+<li>there are tokens the model generates;</li>
+<li>processing both has a cost.</li>
+</ul>
+<p>A long conversation does not necessarily send only our most recent sentence. The system may need to include instructions, history, available tools, previous results and other context required to continue working.</p>
+<p>That is why an agent can consume much more than the line we just typed.</p>
+<p>There are other mechanisms too — prompt caching, reasoning tokens, different prices at large context sizes, tools — but those are a second layer. The first useful idea is simply that <strong>every pass through the loop consumes inference</strong>.</p>
+<p>The API is the natural fit for a huge number of cases.</p>
+<p>If I am building an application that other people will use, it makes no sense to authenticate it through my personal ChatGPT subscription. If I want to run an automated process in CI, use models from my backend, select different models dynamically or apply enterprise controls, the API is usually a much better fit.</p>
+<p>This is also where requirements begin to appear that you may never think about while experimenting at home: data retention, regional residency, contractual terms, spend controls or project separation.</p>
+<p>The conceptual distinction I would keep is this:</p>
+<p><strong>a subscription is mainly designed for you to use a product; an API is designed for software to consume a service.</strong></p>
+<p>It is a useful simplification for a first mental model, even as more hybrid products blur the boundary between the two access patterns.</p>
+<h3 id="trying-many-models">Trying many models</h3>
+<p>Two kinds of solutions are particularly convenient here.</p>
+<p>The first is subscriptions that already aggregate different models.</p>
+<p>OpenCode Go, for example, currently costs $10 per month and provides access to a selection of models through its own API key. Its October 2026 catalogue includes models from GLM, Kimi, Qwen, DeepSeek, MiniMax and others, and the documentation explicitly notes that the list changes as new models are added. The same key can be used with OpenCode or other compatible agents.</p>
+<p>The second is <strong>routers</strong>.</p>
+<p>OpenRouter is probably the best-known example. Instead of opening separate accounts and configuring a different integration for every provider, you use a single API and gain access to a very large catalogue of models and providers.</p>
+<p>I find it especially useful for experimentation: I can load some credit, change one line of configuration and try another model, keep the same model and compare providers for latency or throughput, or let the router select automatically between several endpoints. It makes an excellent test bench, even if an enterprise integration may ultimately need a different architecture.</p>
+<h3 id="running-it-yourself">Running it yourself</h3>
+<p>The third option is to run the model on your own hardware. You can download compatible model weights, use a runtime such as Ollama, LM Studio or llama.cpp, and expose it through a local API that other tools consume much like a remote provider.</p>
+<p>That layer is fascinating if you also want to learn how inference is served: you gain more control over the environment and can keep certain data local. You also pick up a separate set of problems — VRAM, quantization, GPU offload, KV cache, context size, runtimes and performance — that have little to do with learning how to use an agent.</p>
+<p>In my case, for example, getting an experience I liked with a 27B Qwen model and a 16 GB RTX 5070 Ti meant trying different quantizations, adjusting KV cache, playing with context and measuring throughput before I even started the agentic test I actually wanted to run.</p>
+<p>In my case that friction was worthwhile because I wanted to learn the inference layer as well. To learn OpenCode itself, I could have used a hosted provider from the first minute. The distinction I would make is simple: <strong>if you want to learn local inference, run a local model; if you want to learn agents, start with the path that keeps your attention on the task.</strong></p>
+<figure class="pub-figure pub-breakout-wide pub-diagram"><div class="technical-visual-frame technical-visual-frame--architecture"><svg class="technical-visual technical-visual--desktop technical-visual--article-handoff" viewBox="0 0 1000 610" role="img" aria-labelledby="tv-subscription-api-local-en-desktop-title tv-subscription-api-local-en-desktop-desc" preserveAspectRatio="xMidYMid meet">
+    <title id="tv-subscription-api-local-en-desktop-title">Three ways to provide inference to one agent</title>
+    <desc id="tv-subscription-api-local-en-desktop-desc">Subscription, API and local execution are alternative ways to provide inference. They converge on the same harness and model rather than defining different kinds of agents.</desc>
+    <defs>
+    <marker id="tv-subscription-api-local-en-desktop-arrow-primary" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="10" markerHeight="10" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-primary" d="M0 0L10 5L0 10Z"></path></marker>
+    <marker id="tv-subscription-api-local-en-desktop-arrow-secondary" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="9" markerHeight="9" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-secondary" d="M0 0L10 5L0 10Z"></path></marker>
+    <marker id="tv-subscription-api-local-en-desktop-arrow-attempted" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="9" markerHeight="9" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-attempted" d="M0 0L10 5L0 10Z"></path></marker>
+  </defs>
+    <g class="tv-node tv-node--entry">
+    <rect class="tv-node-surface" x="25" y="40" width="260" height="140" rx="12"></rect>
+    <path class="tv-node-keyline" d="M37 41.5H273"></path>
+    <text class="tv-node-title" x="43" y="75">Subscription</text>
+    <text class="tv-node-detail" x="43" y="102">Predictable cost</text><text class="tv-node-detail" x="43" y="124">Usage limits</text><text class="tv-node-detail" x="43" y="146">Easy experimentation</text>
+  </g><g class="tv-node tv-node--context">
+    <rect class="tv-node-surface" x="25" y="220" width="260" height="140" rx="12"></rect>
+    <path class="tv-node-keyline" d="M37 221.5H273"></path>
+    <text class="tv-node-title" x="43" y="255">API</text>
+    <text class="tv-node-detail" x="43" y="282">Pay per use</text><text class="tv-node-detail" x="43" y="304">Programmable</text><text class="tv-node-detail" x="43" y="326">Automation / integration</text>
+  </g><g class="tv-node tv-node--runtime">
+    <rect class="tv-node-surface" x="25" y="400" width="260" height="140" rx="12"></rect>
+    <path class="tv-node-keyline" d="M37 401.5H273"></path>
+    <text class="tv-node-title" x="43" y="435">Local</text>
+    <text class="tv-node-detail" x="43" y="462">Your hardware</text><text class="tv-node-detail" x="43" y="484">More control</text><text class="tv-node-detail" x="43" y="506">More setup</text>
+  </g>
+      <path class="tv-edge tv-edge--secondary" d="M335 110V470"></path>
+      <path class="tv-edge tv-edge--primary" d="M285 110H335" marker-end="url(#tv-subscription-api-local-en-desktop-arrow-primary)"></path><path class="tv-edge tv-edge--primary" d="M285 290H335" marker-end="url(#tv-subscription-api-local-en-desktop-arrow-primary)"></path><path class="tv-edge tv-edge--primary" d="M285 470H335" marker-end="url(#tv-subscription-api-local-en-desktop-arrow-primary)"></path>
+      <path class="tv-edge tv-edge--primary" d="M335 290H418" marker-end="url(#tv-subscription-api-local-en-desktop-arrow-primary)"></path>
+      <g class="tv-node tv-node--context">
+    <rect class="tv-node-surface" x="430" y="220" width="200" height="140" rx="12"></rect>
+    <path class="tv-node-keyline" d="M442 221.5H618"></path>
+    <text class="tv-node-title" x="448" y="255">Harness</text>
+    <text class="tv-node-detail" x="448" y="282">One agent experience</text><text class="tv-node-detail" x="448" y="300">for any access route</text>
+  </g>
+      <g class="tv-node tv-node--model">
+    <rect class="tv-node-surface" x="790" y="220" width="200" height="140" rx="12"></rect>
+    <path class="tv-node-keyline" d="M802 221.5H978"></path>
+    <text class="tv-node-title" x="808" y="255">Model</text>
+    <text class="tv-node-detail" x="808" y="282">Inference</text>
+  </g>
+      <path class="tv-edge tv-edge--primary" d="M630 290H778" marker-end="url(#tv-subscription-api-local-en-desktop-arrow-primary)"></path>
+  </svg><svg class="technical-visual technical-visual--mobile technical-visual--article-handoff" viewBox="0 0 520 930" role="img" aria-labelledby="tv-subscription-api-local-en-mobile-title tv-subscription-api-local-en-mobile-desc" preserveAspectRatio="xMidYMid meet">
+    <title id="tv-subscription-api-local-en-mobile-title">Three ways to provide inference to one agent</title>
+    <desc id="tv-subscription-api-local-en-mobile-desc">Subscription, API and local execution are alternative ways to provide inference. They converge on the same harness and model rather than defining different kinds of agents.</desc>
+    <defs>
+    <marker id="tv-subscription-api-local-en-mobile-arrow-primary" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="10" markerHeight="10" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-primary" d="M0 0L10 5L0 10Z"></path></marker>
+    <marker id="tv-subscription-api-local-en-mobile-arrow-secondary" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="9" markerHeight="9" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-secondary" d="M0 0L10 5L0 10Z"></path></marker>
+    <marker id="tv-subscription-api-local-en-mobile-arrow-attempted" viewBox="0 0 10 10" refX="9.2" refY="5" markerWidth="9" markerHeight="9" orient="auto" markerUnits="userSpaceOnUse"><path class="tv-marker-attempted" d="M0 0L10 5L0 10Z"></path></marker>
+  </defs>
+    <text class="tv-section-label" x="64" y="34" text-anchor="start">Choose one access route</text>
+      <g class="tv-node tv-node--entry">
+    <rect class="tv-node-surface" x="64" y="58" width="340" height="126" rx="12"></rect>
+    <path class="tv-node-keyline" d="M76 59.5H392"></path>
+    <text class="tv-node-title" x="82" y="93">Subscription</text>
+    <text class="tv-node-detail" x="82" y="120">Predictable cost</text><text class="tv-node-detail" x="82" y="142">Usage limits</text><text class="tv-node-detail" x="82" y="164">Easy experimentation</text>
+  </g><g class="tv-node tv-node--context">
+    <rect class="tv-node-surface" x="64" y="208" width="340" height="126" rx="12"></rect>
+    <path class="tv-node-keyline" d="M76 209.5H392"></path>
+    <text class="tv-node-title" x="82" y="243">API</text>
+    <text class="tv-node-detail" x="82" y="270">Pay per use</text><text class="tv-node-detail" x="82" y="292">Programmable</text><text class="tv-node-detail" x="82" y="314">Automation / integration</text>
+  </g><g class="tv-node tv-node--runtime">
+    <rect class="tv-node-surface" x="64" y="358" width="340" height="126" rx="12"></rect>
+    <path class="tv-node-keyline" d="M76 359.5H392"></path>
+    <text class="tv-node-title" x="82" y="393">Local</text>
+    <text class="tv-node-detail" x="82" y="420">Your hardware</text><text class="tv-node-detail" x="82" y="442">More control</text><text class="tv-node-detail" x="82" y="464">More setup</text>
+  </g>
+      <path class="tv-edge tv-edge--secondary" d="M440 118V418"></path>
+      <path class="tv-edge tv-edge--primary" d="M404 118H440" marker-end="url(#tv-subscription-api-local-en-mobile-arrow-primary)"></path><path class="tv-edge tv-edge--primary" d="M404 268H440" marker-end="url(#tv-subscription-api-local-en-mobile-arrow-primary)"></path><path class="tv-edge tv-edge--primary" d="M404 418H440" marker-end="url(#tv-subscription-api-local-en-mobile-arrow-primary)"></path>
+      <path class="tv-edge tv-edge--primary" d="M440 268V510H260V548" marker-end="url(#tv-subscription-api-local-en-mobile-arrow-primary)"></path>
+      <g class="tv-node tv-node--context">
+    <rect class="tv-node-surface" x="86" y="560" width="348" height="124" rx="12"></rect>
+    <path class="tv-node-keyline" d="M98 561.5H422"></path>
+    <text class="tv-node-title" x="104" y="591">Harness</text>
+    <text class="tv-node-detail" x="104" y="614">One agent experience</text><text class="tv-node-detail" x="104" y="636">for any access route</text>
+  </g>
+      <g class="tv-node tv-node--model">
+    <rect class="tv-node-surface" x="86" y="786" width="348" height="112" rx="12"></rect>
+    <path class="tv-node-keyline" d="M98 787.5H422"></path>
+    <text class="tv-node-title" x="104" y="817">Model</text>
+    <text class="tv-node-detail" x="104" y="840">Inference</text>
+  </g>
+      <path class="tv-edge tv-edge--primary" d="M260 684V774" marker-end="url(#tv-subscription-api-local-en-mobile-arrow-primary)"></path>
+  </svg></div><figcaption>Subscription, API and local execution are three different ways of supplying inference to an agent. Each changes cost, friction and control.</figcaption></figure>
+<h2 id="the-harness-matters-much-more-than-it-seems">The harness matters much more than it seems</h2>
+<p>Once you have chosen how to access the model, there is still another decision that I initially underestimated: <strong>which tool I am going to use it from</strong>.</p>
+<p>There is a reason OpenAI develops Codex around its own models, and Anthropic does the same with Claude Code.</p>
+<p>When a vendor controls a large part of the chain, it can optimise the whole experience: models, system prompts, tool-calling formats, context mechanisms, compaction, permissions, interface and new capabilities. That integration often shows up in day-to-day use, while open harnesses make it easier to change model or provider without changing your whole workflow. <strong>The harness is part of the product</strong> and directly shapes how context is prepared, tools are executed and the session is maintained.</p>
+<p>For a first setup I would use something mature and learn how I actually want to work. Building a custom harness or comparing twenty frameworks becomes much more useful once you have a concrete limitation to solve.</p>
+<p>If you already use ChatGPT and have a compatible subscription, Codex is a very natural route. If you are in the Claude ecosystem, Claude Code plays the same role. In both cases you get a fairly integrated experience between provider, models and agent.</p>
+<p>OpenCode seems especially interesting to me for the kind of user who wants to experiment.</p>
+<p>It is an open harness where you can connect very different providers. Today I can use a model through OpenCode Go, tomorrow connect OpenRouter, and later point it at a local instance. The workflow remains roughly the same while I change the inference layer.</p>
+<p>That lets you discover something that is hard to see from benchmarks alone: <strong>which part of the experience you like actually comes from the model, and which part comes from the agent layer around it</strong>.</p>
+<p>There is also a simple interface question. I may like working from a terminal; someone else may prefer a desktop application with visible sessions, clear diffs and fewer commands to remember. For a first experience, I would choose whichever tool lets you forget about the setup sooner and start giving it real work.</p>
+<h2 id="what-i-would-try-as-a-first-experience">What I would try as a first experience</h2>
+<p>For a first test I would choose a disposable project and, more importantly, a task you understand well enough to judge the result. That lets you watch how the agent works without beginning on the repository you care about most, while Git and permission boundaries still give you a safety net.</p>
+<p>The task should be real enough to force the agent to use the environment. Rather than asking it to “build a calculator”, I would pick something mildly annoying: a folder you have wanted to organise for months, a small personal project where you want to add a feature, a repository you know with a failing test, a set of Markdown files with inconsistent names, or a boring script you normally handle manually.</p>
+<p>For many people the surprising part will be less that the model can write code — the chat could already do that — and more that it can run <code>ls</code>, open several files, find the right place to work, modify something, check the result and continue without you manually moving every piece of information between your computer and a conversation.</p>
+<p>From that point, the interesting part begins: learning <strong>what to delegate and what not to delegate</strong>.</p>
+<p>An instruction such as “improve this project” is still a bad instruction even if the model is excellent.</p>
+<p>A task with intent, constraints and a way to check whether it is done works much better:</p>
+<blockquote>
+<p>Review how these pages are being generated. I want to remove this duplication without changing the public routes. Before changing anything, identify where it happens, and then run the existing tests and the build.</p>
+</blockquote>
+<p>In practice, explaining the work clearly has been more useful to me than searching for a magical prompt. A whole culture of giant prompts has grown around agents, and it can make the tools feel as though they require a new language. My experience has moved the other way: as models improve, I care more about <strong>good context, clear goals and ways to verify the result</strong>, and less about writing twenty-paragraph spells for every task.</p>
+<h2 id="from-prompt-to-context">From prompt to context</h2>
+<p>This is where using agents starts to separate itself much more clearly from using a chatbot occasionally.</p>
+<p>An agent that has been working for an hour does not only have our latest message.</p>
+<p>It may have general instructions, project information, tool definitions, files it has read, terminal output, search results, earlier decisions and a conversation that keeps growing.</p>
+<p>All of that competes for space inside the context the model processes.</p>
+<p>That is why people talk so much about <em>context engineering</em>.</p>
+<p>The idea does not need to be more complicated than it sounds: <strong>what information the model needs, when it needs it and how we provide it</strong>.</p>
+<p>An instruction file at the root of a repository can tell it how the project is built and what it should not touch. A skill can encapsulate a procedure we want to reuse. A tool can let it fetch information on demand instead of permanently stuffing all of that information into the prompt.</p>
+<p>At that point you also start to understand why filling the context with documentation “just in case” can be counterproductive.</p>
+<p>More context does not automatically mean more intelligence.</p>
+<p>Part of the work is precisely making sure the model sees <strong>the relevant information at the right time</strong>.</p>
+<p>These ideas make much more sense after you have used an agent and watched a session start well and then degrade as it grows. At that point, concepts such as compaction, instructions and context selection stop being abstract and start solving problems you have actually seen.</p>
+<h2 id="adding-mcp-skills-and-subagents-when-they-become-useful">Adding MCP, skills and subagents when they become useful</h2>
+<p>It is very easy to enter this ecosystem and spend more time preparing the agent than using it. MCP can expose external tools and data through a standard interface; skills can package reusable knowledge or procedures; subagents can split work; and plugins can bundle broader functionality depending on the ecosystem.</p>
+<p>All of those pieces have real uses, and all of them add cost. More tools give the model more options to choose between, more instructions consume more context, and more agents mean more inference, coordination and places for work to drift. If you are still learning how an agent behaves inside a repository, I would start small and add each piece when a concrete problem makes it useful.</p>
+<h2 id="why-an-agentic-session-can-cost-much-more-than-it-seems">Why an agentic session can cost much more than it seems</h2>
+<p>This was another important mental shift for me when I started trying APIs. In a chat, we naturally think in messages: I ask one thing and the model answers. In an agent, a single request from us can internally become many calls:</p>
+<p>the model studies the problem, decides to read a file, receives the file, decides to search for another symbol, receives the result, runs a command, interprets the error, modifies code, runs tests and analyses the result.</p>
+<p>For us, the request is still:</p>
+<blockquote>
+<p>“Fix this.”</p>
+</blockquote>
+<p>For the provider, it may represent many inference calls over a context that keeps growing.</p>
+<p>If you then add multiple subagents working in parallel, the difference becomes even larger.</p>
+<p>This helps explain the practical difference between two ways of paying for AI. A $20 subscription can let you run a number of experiments that would be hard to reproduce by paying certain frontier models one API call at a time. The API, in contrast, gives you control, programmability and the ability to integrate inference into your own systems. They are two access models designed for different needs.</p>
+<h2 id="choosing-models-for-your-own-workflow">Choosing models for your own workflow</h2>
+<p>This article will age because the market moves absurdly fast. As of October 2026, the landscape is already different from a few months ago, and it will probably change several more times before the end of the year.</p>
+<p>One month a new Claude model leads certain comparisons. Then OpenAI releases another family. Qwen updates its line. DeepSeek releases something much cheaper. Some provider starts serving a model fast enough to completely change the experience.</p>
+<p>Trying to always buy “the best model” can become a hobby in itself.</p>
+<p>Benchmarks and evals are useful evidence, but an aggregate score does not know what your job is or which part of the experience matters most to you.</p>
+<p>Maybe you need a model to sustain a programming session for hours. Maybe what you care about most is speed because you do dozens of short iterations. Maybe you need a huge context window. Maybe you work heavily with tools and care a lot about reliable tool calls. Maybe the biggest difference you notice is not intelligence at all, but that one model keeps interrupting your workflow because of its safety policies.</p>
+<p>Even price can completely change the comparison.</p>
+<p>A slightly worse model that is ten times cheaper may be much better for a subagent that only classifies results.</p>
+<p>So my recommendation is simple: choose two or three models that make sense for your case and <strong>try them on the same real task</strong>. Then compare which one needed less intervention, understood the goal better, was fast enough and cost an amount you are comfortable with. That small personal eval will probably tell you more than a leaderboard where your actual task does not even appear.</p>
+<h2 id="a-particularly-awkward-case-cybersecurity">A particularly awkward case: cybersecurity</h2>
+<p>In my case there is another variable that is probably irrelevant to most users: I work in offensive security. The strongest models can be extremely useful for code review, understanding vulnerabilities, writing small PoCs, processing documentation or accompanying a pentest, but they also operate under safety policies. When your work consists precisely of exploiting systems, analysing malware or carrying out actions that would clearly be abusive outside an authorised setting, those policies can become a very visible part of the experience.</p>
+<p>OpenAI currently has Daybreak / Trusted Access for Cyber, a programme specifically aimed at security professionals and organisations. Its Blue and Red access levels can reduce certain refusals in authorised workflows; Red is aimed at activities such as pentesting, red teaming and exploit validation and requires additional approval. OpenAI’s own documentation is clear that this does not remove all safeguards or all refusals.</p>
+<p>That is an important improvement, although I still run into sessions where some of the friction comes from establishing that the work is authorised. In other tests, models such as GLM or DeepSeek have been more than capable enough for the task and have given me a more direct experience.</p>
+<p>The conclusion I draw from that is narrow but useful: <strong>the best model depends on the workflow</strong>, and in cybersecurity policy is part of that workflow. For a complex review I may prefer the model that reasons better even if it adds some friction; for other tasks I may prefer a slightly less capable model that moves quickly and consistently.</p>
+<h2 id="what-i-would-recommend-right-now">What I would recommend right now</h2>
+<p>This is the section that will age fastest, so it should be read for what it is: <strong>a snapshot from October 2026</strong>. The table below is simply a set of entry points depending on what you want to try.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>If you want…</th><th>I would start with…</th><th>Why</th></tr></thead><tbody><tr><td>The most integrated experience</td><td>ChatGPT + Codex</td><td>One subscription covers chat, reasoning and the agent; a good way to experiment without thinking about API billing from day one.</td></tr><tr><td>Claude plus a terminal agent</td><td>Claude Pro + Claude Code</td><td>A very integrated and direct experience if what you really want is to use Claude as an agent.</td></tr><tr><td>To try many models cheaply</td><td>OpenCode + Go</td><td>An open harness plus a cheap subscription with a changing selection of models.</td></tr><tr><td>To experiment with APIs/providers</td><td>OpenRouter</td><td>One API, hundreds of models and the ability to compare different providers for the same model.</td></tr><tr><td>To learn local inference</td><td>Ollama / LM Studio + local model</td><td>Much more control and a good way to understand what happens underneath, assuming you accept the extra hardware friction.</td></tr></tbody></table>
+<p>In my own case, if someone asked me what I would choose for a first general experience, it would probably be <strong>ChatGPT Plus</strong> because I like the combination it offers. I can spend a lot of time in chat discussing an idea, researching, refining requirements or simply deciding what I want to do; when the conversation moves from “think about the work” to “do the work”, Codex fits naturally. That pattern has become almost my default way of using these tools: <strong>discuss in chat → implement with the agent</strong>.</p>
+<p>Plus currently costs $20 per month and offers broader access to models like GPT-6 Sol and GPT-6.1 Sol. Plus also includes limited access to GPT-6 Astra in Work and Codex.</p>
+<p>There are quotas and they can change, but for someone learning the practical allowance is large enough to run plenty of experiments without turning every session into a spreadsheet of API costs.</p>
+<p>If all I cared about were Claude models and working from a terminal, I would look at <strong>Claude Pro</strong>. It currently includes Claude Code, although Claude and Claude Code share usage limits and there are both shorter usage windows and weekly limits.</p>
+<p>If I wanted to explore the ecosystem outside the major US providers, <strong>OpenCode Go</strong> currently feels like one of the simplest ways to do it. For $10 per month it provides access to a substantial selection of Qwen, DeepSeek, GLM, Kimi, MiniMax and other models, and integrates directly with OpenCode.</p>
+<p><strong>Ollama Pro</strong> now occupies a similar space with a somewhat different emphasis. Its Pro plan currently costs $20 per month and includes $60 in monthly cloud-model credits, while keeping the local-execution ecosystem that Ollama is known for. Ollama also advertises support for popular agents and its own API.</p>
+<p>And if I want to fully open the box and start comparing APIs, then <strong>OpenRouter</strong>. I can load some credit, switch models, compare costs, try providers, inspect latency and decide later whether any of them deserve direct integration. It adds too many choices for a very first session; once you understand the pieces, it makes a very comfortable laboratory.</p>
+<h2 id="start-with-the-smallest-useful-setup">Start with the smallest useful setup</h2>
+<p>I think this is one of the easiest mistakes to make right now. There are so many new tools that you can spend weeks preparing the perfect way to use AI before giving it one sufficiently real task. You start looking for an agent, discover MCP, add skills, see someone using specialised subagents, find another harness that is more extensible and end up changing provider because a new model promises better tool calling. It is easy to build an impressive setup before you have established which parts you actually need.</p>
+<p>For me the starting point should be much smaller: <strong>one model, one harness, one project you can afford to break and one real task</strong>. From there, each extra layer should arrive in response to a concrete problem. If the model falls short, try another one; if the subscription limits get in the way, compare another plan or an API; if you want to try many models, add a router; if the agent needs an internal tool, MCP starts to make sense; if you keep repeating the same procedure, perhaps it should become a skill; and if you need privacy or want to learn inference, run the model locally.</p>
+<p>That order has been much more useful to me than copying a complex architecture before I have a problem for it to solve.</p>
+<h2 id="from-chatbot-to-system">From chatbot to system</h2>
+<p>The first time we use ChatGPT, it is easy to think that “AI” is simply the model answering inside that page. Once you start working with agents, the picture becomes larger: model capability still matters enormously, but so do the provider serving it, the harness building the loop, the context it receives, the available tools, the environment where it works and the way we pay for inference.</p>
+<p>Understanding those pieces is useful mainly because it tells you which ones you need at a given moment and which ones you can ignore. To discover what delegating a task to an agent feels like, it is enough to pick Codex, Claude Code or OpenCode, give it access to something you can afford to break and try a real task. What happens in that session will tell you far more clearly whether you need another model, another provider or more tooling.</p>
+<p>That has been much more useful to me than trying to decide from the outside what the perfect model-agent-provider combination was supposed to be. In a few months that combination will probably have changed again; the map, however, should still look fairly similar.</p>
+<figure class="pub-figure pub-breakout-wide" data-preview="true"><p><img alt="Final conceptual map for getting started with agents, built around a simple central path and optional components around it." loading="lazy" decoding="async" width="1672" height="941" src="/_astro/start-here-map.DgRKaATj_Z6XcNL.webp"></p><figcaption>A simple entry map for getting started with agents: one model, one harness and one real task. Everything else is an optional layer that makes sense when a concrete problem appears.</figcaption></figure></div><nav class="article-end-nav" aria-label="Back to Research"><a href="/en/research/"><span>Back to Research</span><strong>Research →</strong></a></nav></div></div></article><script>
+    if (window.matchMedia('(min-width: 1200px)').matches) {
+      document.querySelector('[data-article-toc-details]')?.setAttribute('open', '');
+    }
+  </script></main><footer class="site-footer"><div class="footer-inner"><a class="footer-wordmark" href="/en/">dful<span>.</span></a><span>Offensive Security · AI Security · Agentic Systems</span></div></footer><script>
+  (() => {
+    const init = () => {
+      const figures = [...document.querySelectorAll('.publishing-prose .pub-figure[data-preview="true"]')];
+      if (!figures.length) return;
+
+      const spanish = document.documentElement.lang === 'es';
+      const labels = spanish
+        ? {
+            open: 'Abrir vista ampliada',
+            close: 'Cerrar vista previa',
+            zoom: 'Zoom de imagen',
+            fit: 'Ajustar',
+            actual: 'Tamaño real',
+          }
+        : {
+            open: 'Open enlarged preview',
+            close: 'Close preview',
+            zoom: 'Image zoom',
+            fit: 'Fit',
+            actual: 'Actual size',
+          };
+
+      let dialog = document.querySelector('dialog[data-figure-preview]');
+      if (!(dialog instanceof HTMLDialogElement)) {
+        dialog = document.createElement('dialog');
+        dialog.className = 'figure-preview-dialog';
+        dialog.setAttribute('data-figure-preview', 'true');
+        dialog.dataset.mode = 'fit';
+
+        const toolbar = document.createElement('div');
+        toolbar.className = 'figure-preview-toolbar';
+
+        const modeGroup = document.createElement('div');
+        modeGroup.className = 'figure-preview-modes';
+        modeGroup.setAttribute('role', 'group');
+        modeGroup.setAttribute('aria-label', labels.zoom);
+
+        const fit = document.createElement('button');
+        fit.type = 'button';
+        fit.className = 'figure-preview-mode';
+        fit.setAttribute('data-figure-preview-fit', 'true');
+        fit.setAttribute('aria-pressed', 'true');
+        fit.textContent = labels.fit;
+
+        const actual = document.createElement('button');
+        actual.type = 'button';
+        actual.className = 'figure-preview-mode';
+        actual.setAttribute('data-figure-preview-actual', 'true');
+        actual.setAttribute('aria-pressed', 'false');
+        actual.setAttribute('title', labels.actual);
+        actual.textContent = '1:1';
+
+        const close = document.createElement('button');
+        close.type = 'button';
+        close.className = 'figure-preview-close';
+        close.setAttribute('data-figure-preview-close', 'true');
+        close.setAttribute('aria-label', labels.close);
+        close.textContent = '×';
+
+        const viewport = document.createElement('div');
+        viewport.className = 'figure-preview-viewport';
+        viewport.setAttribute('data-figure-preview-viewport', 'true');
+
+        const image = document.createElement('img');
+        image.className = 'figure-preview-image';
+        viewport.appendChild(image);
+
+        const caption = document.createElement('p');
+        caption.className = 'figure-preview-caption';
+        caption.id = 'figure-preview-caption';
+
+        modeGroup.append(fit, actual);
+        toolbar.append(modeGroup, close);
+        dialog.append(toolbar, viewport, caption);
+        document.body.appendChild(dialog);
+
+        const setMode = (mode) => {
+          const native = mode === 'native';
+          dialog.dataset.mode = native ? 'native' : 'fit';
+          fit.setAttribute('aria-pressed', native ? 'false' : 'true');
+          actual.setAttribute('aria-pressed', native ? 'true' : 'false');
+          if (!native) viewport.scrollTo({ top: 0, left: 0 });
+        };
+
+        fit.addEventListener('click', () => setMode('fit'));
+        actual.addEventListener('click', () => setMode('native'));
+        close.addEventListener('click', () => dialog.close());
+        dialog.addEventListener('click', (event) => {
+          if (event.target !== dialog) return;
+          const rect = dialog.getBoundingClientRect();
+          const outside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom;
+          if (outside) dialog.close();
+        });
+        dialog.addEventListener('close', () => {
+          setMode('fit');
+          const trigger = dialog.dataset.lastTrigger;
+          const source = trigger ? document.querySelector(`[data-preview-trigger="${trigger}"]`) : null;
+          if (source instanceof HTMLButtonElement) source.focus();
+          delete dialog.dataset.lastTrigger;
+        });
+      }
+
+      const close = dialog.querySelector('[data-figure-preview-close]');
+      const fit = dialog.querySelector('[data-figure-preview-fit]');
+      const actual = dialog.querySelector('[data-figure-preview-actual]');
+      const previewImage = dialog.querySelector('.figure-preview-image');
+      const viewport = dialog.querySelector('[data-figure-preview-viewport]');
+      const caption = dialog.querySelector('.figure-preview-caption');
+      if (!(close instanceof HTMLButtonElement) || !(fit instanceof HTMLButtonElement) || !(actual instanceof HTMLButtonElement) || !(previewImage instanceof HTMLImageElement) || !(viewport instanceof HTMLDivElement) || !(caption instanceof HTMLParagraphElement)) return;
+
+      const largestSource = (image) => {
+        const candidates = (image.srcset || '')
+          .split(',')
+          .map((candidate) => candidate.trim())
+          .filter(Boolean)
+          .map((candidate) => {
+            const parts = candidate.split(/\s+/);
+            const descriptor = parts.length > 1 ? parts.pop() : '';
+            const url = parts.join(' ') || candidate;
+            let score = 0;
+            if (descriptor.endsWith('w')) score = Number.parseFloat(descriptor);
+            else if (descriptor.endsWith('x')) score = Number.parseFloat(descriptor) * (image.naturalWidth || 1);
+            return { url, score: Number.isFinite(score) ? score : 0 };
+          })
+          .sort((a, b) => b.score - a.score);
+        return candidates[0]?.url || image.currentSrc || image.src;
+      };
+
+      figures.forEach((figure, index) => {
+        const image = figure.querySelector('img');
+        if (!(image instanceof HTMLImageElement) || figure.querySelector('[data-preview-trigger]')) return;
+
+        const trigger = document.createElement('button');
+        trigger.type = 'button';
+        trigger.className = 'figure-preview-trigger';
+        const triggerId = `figure-preview-trigger-${index + 1}`;
+        trigger.setAttribute('data-preview-trigger', triggerId);
+        const alt = image.alt || (spanish ? 'Imagen técnica' : 'Technical image');
+        trigger.setAttribute('aria-label', `${labels.open}: ${alt}`);
+        image.parentNode?.insertBefore(trigger, image);
+        trigger.appendChild(image);
+
+        trigger.addEventListener('click', () => {
+          previewImage.src = largestSource(image);
+          previewImage.alt = alt;
+          const figureCaption = figure.querySelector('figcaption')?.textContent?.trim() || alt;
+          caption.textContent = figureCaption;
+          dialog.setAttribute('aria-label', alt);
+          dialog.setAttribute('aria-describedby', caption.id);
+          dialog.dataset.lastTrigger = triggerId;
+          dialog.dataset.mode = 'fit';
+          fit.setAttribute('aria-pressed', 'true');
+          actual.setAttribute('aria-pressed', 'false');
+          viewport.scrollTo({ top: 0, left: 0 });
+
+          if (typeof dialog.showModal === 'function') {
+            dialog.showModal();
+            close.focus();
+          }
+        });
+      });
+    };
+
+    init();
+    document.addEventListener('astro:page-load', init);
+  })();
+</script><script type="module">var e=()=>{document.querySelectorAll(`.pub-tabs:not([data-enhanced])`).forEach((e,t)=>{e.setAttribute(`data-enhanced`,`true`);let n=[...e.querySelectorAll(`:scope > .pub-tab`)];if(!n.length)return;let r=document.createElement(`div`);r.className=`pub-tab-list`,r.setAttribute(`role`,`tablist`),n.forEach((e,i)=>{let a=`pub-tab-${t}-${i}`,o=`pub-tab-panel-${t}-${i}`,s=document.createElement(`button`);s.type=`button`,s.id=a,s.className=`pub-tab-button`,s.setAttribute(`role`,`tab`),s.setAttribute(`aria-controls`,o),s.setAttribute(`aria-selected`,i===0?`true`:`false`),s.tabIndex=i===0?0:-1,s.textContent=e.getAttribute(`data-tab-label`)||`Tab ${i+1}`,e.id=o,e.setAttribute(`role`,`tabpanel`),e.setAttribute(`aria-labelledby`,a),e.toggleAttribute(`hidden`,i!==0),s.addEventListener(`click`,()=>{[...r.querySelectorAll(`[role="tab"]`)].forEach(e=>{e.setAttribute(`aria-selected`,e===s?`true`:`false`),e.tabIndex=e===s?0:-1}),n.forEach(t=>t.toggleAttribute(`hidden`,t!==e)),s.focus()}),s.addEventListener(`keydown`,e=>{let t=[...r.querySelectorAll(`[role="tab"]`)],n=t.indexOf(s),i=n;if(e.key===`ArrowRight`)i=(n+1)%t.length;else if(e.key===`ArrowLeft`)i=(n-1+t.length)%t.length;else if(e.key===`Home`)i=0;else if(e.key===`End`)i=t.length-1;else return;e.preventDefault(),t[i].click()}),r.appendChild(s)}),e.prepend(r)})};e(),document.addEventListener(`astro:page-load`,e);</script><script type="module">var e=()=>{let e=document.documentElement.lang===`es`?{copy:`Copiar`,copied:`Copiado`}:{copy:`Copy`,copied:`Copied`};document.querySelectorAll(`pre`).forEach(t=>{if(t.closest(`.pub-filetree`)||t.parentElement?.classList.contains(`code-frame`))return;let n=document.createElement(`div`);n.className=`code-frame`,t.parentNode?.insertBefore(n,t),n.appendChild(t);let r=t.dataset.language??t.querySelector(`code`)?.className.match(/language-([\w-]+)/)?.[1];if(r){let e=document.createElement(`span`);e.className=`code-language`,e.textContent=r===`powershell`?`PowerShell`:r,n.appendChild(e)}let i=document.createElement(`button`);i.className=`copy-code`,i.type=`button`,i.textContent=e.copy,i.addEventListener(`click`,async()=>{try{await navigator.clipboard.writeText(t.textContent??``),i.textContent=e.copied,window.setTimeout(()=>{i.textContent=e.copy},1400)}catch{i.textContent=e.copy}}),n.appendChild(i)})};e(),document.addEventListener(`astro:page-load`,e);</script></body></html>
